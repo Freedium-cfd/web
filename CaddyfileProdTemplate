@@ -1,0 +1,11 @@
+# https://futurestud.io/tutorials/caddy-reverse-proxy-a-node-js-app
+freedium.cfd {
+	# header Server "nginx"
+	header -Server
+
+    {{ template }}
+
+    route /* {
+		reverse_proxy localhost:7080
+	}
+}

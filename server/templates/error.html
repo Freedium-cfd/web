@@ -1,0 +1,25 @@
+<div class="container w-full md:max-w-3xl mx-auto pt-40"></div>
+
+ <div class="container w-full md:max-w-3xl mx-auto pt-20 px-8 break-words">
+ 	<div class="flex flex-col items-center justify-center h-60">
+        <div class="bg-green-500 text-white text-6xl font-bold p-6 rounded-lg shadow-lg">
+            Oppps!
+        </div>
+
+    	<div class="flex items-center justify-center mt-12">
+	        <p class="text-gray-700 text-lg">
+            	{{ error_msg }}
+        	</p>
+    	</div>
+
+        <div class="flex items-center justify-center mt-8">
+	        <p class="text-gray-700">
+            	We are aware of this error. Please try again later if this was an error on our part, we will fix it as soon as possible.
+        	</p>
+    	</div>
+
+		<div class="flex items-center justify-center mt-28">
+			<p class="p-5 bg-black text-white" style="font-family: monospace;">Your emergency transponder code: {{ transponder_code }}</p>
+	    </div>
+	</div>
+</div>

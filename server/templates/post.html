@@ -1,0 +1,71 @@
+<div class="container w-full md:max-w-3xl mx-auto pt-20 break-words">
+
+		<div class="w-full px-4 md:px-6 text-xl text-gray-800 leading-normal" style="font-family:Georgia,serif;">
+
+			<div class="font-sans">
+				<p class="text-base md:text-sm text-green-500 font-bold pb-3"><a href="{{ url }}" class="text-sm md:text-sm text-green-500 font-bold no-underline hover:underline ">&lt; Go to the original</a></p>
+                {% if previewImageId %}
+                <img alt="Preview image" style="max-height: 65vh;width: auto;margin: auto;" loading="eager" role="presentation" src="https://miro.medium.com/v2/resize:fit:700/{{ previewImageId }}">
+                {% endif %}
+				<h1 class="font-bold font-sans break-normal text-gray-900 pt-6 pb-2 text-3xl md:text-4xl">{{ title }}</h1>
+                {% if subtitle %}
+                <h2 class="font-medium font-sans break-normal text-gray-600 pt-1 pb-3 text-1xl md:text-1xl">{{ subtitle }}</h2>
+                {% endif %}
+			</div>
+
+			<div class="bg-gray-100 border border-gray-300 m-2">
+  <div class="flex items-center space-x-4 p-4">
+    <div class="flex-shrink-0">
+      <a href="https://medium.com/@{{ creator.username }}" target="_blank" title="{{ creator.bio }}" class="block relative">
+        <img src="https://miro.medium.com/v2/resize:fill:88:88/{{ creator.imageId }}" alt="{{ creator.name }}" class="rounded-full h-11 w-11 no-lightense">
+        <div class="absolute bottom-0 right-0 h-3 w-3 border-2 border-white bg-green-500 rounded-full"></div>
+      </a>
+    </div>
+    <div class="flex-grow">
+      <a href="https://medium.com/@{{ creator.username }}" target="_blank" title="{{ creator.bio }}" class="block font-semibold text-gray-900">{{ creator.name }}</a>
+      <button class="text-sm text-white bg-green-500 px-3 py-1 rounded-lg mt-1"><a href="https://medium.com/@{{ creator.username }}" target="_blank" title="{{ creator.bio }}" class="block text-sm text-white">Follow</a></button>
+    </div>
+  </div>
+  <div class="px-4 pb-2">
+    <div class="flex flex-wrap items-center space-x-2 text-sm text-gray-500">
+      {% if collection %}
+      <a href="https://medium.com/{{ collection.slug }}" title="{{ collection.shortDescription }}" target="_blank" class="flex items-center space-x-1">
+        <img src="https://miro.medium.com/v2/resize:fill:48:48/{{ collection.avatar.id }}" alt="{{ collection.name }}" class="h-4 w-4 rounded-full no-lightense">
+        <p>{{ collection.name }}</p>
+      </a>
+      <span>·</span>
+      {% endif %}
+      <span class="text-gray-500">~{{ readingTime }} min read</span>
+      <span class="md:inline">·</span>
+      <span class="text-gray-500">{{ firstPublishedAt }} (Updated: {{ updatedAt }})</span>
+	  <span class="md:inline">·</span>
+	  <span class="text-yellow-500">Free: {{ freeAccess }}</span>
+
+    </div>
+  </div>
+</div>
+
+{% for paragraph in content %}
+	{{ paragraph }}
+{% endfor %}
+
+	<div class="flex flex-wrap gap-2 mt-5">
+		{% for tag in tags %}
+        <a title="{{ tag.displayTitle }}" target="_blank" href="https://medium.com/tag/{{ tag.normalizedTagSlug }}"><span class="text-green-500 bg-green-100 px-2 py-1 rounded-full text-xs">#{{ tag.normalizedTagSlug }}</span></a>
+    {% endfor %}
+  </div>
+
+<div class="container w-full md:max-w-3xl mx-auto pt-12"></div>
+
+</div>
+
+<style>
+code {
+    /*font-size: 75%;*/
+    background-color: #e3e2e2;
+}
+pre {
+    font-size: 75%;
+    background-color: #e3e2e2;
+}
+</style>
