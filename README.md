@@ -1,4 +1,4 @@
-# Freedium.com web site implementation
+# Freedium.cfd web site implementation
 
 ## Start:
 Execute `start_dev.sh` and open in browser `localhost:6752`.
