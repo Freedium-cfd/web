@@ -8,7 +8,6 @@ import redis.asyncio as redis
 from xkcdpass import xkcd_password as xp
 
 from server.utils.loguru_handler import InterceptHandler
-from server.utils.profile import profiler_enable
 
 redis_storage = redis.Redis(host="localhost", port=6379, db=0)
 
@@ -27,7 +26,6 @@ logging.basicConfig(handlers=[InterceptHandler()], level=0, force=True)
 post_id_correlation: ContextVar[Optional[str]] = ContextVar("post_id_correlation", default="UNKNOWN_ID")
 url_correlation: ContextVar[Optional[str]] = ContextVar("url_correlation", default="UNKNOWN_URL")
 transponder_code_correlation: ContextVar[Optional[str]] = ContextVar("transponder_code_correlation", default="unknown transponder location... Beep!")
-# profile = profiler_enable()
 
 START_TIME = dt.datetime.now().strftime("%H-%M-%S")
 WORDS_LIST_FILE = "xkcdpass/static/legac"

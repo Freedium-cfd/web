@@ -17,8 +17,46 @@
         <meta name="msapplication-TileColor" content="#00aba9">
         <meta name="theme-color" content="#ffffff">
         <script src="https://cdn.jsdelivr.net/npm/lightense-images@1.0.17/dist/lightense.min.js"></script>
+        <style>
+    /* Custom CSS */
+    .notification-container {
+      display: none; /* Initially hidden */
+      position: fixed;
+      top: 20px;
+      padding: 2%;
+      z-index: 1000;
+    }
+
+    .notification-card {
+      background-color: #fff;
+      border: 1px solid #ccc;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      padding: 10px 20px;
+      border-radius: 5px;
+      text-align: center;
+    }
+  </style>
     </head>
     <body class="bg-gray-100 font-sans leading-normal tracking-normal">
+            <!-- Notification Container -->
+  <div class="notification-container">
+    <div class="notification-card">
+      <p class="text-2xl pb-5">Now we open-source!</p>
+      <p class="pb-3">We are working hard to make Medium.com's paywalled posts more accessible to you. As part of our commitment to improving the user experience, we are exploring options such as adding a donation feature or enabling relevant advertising. These steps will help us maintain the quality of our service while providing alternative ways to access premium articles.<br><br>Your support through donations or advertising will directly help to sustain the valuable information and insights that Medium provides. We believe that by incorporating these options, we can strike a balance between accessibility and the continued creation of the high-quality content you've come to expect from Medium.com.</p>
+      <a href="https://patreon.com/Freedium" target="_blank" title="Patreon">
+      <button class="bg-red-400 mx-1 text-white font-semibold py-1 px-2 rounded mt-2">
+        Patreon
+      </button>
+    </a>
+      <button class="bg-gray-300 mx-1 hover:bg-gray-400 text-gray-800 font-semibold py-1 px-2 rounded mt-2 close-button">
+        Close
+      </button>
+      <button class="bg-gray-800 mx-1 text-white font-semibold py-1 px-2 rounded mt-2">
+        GitHub organization repository
+      </button>
+    </div>
+  </div>
+
         <nav id="header" class="fixed w-full z-10 top-0">
             {% if enable_ads_header %}
                 <div class="w-full bg-yellow-400 text-center py-1 px-4">
@@ -64,13 +102,42 @@
                 </div>
             </div>
         </nav>
-        {% if enable_ads_header %}<div class="container w-full md:max-w-3xl mx-auto pt-12"></div>{% endif %}
+        {% if enable_ads_header %}<div class="container w-full md:max-w-3xl mx-auto pt-8"></div>{% endif %}
         {{ body_template }}
         <script>
   function navigateToOrigin() {
     window.location.href = window.location.origin;
   }
         </script>
+<script>
+    // Wait for the DOM to load
+    document.addEventListener('DOMContentLoaded', () => {
+      const notificationContainer = document.querySelector('.notification-container');
+      const closeButton = document.querySelector('.close-button');
+
+      // Show the notification
+      function showNotification() {
+        // Check storage value 'showNotification5897' and show the notification if it's doesn't exist
+        if (!localStorage.getItem('showNotification5897')) {
+                notificationContainer.style.display = 'block';
+        }
+      }
+
+      // Hide the notification
+      function hideNotification() {
+        localStorage.setItem('showNotification5897', 'false');
+        notificationContainer.style.display = 'none';
+      }
+
+      // Close button functionality
+      closeButton.addEventListener('click', () => {
+        hideNotification();
+      });
+
+      showNotification();
+    });
+  </script>
+
         <script>
 const h = document.documentElement, b = document.body;
 const st = 'scrollTop';

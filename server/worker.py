@@ -6,11 +6,9 @@ import gunicorn.app.base
 import uvicorn
 from loguru import logger
 
-# from server import profile
 from server.main import app
 from server.utils.logger import GunicornLogger
 from server.utils.logger_trace import trace
-# from server.utils.profile import profiler_summary
 
 logger.trace(f"Uvicorn version: {uvicorn.__version__}")
 
@@ -19,11 +17,7 @@ def post_worker_init(worker):
     # Remove the atexit handler set up by the parent process
     # https://github.com/benoitc/gunicorn/issues/1391#issuecomment-467010209
     logger.trace("Removing atexit handler")
-    # atexit.unregister(_exit_function)
-
-def on_exit():
-    pass
-    # profiler_summary(profile)
+    atexit.unregister(_exit_function)
 
 
 @trace
