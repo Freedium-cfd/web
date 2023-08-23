@@ -14,9 +14,9 @@
                      src="https://miro.medium.com/v2/resize:fit:700/{{ previewImageId }}">
             {% endif %}
             <h1 class="font-bold font-sans break-normal text-gray-900 pt-6 pb-2 text-3xl md:text-4xl">{{ title }}</h1>
-            {% if subtitle %}<h2 class="font-medium font-sans break-normal text-gray-600 pt-1 pb-3 text-1xl md:text-1xl">{{ subtitle }}</h2>{% endif %}
+            {% if subtitle %}<h2 class="font-medium font-sans break-normal text-gray-600 pt-1 text-1xl md:text-1xl">{{ subtitle }}</h2>{% endif %}
         </div>
-        <div class="bg-gray-100 border border-gray-300 m-2">
+        <div class="bg-gray-100 border border-gray-300 m-2 mt-5">
             <div class="flex items-center space-x-4 p-4">
                 <div class="flex-shrink-0">
                     <a href="https://medium.com/@{{ creator.username }}" target="_blank" title="{{ creator.bio }}" class="block relative">
@@ -61,13 +61,19 @@
                 </div>
             </div>
         </div>
+        <div class="main-content mt-8">
         {% for paragraph in content %}{{ paragraph }}{% endfor %}
+        </div>
         <div class="flex flex-wrap gap-2 mt-5">
             {% for tag in tags %}<a title="{{ tag.displayTitle }}" target="_blank" href="https://medium.com/tag/{{ tag.normalizedTagSlug }}"><span class="text-green-500 bg-green-100 px-2 py-1 rounded-full text-xs">#{{ tag.normalizedTagSlug }}</span></a>{% endfor %}
         </div>
         <div class="container w-full md:max-w-3xl mx-auto pt-12"></div>
     </div>
     <style>
+.main-content {
+ letter-spacing: -0.06px;
+ font-family: source-serif-pro, Georgia, Cambria, "Times New Roman", Times, serif;
+}
 code {
     /*font-size: 75%;*/
     background-color: #e3e2e2;
@@ -77,3 +83,33 @@ pre {
     background-color: #e3e2e2;
 }
     </style>
+
+    <script>
+document.addEventListener('DOMContentLoaded', (event) => {
+  document.querySelectorAll('pre code').forEach((el) => {
+         code = el.textContent;
+    hljs.highlightElement(el);
+         el.innerHTML = '<button class="hljs-copy">Copy</button>' + el.innerHTML; // append copy button
+        el.getElementsByClassName('hljs-copy')[0].contentCopy = code;
+         el.getElementsByClassName('hljs-copy')[0].addEventListener("click", function () {
+             this.innerText = 'Copying..';
+             if (!navigator.userAgent.toLowerCase().includes('safari')) {
+                 navigator.clipboard.writeText(code);
+             } else {
+                 prompt("Clipboard (Select: ⌘+a > Copy:⌘+c)", this.contentCopy);
+             }
+             this.innerText = 'Copied!';
+             button = this;
+             setTimeout(function () {
+                 button.innerText = 'Copy';
+             }, 1500)
+         });
+});
+  });
+ </script>
+ <style>
+     .hljs-copy {
+         float: right;
+         cursor: pointer;
+     }
+ </style>

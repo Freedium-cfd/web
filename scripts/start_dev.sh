@@ -10,7 +10,7 @@ arch=$(dpkg --print-architecture)
 redis-cli flushall
 ./bin/$arch/caddy run --config CaddyfileDev &
 CADDY_PID=$!
-LOG_LEVEL_NAME=TRACE IS_DEV=True TIMEOUT=7 python3 -m server server &
+TIMEOUT=7 python3 -m server server &
 SERVER_PID=$!
 
 sendMessageTelegram(){
@@ -34,7 +34,7 @@ do
   CHECK_SERVER_PID=$(ps -A| grep $SERVER_PID |wc -l)
   if [[ $CHECK_SERVER_PID -eq 0 ]]; then
         # sendMessageTelegram "Restarting server, since it's down"
-        LOG_LEVEL_NAME=TRACE TIMEOUT=7 python3 -m server server &
+        TIMEOUT=7 python3 -m server server &
         SERVER_PID=%!
   fi
 

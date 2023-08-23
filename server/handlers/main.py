@@ -1,3 +1,4 @@
+from loguru import logger
 import sentry_sdk
 from fastapi.responses import HTMLResponse
 
@@ -28,21 +29,25 @@ async def render_medium_post_link(path: str):
         medium_parser = await MediumParser.from_url(path)
         rendered_medium_post = await medium_parser.render_as_html(minify=False, template_folder="server/templates")
     except medium_parser_exceptions.InvalidURL as ex:
+        logger.exception(ex)
         sentry_sdk.capture_exception(ex)
         return await generate_error(
             "Unable to identify the Medium article URL.",
             status_code=404,
         )
     except (medium_parser_exceptions.InvalidMediumPostURL, medium_parser_exceptions.InvalidMediumPostID, medium_parser_exceptions.MediumPostQueryError) as ex:
+        logger.exception(ex)
         sentry_sdk.capture_exception(ex)
         return await generate_error(
             "Unable to identify the link as a Medium.com article page. Please check the URL for any typing errors.",
             status_code=404,
         )
     except medium_parser_exceptions.InvalidMediumPostID as ex:
+        logger.exception(ex)
         sentry_sdk.capture_exception(ex)
         return await generate_error("Unable to identify the Medium article ID.", status_code=500)
     except Exception as ex:
+        logger.exception(ex)
         sentry_sdk.capture_exception(ex)
         return await generate_error(status_code=500)
     else:
