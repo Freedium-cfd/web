@@ -89,6 +89,7 @@ document.addEventListener('DOMContentLoaded', (event) => {
   document.querySelectorAll('pre code').forEach((el) => {
          code = el.textContent;
     hljs.highlightElement(el);
+          el = el.parentElement;
          el.innerHTML = '<button class="hljs-copy">Copy</button>' + el.innerHTML; // append copy button
         el.getElementsByClassName('hljs-copy')[0].contentCopy = code;
          el.getElementsByClassName('hljs-copy')[0].addEventListener("click", function () {
@@ -111,5 +112,6 @@ document.addEventListener('DOMContentLoaded', (event) => {
      .hljs-copy {
          float: right;
          cursor: pointer;
+         margin: 5px;
      }
  </style>

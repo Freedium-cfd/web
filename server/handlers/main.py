@@ -1,6 +1,6 @@
-from loguru import logger
 import sentry_sdk
 from fastapi.responses import HTMLResponse
+from loguru import logger
 
 from server import MediumParser, base_template, config, main_template, medium_parser_exceptions, minify_html
 from server.utils.error import (
