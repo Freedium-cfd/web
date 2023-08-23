@@ -3,9 +3,10 @@ import random
 from fastapi.responses import HTMLResponse
 
 from server import (
-    base_template, minify_html,
+    base_template,
     config,
     error_template,
+    minify_html,
     transponder_code_correlation,
 )
 from server.utils.logger_trace import trace

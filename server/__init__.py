@@ -14,8 +14,8 @@ redis_storage = redis.Redis(host="localhost", port=6379, db=0)
 jinja_env = jinja2.Environment(enable_async=True)
 template_env = jinja2.Environment(loader=jinja2.FileSystemLoader("./server/templates"), enable_async=True)
 
-from server.toolkits.core.medium_parser.core import MediumParser
 from server.toolkits.core.medium_parser import medium_parser_exceptions
+from server.toolkits.core.medium_parser.core import MediumParser
 from server.toolkits.core.medium_parser.utils import minify_html
 
 base_template = template_env.get_template("base.html")

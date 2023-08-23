@@ -1,13 +1,11 @@
 import sentry_sdk
-
 from fastapi.responses import HTMLResponse
 
-from server import base_template, main_template, MediumParser, medium_parser_exceptions, minify_html, config
-from server.utils.logger_trace import trace
-
+from server import MediumParser, base_template, config, main_template, medium_parser_exceptions, minify_html
 from server.utils.error import (
     generate_error,
 )
+from server.utils.logger_trace import trace
 from server.utils.utils import aio_redis_cache
 
 

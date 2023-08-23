@@ -1,7 +1,7 @@
-from server.utils.logger_trace import trace
-from server.utils.error import generate_error
-
 import sentry_sdk
+
+from server.utils.error import generate_error
+from server.utils.logger_trace import trace
 
 
 @trace

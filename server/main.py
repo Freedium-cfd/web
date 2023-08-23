@@ -1,8 +1,8 @@
-from fastapi import FastAPI
 import sentry_sdk
+from fastapi import FastAPI
 from loguru import logger
 
-from server import redis_storage, config
+from server import config, redis_storage
 from server.exceptions.main import register_main_error_handler
 from server.handlers.main import register_main_router
 from server.middlewares import register_middlewares
