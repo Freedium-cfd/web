@@ -6,7 +6,7 @@ from server.utils.error import (
     generate_error,
 )
 from server.utils.logger_trace import trace
-from server.utils.utils import aio_redis_cache
+from server.utils.utils import aio_redis_cache, correct_url
 
 
 @aio_redis_cache(60 * 60)
@@ -22,7 +22,7 @@ async def render_medium_post_link(path: str):
     if not path:
         return await main_page()
 
-    # path = correct_url(path) (???)
+    path = correct_url(path)
 
     try:
         medium_parser = await MediumParser.from_url(path)
