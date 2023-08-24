@@ -58,16 +58,16 @@ do
     SERVER_PID=$!
   fi
 
-  reverse_service_url="https://localhost"
+  reverse_service_url="http://localhost"
   reverse_status_code=$(curl -m 10 -s -o /dev/null -w "%{http_code}" "$reverse_service_url")
 
-  if [ "$reverse_status_code" -lt 200 ]; then
+  if [ "$reverse_status_code" -lt 308 ]; then
     sendMessageTelegram "Restarting reverse, since it's down"
     kill $CADDY_PID
     ./bin/$arch/caddy start --config CaddyfileProd &
     CADDY_PID=$!
   fi
 
-  sleep 15
+  sleep 65
 done
 

@@ -70,6 +70,6 @@ do
     CADDY_PID=$!
   fi
 
-  sleep 15
+  sleep 65
 done
 
