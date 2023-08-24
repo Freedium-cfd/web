@@ -1,13 +1,17 @@
 import sentry_sdk
+import pickle
 from fastapi.responses import HTMLResponse
 from loguru import logger
 
-from server import MediumParser, base_template, config, main_template, medium_parser_exceptions, minify_html
+from server import MediumParser, base_template, config, main_template, medium_parser_exceptions, minify_html, url_correlation, redis_storage
 from server.utils.error import (
     generate_error,
 )
 from server.utils.logger_trace import trace
 from server.utils.utils import aio_redis_cache, correct_url
+from server.utils.notify import send_message
+
+CACHE_LIFE_TIME = 60 * 25
 
 
 @aio_redis_cache(60 * 60)
@@ -27,7 +31,12 @@ async def render_medium_post_link(path: str):
 
     try:
         medium_parser = await MediumParser.from_url(path)
-        rendered_medium_post = await medium_parser.render_as_html(minify=False, template_folder="server/templates")
+        medium_post_id = medium_parser.post_id
+        redis_result = await redis_storage.get(medium_post_id)
+        if not redis_result:
+            rendered_medium_post = await medium_parser.render_as_html(minify=False, template_folder="server/templates")
+        else:
+            rendered_medium_post = pickle.loads(redis_result)
     except medium_parser_exceptions.InvalidURL as ex:
         logger.exception(ex)
         sentry_sdk.capture_exception(ex)
@@ -60,6 +69,11 @@ async def render_medium_post_link(path: str):
         base_template_rendered = await base_template.render_async(base_context)
 
         minified_rendered_post = minify_html(base_template_rendered)
+        await send_message(f"✅ Successfully rendered post: {url_correlation.get()}")
+
+        if not redis_result:
+            await redis_storage.setex(medium_post_id, CACHE_LIFE_TIME, pickle.dumps(rendered_medium_post))
+
         return HTMLResponse(minified_rendered_post)
 
 

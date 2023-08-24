@@ -6,6 +6,7 @@ import gunicorn.app.base
 import uvicorn
 from loguru import logger
 
+from server import config
 from server.main import app
 from server.utils.logger import GunicornLogger
 from server.utils.logger_trace import trace
@@ -55,5 +56,6 @@ def execute_server_worker(host: str, port: int):
         "worker_class": "uvicorn.workers.UvicornWorker",
         "preload_app": True,
         "post_worker_init": post_worker_init,
+        "timeout": config.WORKER_TIMEOUT,
     }
     GunicornStandaloneApplication(app, options).run()

@@ -21,7 +21,7 @@ async def main():
     while True:
         logger.debug("Checking health of freedium.cfd")
         try:
-            response = requests.get("https://freedium.cfd")
+            response = requests.get("https://freedium.cfd", timeout=3)
             response_status = response.status_code
         except Exception as ex:
             logger.exception(ex)

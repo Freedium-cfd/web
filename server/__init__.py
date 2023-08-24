@@ -7,6 +7,7 @@ import jinja2
 import redis.asyncio as redis
 from xkcdpass import xkcd_password as xp
 
+from server import config
 from server.utils.loguru_handler import InterceptHandler
 
 redis_storage = redis.Redis(host="localhost", port=6379, db=0)
@@ -31,3 +32,9 @@ START_TIME = dt.datetime.now().strftime("%H-%M-%S")
 WORDS_LIST_FILE = "xkcdpass/static/legac"
 
 xkcd_passwd = xp.generate_wordlist(wordfile=WORDS_LIST_FILE, min_length=5, max_length=8)
+
+if config.TELEGRAM_BOT_TOKEN:
+    from aiogram import Bot
+    bot = Bot(config.TELEGRAM_BOT_TOKEN)
+else:
+    bot = None

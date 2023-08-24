@@ -22,6 +22,7 @@ python3 -m server server
 ```
 
 ## TODO:
+ - Add support for embed link preview & iframe support
  - Introducing Freedium as a fully functional open source frontend for Medium.com!
  - New main page with statistics and most interesting Medium posts
  - Add Docker Compose file

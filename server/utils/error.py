@@ -8,8 +8,10 @@ from server import (
     error_template,
     minify_html,
     transponder_code_correlation,
+    url_correlation
 )
 from server.utils.logger_trace import trace
+from server.utils.notify import send_message
 
 # ChatGPT promt: Make this text more Humoristic in one sentenced text: Sorry to hear that but we have some problem
 ERROR_MSG_LIST = [
@@ -37,6 +39,10 @@ ERROR_MSG_LIST = [
 async def generate_error(error_msg: str = None, title: str = "Error", status_code: int = 500):
     if not error_msg:
         error_msg = random.choice(ERROR_MSG_LIST)
+
+    await send_message(
+        f"📛 Error while processing url: <code>{url_correlation.get()}</code>, transponder_code: <code>{transponder_code_correlation.get()}</code>, error: <code>{error_msg}</code>"
+    )
 
     error_template_rendered = await error_template.render_async(error_msg=error_msg, transponder_code=transponder_code_correlation.get())
     base_context = {
