@@ -51,13 +51,14 @@ def logger_register():
             "format": LOG_FORMAT,
             "enqueue": ENQUEUE,
         },
-        {
+    ]
+    if config.IS_DEV:
+        handlers.append({
             "sink": f"{LOG_FOLDER_PATH}/trace_{pid}_log_server",
             "level": "TRACE",
             "format": LOG_FORMAT,
             "enqueue": ENQUEUE,
-        }
-    ]
+        })
     logger.configure(
         handlers=handlers,
         extra={"id": None},
