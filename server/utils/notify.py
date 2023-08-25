@@ -5,6 +5,6 @@ from server import bot, config
 ADMIN_ID = config.TELEGRAM_ADMIN_ID
 
 
-async def send_message(text: str) -> None:
+async def send_message(text: str, silent: bool = False) -> None:
     if config.TELEGRAM_BOT_TOKEN and ADMIN_ID:
-        asyncio.create_task(bot.send_message(ADMIN_ID, text, parse_mode="HTML"))
+        asyncio.create_task(bot.send_message(ADMIN_ID, text, parse_mode="HTML", disable_notification=silent))

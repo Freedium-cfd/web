@@ -72,7 +72,7 @@ async def render_medium_post_link(path: str):
 
         if not redis_result:
             await redis_storage.setex(medium_post_id, CACHE_LIFE_TIME, pickle.dumps(rendered_medium_post))
-            await send_message(f"✅ Successfully rendered post: {url_correlation.get()}")
+            await send_message(f"✅ Successfully rendered post: {url_correlation.get()}", True)
 
         return HTMLResponse(minified_rendered_post)
 
