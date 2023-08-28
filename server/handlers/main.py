@@ -8,7 +8,7 @@ from server.utils.error import (
     generate_error,
 )
 from server.utils.logger_trace import trace
-from server.utils.utils import aio_redis_cache, correct_url
+from server.utils.utils import aio_redis_cache, correct_url, safe_check_redis_connection
 from server.utils.notify import send_message
 
 CACHE_LIFE_TIME = 60 * 25
@@ -27,13 +27,19 @@ async def render_medium_post_link(path: str):
     if not path:
         return await main_page()
 
+    redis_available = await safe_check_redis_connection(redis_storage)
+
     path = correct_url(path)
 
     try:
         medium_parser = await MediumParser.from_url(path)
         medium_post_id = medium_parser.post_id
-        redis_result = await redis_storage.get(medium_post_id)
+        if redis_available:
+            redis_result = await redis_storage.get(medium_post_id)
+        else:
+            redis_result = None
         if not redis_result:
+            await medium_parser.query(timeout=config.TIMEOUT)
             rendered_medium_post = await medium_parser.render_as_html(minify=False, template_folder="server/templates")
         else:
             rendered_medium_post = pickle.loads(redis_result)
@@ -71,7 +77,10 @@ async def render_medium_post_link(path: str):
         minified_rendered_post = minify_html(base_template_rendered)
 
         if not redis_result:
-            await redis_storage.setex(medium_post_id, CACHE_LIFE_TIME, pickle.dumps(rendered_medium_post))
+            if not redis_available:
+                await send_message("ERROR: Redis is not available. Please check your configuration.")
+            else:
+                await redis_storage.setex(medium_post_id, CACHE_LIFE_TIME, pickle.dumps(rendered_medium_post))
             await send_message(f"✅ Successfully rendered post: {url_correlation.get()}", True)
 
         return HTMLResponse(minified_rendered_post)
