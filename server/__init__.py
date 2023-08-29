@@ -1,4 +1,5 @@
 import datetime as dt
+from multiprocessing import Lock, Manager
 import logging
 from contextvars import ContextVar
 from typing import Optional
@@ -37,10 +38,17 @@ post_id_correlation: ContextVar[Optional[str]] = ContextVar("post_id_correlation
 url_correlation: ContextVar[Optional[str]] = ContextVar("url_correlation", default="UNKNOWN_URL")
 transponder_code_correlation: ContextVar[Optional[str]] = ContextVar("transponder_code_correlation", default="unknown transponder location... Beep!")
 
+manager = Manager()
+
+# TODO: workaround
+db_backup_startup_correlation = manager.dict(registered=False)
+db_backup_startup_lock = Lock()
+
 START_TIME = dt.datetime.now().strftime("%H-%M-%S")
 WORDS_LIST_FILE = "xkcdpass/static/legac"
 
 xkcd_passwd = xp.generate_wordlist(wordfile=WORDS_LIST_FILE, min_length=5, max_length=8)
+
 
 if config.TELEGRAM_BOT_TOKEN:
     from aiogram import Bot
