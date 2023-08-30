@@ -89,6 +89,11 @@ freedium.cfd {
          file_server
     }
 
+    handle_path /99860281ef1143d5a5558ad9a21a470d.txt {
+        root * ./static/99860281ef1143d5a5558ad9a21a470d.txt
+         file_server
+    }
+
     handle_path /favicon.ico {
         root * ./static/favicon.ico
          file_server
