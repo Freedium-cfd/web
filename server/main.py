@@ -38,7 +38,7 @@ async def send_db_backup_task():
                     await bot.send_document(chat_id=config.TELEGRAM_ADMIN_ID, document=db_file)
         else:
             logger.warning("No bot instance")
-        await asyncio.sleep(60 * 24)
+        await asyncio.sleep(60 * 60 * 24)
 
 
 @app.on_event("startup")

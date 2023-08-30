@@ -1,21 +1,6 @@
 
-    handle_path /favicon.ico {
-        root * ./static/favicon.ico
-         file_server
-    }
-
-    handle_path /android-chrome-192x192.png {
-        root * ./static/android-chrome-192x192.png
-         file_server
-    }
-
     handle_path /android-chrome-512x512.png {
         root * ./static/android-chrome-512x512.png
-         file_server
-    }
-
-    handle_path /humans.txt {
-        root * ./static/humans.txt
          file_server
     }
 
@@ -24,8 +9,8 @@
          file_server
     }
 
-    handle_path /apple-touch-icon.png {
-        root * ./static/apple-touch-icon.png
+    handle_path /site.webmanifest {
+        root * ./static/site.webmanifest
          file_server
     }
 
@@ -34,8 +19,8 @@
          file_server
     }
 
-    handle_path /favicon-16x16.png {
-        root * ./static/favicon-16x16.png
+    handle_path /mstile-144x144.png {
+        root * ./static/mstile-144x144.png
          file_server
     }
 
@@ -44,8 +29,13 @@
          file_server
     }
 
-    handle_path /mstile-144x144.png {
-        root * ./static/mstile-144x144.png
+    handle_path /apple-touch-icon.png {
+        root * ./static/apple-touch-icon.png
+         file_server
+    }
+
+    handle_path /humans.txt {
+        root * ./static/humans.txt
          file_server
     }
 
@@ -54,18 +44,18 @@
          file_server
     }
 
-    handle_path /mstile-310x150.png {
-        root * ./static/mstile-310x150.png
+    handle_path /sitemap.xml {
+        root * ./static/sitemap.xml
          file_server
     }
 
-    handle_path /mstile-310x310.png {
-        root * ./static/mstile-310x310.png
+    handle_path /android-chrome-192x192.png {
+        root * ./static/android-chrome-192x192.png
          file_server
     }
 
-    handle_path /mstile-70x70.png {
-        root * ./static/mstile-70x70.png
+    handle_path /security.txt {
+        root * ./static/security.txt
          file_server
     }
 
@@ -74,8 +64,28 @@
          file_server
     }
 
-    handle_path /site.webmanifest {
-        root * ./static/site.webmanifest
+    handle_path /mstile-310x310.png {
+        root * ./static/mstile-310x310.png
+         file_server
+    }
+
+    handle_path /favicon-16x16.png {
+        root * ./static/favicon-16x16.png
+         file_server
+    }
+
+    handle_path /mstile-310x150.png {
+        root * ./static/mstile-310x150.png
+         file_server
+    }
+
+    handle_path /mstile-70x70.png {
+        root * ./static/mstile-70x70.png
+         file_server
+    }
+
+    handle_path /favicon.ico {
+        root * ./static/favicon.ico
          file_server
     }
 
