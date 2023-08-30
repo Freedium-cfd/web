@@ -33,7 +33,7 @@ async def main():
     template = Template(sitemap_template)
 
     sitemap_output = template.render(pages=MEDIUM_URLS)
-    with open("scripts/sitemap.xml", 'w') as f:
+    with open("static/sitemap.xml", 'w') as f:
         f.write(sitemap_output)
 
     ic("DONE!")
