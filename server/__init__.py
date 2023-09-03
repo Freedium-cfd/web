@@ -20,11 +20,12 @@ template_safe_env = Environment(loader=FileSystemLoader("./server/templates"), u
 
 from server.toolkits.core.medium_parser import medium_parser_exceptions
 from server.toolkits.core.medium_parser.core import MediumParser
-from server.toolkits.core.medium_parser.utils import minify_html
+from server.toolkits.core.medium_parser.utils import minify_html, is_valid_medium_post_id_hexadecimal
 
 base_template = template_env.get_template("base.html")
 url_line_template = template_env.get_template("url_line.html").render()
 main_template_raw = template_safe_env.get_template("main.html")
+postleter_template = template_env.get_template("postleter.html")
 error_template_raw = template_safe_env.get_template("error.html")
 
 main_template_raw_rendered = main_template_raw.render(url_line=url_line_template)

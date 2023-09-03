@@ -3,7 +3,11 @@ import pickle
 from fastapi.responses import HTMLResponse
 from loguru import logger
 
-from server import MediumParser, base_template, config, main_template, medium_parser_exceptions, minify_html, url_correlation, redis_storage
+from icecream import ic
+
+from aiohttp_client_cache import CachedSession, SQLiteBackend
+import random
+from server import MediumParser, base_template, config, main_template, medium_parser_exceptions, minify_html, url_correlation, redis_storage, postleter_template, is_valid_medium_post_id_hexadecimal
 from server.utils.error import (
     generate_error,
 )
@@ -13,10 +17,44 @@ from server.utils.notify import send_message
 
 CACHE_LIFE_TIME = 60 * 25
 
+@trace
+async def route_processing(path: str):
+    if not path:
+        return await main_page()
+    elif path == "render_postleter":
+        return await render_postleter()
+    else:
+        return await render_medium_post_link(path)
 
-@aio_redis_cache(60 * 60)
+
+@trace
+@aio_redis_cache(7 * 60)
+async def render_postleter(limit: int = 120, as_html: bool = False):
+    async with CachedSession(cache=SQLiteBackend('medium_cache.sqlite')) as session:
+        post_id_list = [i async for i in session.cache.responses.keys()]
+
+    random_post_id_list = random.choices(post_id_list, k=limit)
+
+    outlenget_posts_list = []
+    for post_id in random_post_id_list:
+        post = MediumParser(post_id)
+        await post.query()
+        post_metadata = await post.generate_metadata(as_dict=True)
+        outlenget_posts_list.append(post_metadata)
+
+    ic(outlenget_posts_list)
+
+    postleter_template_rendered = await postleter_template.render_async(post_list=outlenget_posts_list)
+    postleter_template_rendered_minified = minify_html(postleter_template_rendered)
+    if as_html:
+        return postleter_template_rendered_minified
+    return HTMLResponse(postleter_template_rendered_minified)
+
+
+@trace
 async def main_page():
-    main_template_rendered = await main_template.render_async()
+    postleter_template = await render_postleter(as_html=True)
+    main_template_rendered = await main_template.render_async(postleter=postleter_template)
     base_template_rendered = await base_template.render_async(body_template=main_template_rendered)
     base_template_rendered_minified = minify_html(base_template_rendered)
     return HTMLResponse(base_template_rendered_minified)
@@ -24,15 +62,14 @@ async def main_page():
 
 @trace
 async def render_medium_post_link(path: str):
-    if not path:
-        return await main_page()
-
     redis_available = await safe_check_redis_connection(redis_storage)
 
-    path = correct_url(path)
-
     try:
-        medium_parser = await MediumParser.from_url(path)
+        if is_valid_medium_post_id_hexadecimal(path):
+            medium_parser = MediumParser(path)
+        else:
+            url = correct_url(path)
+            medium_parser = await MediumParser.from_url(url)
         medium_post_id = medium_parser.post_id
         if redis_available:
             redis_result = await redis_storage.get(medium_post_id)
@@ -89,7 +126,7 @@ async def render_medium_post_link(path: str):
 def register_main_router(app):
     app.add_api_route(
         path="/{path:path}",
-        endpoint=render_medium_post_link,
+        endpoint=route_processing,
         methods=["GET"],
         response_model=str,
         tags=["pages"],
