@@ -3,8 +3,6 @@ import pickle
 from fastapi.responses import HTMLResponse
 from loguru import logger
 
-from icecream import ic
-
 from aiohttp_client_cache import CachedSession, SQLiteBackend
 import random
 from server import MediumParser, base_template, config, main_template, medium_parser_exceptions, minify_html, url_correlation, redis_storage, postleter_template, is_valid_medium_post_id_hexadecimal
@@ -15,7 +13,7 @@ from server.utils.logger_trace import trace
 from server.utils.utils import aio_redis_cache, correct_url, safe_check_redis_connection
 from server.utils.notify import send_message
 
-CACHE_LIFE_TIME = 60 * 25
+CACHE_LIFE_TIME = 60 * 60 * 24
 
 @trace
 async def route_processing(path: str):
@@ -41,8 +39,6 @@ async def render_postleter(limit: int = 120, as_html: bool = False):
         await post.query()
         post_metadata = await post.generate_metadata(as_dict=True)
         outlenget_posts_list.append(post_metadata)
-
-    ic(outlenget_posts_list)
 
     postleter_template_rendered = await postleter_template.render_async(post_list=outlenget_posts_list)
     postleter_template_rendered_minified = minify_html(postleter_template_rendered)
