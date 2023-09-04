@@ -15,6 +15,7 @@ from server.utils.notify import send_message
 
 CACHE_LIFE_TIME = 60 * 60 * 24
 
+
 @trace
 async def route_processing(path: str):
     if not path:
@@ -35,10 +36,13 @@ async def render_postleter(limit: int = 120, as_html: bool = False):
 
     outlenget_posts_list = []
     for post_id in random_post_id_list:
-        post = MediumParser(post_id)
-        await post.query()
-        post_metadata = await post.generate_metadata(as_dict=True)
-        outlenget_posts_list.append(post_metadata)
+        try:
+            post = MediumParser(post_id)
+            await post.query()
+            post_metadata = await post.generate_metadata(as_dict=True)
+            outlenget_posts_list.append(post_metadata)
+        except Exception as ex:
+            await send_message(f"Couldn't render post_id for postleter: {post_id}, ex: {ex}")
 
     postleter_template_rendered = await postleter_template.render_async(post_list=outlenget_posts_list)
     postleter_template_rendered_minified = minify_html(postleter_template_rendered)
