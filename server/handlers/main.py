@@ -1,7 +1,9 @@
 import sentry_sdk
 import pickle
+import aiohttp
 from fastapi.responses import HTMLResponse
 from loguru import logger
+from contextlib import suppress
 
 from aiohttp_client_cache import CachedSession, SQLiteBackend
 import random
@@ -9,11 +11,15 @@ from server import MediumParser, base_template, config, main_template, medium_pa
 from server.utils.error import (
     generate_error,
 )
+from fastapi import Response
 from server.utils.logger_trace import trace
 from server.utils.utils import aio_redis_cache, correct_url, safe_check_redis_connection
 from server.utils.notify import send_message
 
 CACHE_LIFE_TIME = 60 * 60 * 24
+TIMEOUT = 5
+
+IFRAME_HEADERS = {'Access-Control-Allow-Origin': '*'}
 
 
 @trace
@@ -24,6 +30,18 @@ async def route_processing(path: str):
         return await render_postleter()
     else:
         return await render_medium_post_link(path)
+
+
+@trace
+async def render_iframe(iframe_id):
+    async with aiohttp.ClientSession() as client:
+        request = await client.get(
+            f"https://medium.com/media/{iframe_id}",
+            timeout=TIMEOUT,
+            headers={"User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.116 Safari/537.36"},
+        )
+        request_content = await request.text()
+    return Response(content=request_content, media_type="text/html; charset=utf-8", headers=IFRAME_HEADERS)
 
 
 @trace
@@ -110,8 +128,9 @@ async def render_medium_post_link(path: str):
             "description": rendered_medium_post.description,
         }
         base_template_rendered = await base_template.render_async(base_context)
+        minified_rendered_post = base_template_rendered
 
-        minified_rendered_post = minify_html(base_template_rendered)
+        # minified_rendered_post = minify_html(base_template_rendered)
 
         if not redis_result:
             if not redis_available:
@@ -124,6 +143,7 @@ async def render_medium_post_link(path: str):
 
 
 def register_main_router(app):
+    app.add_api_route(path="/render_iframe/{iframe_id}", endpoint=render_iframe, methods=["GET"])
     app.add_api_route(
         path="/{path:path}",
         endpoint=route_processing,
