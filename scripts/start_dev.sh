@@ -5,7 +5,7 @@
 # if [ -z "$TELEGRAM_ADMIN_ID" ]; then echo "TELEGRAM_ADMIN_ID var is blank"; else echo "TELEGRAM_ADMIN_ID var is set to '$TELEGRAM_ADMIN_ID'"; fi
 # if [ -z "$TELEGRAM_BOT_TOKEN" ]; then echo "TELEGRAM_BOT_TOKEN var is blank"; else echo "TELEGRAM_BOT_TOKEN var is set to '$TELEGRAM_BOT_TOKEN'"; fi
 
-arch=$(dpkg --print-architecture)
+arch=$(lscpu | grep Architecture | awk {'print $2'})
 echo $arch
 
 redis-cli flushall
