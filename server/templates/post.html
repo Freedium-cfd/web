@@ -18,7 +18,7 @@
             <div class="flex items-center space-x-4 p-4">
                 <div class="flex-shrink-0">
                     <a href="https://medium.com/@{{ creator.username }}" target="_blank" title="{{ creator.bio }}" class="block relative">
-                        <img src="https://miro.medium.com/v2/resize:fill:88:88/{{ creator.imageId }}"
+                        <img src="https://miro.medium.com/v2/resize:fill:88:88/{{ creator.imageId or '1*dmbNkD5D-u45r44go_cf0g.png'}}"
                              alt="{{ creator.name }}"
                              class="rounded-full h-11 w-11 no-lightense">
                         <div class="absolute bottom-0 right-0 h-3 w-3 border-2 border-white bg-green-500 rounded-full"></div>

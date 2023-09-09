@@ -94,7 +94,7 @@ async def render_medium_post_link(path: str):
         else:
             redis_result = None
         if not redis_result:
-            await medium_parser.query(timeout=config.TIMEOUT)
+            await medium_parser.query(timeout=config.TIMEOUT, use_cache=False)
             rendered_medium_post = await medium_parser.render_as_html(minify=False, template_folder="server/templates")
         else:
             rendered_medium_post = pickle.loads(redis_result)
