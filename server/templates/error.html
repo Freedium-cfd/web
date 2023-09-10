@@ -5,9 +5,7 @@
         <div class="flex items-center justify-center mt-12">
             <p class="text-gray-700 text-lg">{{ error_msg }}</p>
         </div>
-
         {{ url_line }}
-
         <div class="flex md:max-w-2xl items-center justify-center mt-8">
             <p class="text-gray-700">We are aware of this error. Please try again later if this was an error on our part, we will fix it as soon as possible.</p>
         </div>
@@ -16,7 +14,6 @@
         </div>
     </div>
 </div>
-
 <script>
 const urlMedium = document.getElementById('medium-link-input');
 urlMedium.value = window.location.pathname.slice(1)

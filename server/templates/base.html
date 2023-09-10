@@ -38,39 +38,35 @@
       border-radius: 5px;
       text-align: center;
     }
-  </style>
+        </style>
     </head>
     <body class="bg-gray-100 font-sans leading-normal tracking-normal" style="text-rendering: optimizeLegibility;">
-            <!-- Notification Container -->
-  <div class="notification-container">
-    <div class="notification-card">
-      <p class="text-2xl pb-5">Medium has changed its paywall! Sorry for inconvenience.</p>
-      <p class="pb-3">We are working hard to make Medium.com's paywalled posts more accessible to you. As part of our commitment to improving the user experience, we are exploring options such as adding a donation feature or enabling relevant advertising. These steps will help us maintain the quality of our service while providing alternative ways to access premium articles.<br><br>Your support through donations or advertising will directly help to sustain the valuable information and insights that Medium provides. We believe that by incorporating these options, we can strike a balance between accessibility and the continued creation of the high-quality content you've come to expect from Medium.com.</p>
-      <a href="https://patreon.com/Freedium" target="_blank" title="Patreon">
-      <button class="bg-red-400 mx-1 text-white font-semibold py-1 px-2 rounded mt-2">
-        Patreon
-      </button>
-    </a>
-      <button class="bg-gray-300 mx-1 hover:bg-gray-400 text-gray-800 font-semibold py-1 px-2 rounded mt-2 close-button">
-        Close
-      </button>
-      <button class="bg-gray-800 mx-1 text-white font-semibold py-1 px-2 rounded mt-2">
-        GitHub organization repository
-      </button>
-    </div>
-  </div>
-
+        <!-- Notification Container -->
+        <div class="notification-container">
+            <div class="notification-card">
+                <p class="text-2xl pb-5">Medium has changed its paywall! Sorry for inconvenience.</p>
+                <p class="pb-3">
+                    We are working hard to make Medium.com's paywalled posts more accessible to you. As part of our commitment to improving the user experience, we are exploring options such as adding a donation feature or enabling relevant advertising. These steps will help us maintain the quality of our service while providing alternative ways to access premium articles.
+                    <br>
+                    <br>
+                    Your support through donations or advertising will directly help to sustain the valuable information and insights that Medium provides. We believe that by incorporating these options, we can strike a balance between accessibility and the continued creation of the high-quality content you've come to expect from Medium.com.
+                </p>
+                <a href="https://patreon.com/Freedium" target="_blank" title="Patreon">
+                    <button class="bg-red-400 mx-1 text-white font-semibold py-1 px-2 rounded mt-2">Patreon</button>
+                </a>
+                <button class="bg-gray-300 mx-1 hover:bg-gray-400 text-gray-800 font-semibold py-1 px-2 rounded mt-2 close-button">Close</button>
+                <button class="bg-gray-800 mx-1 text-white font-semibold py-1 px-2 rounded mt-2">GitHub organization repository</button>
+            </div>
+        </div>
         <nav id="header" class="fixed w-full z-10 top-0">
-                <!--
+            <!--
             {% if enable_ads_header %}
                 <div class="w-full bg-yellow-400 text-center py-1 px-4">
                     <p class="text-yellow-900">Place your advertisement here! Contact us at advertise@freedium.com</p>
                 </div>
             {% endif %}
                 -->
-            <div id="progress"
-                 class="h-1 z-20 top-0"
-                 style="background:linear-gradient(to right, #4dc0b5 var(--scroll), transparent 0)"></div>
+            <div id="progress" class="h-1 z-20 top-0" style="background:linear-gradient(to right, #4dc0b5 var(--scroll), transparent 0)"></div>
             <div class="w-full md:max-w-4xl mx-auto flex flex-wrap items-center justify-between mt-0 py-3">
                 <div class="pl-4">
                     <a class="text-green-500 text-base no-underline hover:no-underline font-extrabold text-xl"
@@ -86,8 +82,7 @@
                         </svg>
                     </button>
                 </div>
-                <div class="w-full flex-grow lg:flex lg:items-center lg:w-auto hidden lg:block mt-2 lg:mt-0 bg-gray-100 "
-                     id="nav-content">
+                <div class="w-full flex-grow lg:flex lg:items-center lg:w-auto hidden lg:block mt-2 lg:mt-0 bg-gray-100 " id="nav-content">
                     <ul class="list-reset lg:flex justify-end flex-1 items-center">
                         <!--
 					<li class="mr-3">
@@ -114,7 +109,7 @@
     window.location.href = window.location.origin;
   }
         </script>
-<script>
+        <script>
     // Wait for the DOM to load
     document.addEventListener('DOMContentLoaded', () => {
       const notificationContainer = document.querySelector('.notification-container');
@@ -141,8 +136,7 @@
 
       showNotification();
     });
-  </script>
-
+        </script>
         <script>
 const h = document.documentElement, b = document.body;
 const st = 'scrollTop';

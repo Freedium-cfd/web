@@ -1,72 +1,52 @@
 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 w-full">
-  {% for post in post_list %}
-  <div class="p-6 bg-white rounded-xl">
-	<a
-	   class="group post_view"
-       post_id="{{ post.post_id }}"
-	   >
-	  <div class="max-h-72 items-center d-flex overflow-hidden">
-		{% if post.preview_image_id %}
-        <img
-			 src="https://miro.medium.com/v2/resize:fit:700/{{ post.preview_image_id }}"
-             loading="eager"
-			 class="w-full h-auto hover:scale-105 transition transition-all duration-200 ease-in-out"
-			 >
-		  </div>
-        {% else  %}
-        <img
-	    	 src="https://images.unsplash.com/photo-1636467204130-edf8ee206dce?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80"
-             loading="eager"
-			 class="w-full h-auto hover:scale-105 transition transition-all duration-200 ease-in-out"
-			 >
-		  </div>
-        {% endif %}
-
-		<h3
-			class="mt-6 leading-normal text-gray-800 group-hover:text-purple-400 font-semibold text-xl lg:text-2xl line-clamp-3 transition translation-all duration-200 ease-in-out"
-			title="Lorem Ipsum is simply dummy text of the printing"
-			>
-          {{ post.title }}
-		</h3>
-		</a>
-
-	  <div class="mt-6">
-        <div class="flex flex-wrap items-center space-x-2 text-sm text-gray-500">
-                    {% if post.collection %}
-                        <a href="https://medium.com/{{ post.collection.slug }}"
-                           title="{{ post.collection.shortDescription }}"
-                           target="_blank"
-                           class="flex items-center space-x-1">
-                            <img src="https://miro.medium.com/v2/resize:fill:48:48/{{ post.collection.avatar.id }}"
-                                 alt="{{ post.collection.name }}"
-                                 loading="eager"
-                                 class="h-4 w-4 rounded-full no-lightense">
-                            <p>{{ post.collection.name }}</p>
-                        </a>
-                        <span>·</span>
-                    {% endif %}
-                    <span class="text-gray-500">~{{ post.reading_time }} min read</span>
-                    <span class="md:inline">·</span>
-                    <span class="text-gray-500">{{ post.first_published_at }} (Updated: {{ post.updated_at }})</span>
-                    <span class="md:inline">·</span>
-                    <span class="text-yellow-500">Free: {{ post.free_access }}</span>
+    {% for post in post_list %}
+        <div class="p-6 bg-white rounded-xl">
+            <a class="group post_view" post_id="{{ post.post_id }}">
+                <div class="max-h-72 items-center d-flex overflow-hidden">
+                    {% if post.preview_image_id %}
+                        <img src="https://miro.medium.com/v2/resize:fit:700/{{ post.preview_image_id }}"
+                             loading="eager"
+                             class="w-full h-auto hover:scale-105 transition transition-all duration-200 ease-in-out">
+                    </div>
+                {% else %}
+                    <img src="https://images.unsplash.com/photo-1636467204130-edf8ee206dce?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80"
+                         loading="eager"
+                         class="w-full h-auto hover:scale-105 transition transition-all duration-200 ease-in-out">
                 </div>
-
-        <p class="mt-6 leading-normal line-clamp-3 text-gray-600">
-		  {{ post.description }}
-		</p>
-	  </div>
-
-	  <a post_id="{{ post.post_id }}" class="inline-block mt-6 text-purple-500 hover:text-purple-400 post_view">
-		Read More
-	  </a>
-	  </div>
+            {% endif %}
+            <h3 class="mt-6 leading-normal text-gray-800 group-hover:text-purple-400 font-semibold text-xl lg:text-2xl line-clamp-3 transition translation-all duration-200 ease-in-out"
+                title="Lorem Ipsum is simply dummy text of the printing">{{ post.title }}</h3>
+        </a>
+        <div class="mt-6">
+            <div class="flex flex-wrap items-center space-x-2 text-sm text-gray-500">
+                {% if post.collection %}
+                    <a href="https://medium.com/{{ post.collection.slug }}"
+                       title="{{ post.collection.shortDescription }}"
+                       target="_blank"
+                       class="flex items-center space-x-1">
+                        <img src="https://miro.medium.com/v2/resize:fill:48:48/{{ post.collection.avatar.id }}"
+                             alt="{{ post.collection.name }}"
+                             loading="eager"
+                             class="h-4 w-4 rounded-full no-lightense">
+                        <p>{{ post.collection.name }}</p>
+                    </a>
+                    <span>·</span>
+                {% endif %}
+                <span class="text-gray-500">~{{ post.reading_time }} min read</span>
+                <span class="md:inline">·</span>
+                <span class="text-gray-500">{{ post.first_published_at }} (Updated: {{ post.updated_at }})</span>
+                <span class="md:inline">·</span>
+                <span class="text-yellow-500">Free: {{ post.free_access }}</span>
+            </div>
+            <p class="mt-6 leading-normal line-clamp-3 text-gray-600">{{ post.description }}</p>
+        </div>
+        <a post_id="{{ post.post_id }}" class="inline-block mt-6 text-purple-500 hover:text-purple-400 post_view">Read More</a>
+    </div>
 {% endfor %}
-      </div>
-
+</div>
 <script>
         for (let post_a_el of document.getElementsByClassName("post_view")) {
     console.log(post_a_el.attributes["post_id"]);
     post_a_el.href = `${window.location.origin}/${post_a_el.attributes["post_id"].value}`
 }
-        </script>
+</script>

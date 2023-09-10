@@ -1,14 +1,21 @@
 <div class="fixed bottom-4 left-4" style="z-index: 999999;">
-  <button onclick="navigateNoCache()" class="m-1.5 flex items-center bg-blue-500 text-white py-2 px-4 rounded-full shadow-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500">
-     <svg xmlns="http://www.w3.org/2000/svg" height="1em" viewBox="0 0 512 512"><!--! Font Awesome Free 6.4.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2023 Fonticons, Inc. --><style>svg{fill:#ffffff}</style><path d="M463.5 224H472c13.3 0 24-10.7 24-24V72c0-9.7-5.8-18.5-14.8-22.2s-19.3-1.7-26.2 5.2L413.4 96.6c-87.6-86.5-228.7-86.2-315.8 1c-87.5 87.5-87.5 229.3 0 316.8s229.3 87.5 316.8 0c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0c-62.5 62.5-163.8 62.5-226.3 0s-62.5-163.8 0-226.3c62.2-62.2 162.7-62.5 225.3-1L327 183c-6.9 6.9-8.9 17.2-5.2 26.2s12.5 14.8 22.2 14.8H463.5z"/></svg>
-          <span class="pl-1.5">problem with displaying post? click there</span>
-  </button>
-    <button id="openProblemModal" class="m-1.5 flex items-center bg-red-500 text-white py-2 px-4 rounded-full shadow-lg hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-blue-500">
-      <svg xmlns="http://www.w3.org/2000/svg" height="1em" viewBox="0 0 512 512"><!--! Font Awesome Free 6.4.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2023 Fonticons, Inc. --><style>svg{fill:#ffffff}</style><path d="M256 32c14.2 0 27.3 7.5 34.5 19.8l216 368c7.3 12.4 7.3 27.7 .2 40.1S486.3 480 472 480H40c-14.3 0-27.6-7.7-34.7-20.1s-7-27.8 .2-40.1l216-368C228.7 39.5 241.8 32 256 32zm0 128c-13.3 0-24 10.7-24 24V296c0 13.3 10.7 24 24 24s24-10.7 24-24V184c0-13.3-10.7-24-24-24zm32 224a32 32 0 1 0 -64 0 32 32 0 1 0 64 0z"/></svg>
-          <span class="pl-1.5">report problem</span>
-  </button>
+    <button onclick="navigateNoCache()"
+            class="m-1.5 flex items-center bg-blue-500 text-white py-2 px-4 rounded-full shadow-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500">
+        <svg xmlns="http://www.w3.org/2000/svg" height="1em" viewBox="0 0 512 512">
+            <!--! Font Awesome Free 6.4.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2023 Fonticons, Inc. --><style>svg{fill:#ffffff}</style>
+            <path d="M463.5 224H472c13.3 0 24-10.7 24-24V72c0-9.7-5.8-18.5-14.8-22.2s-19.3-1.7-26.2 5.2L413.4 96.6c-87.6-86.5-228.7-86.2-315.8 1c-87.5 87.5-87.5 229.3 0 316.8s229.3 87.5 316.8 0c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0c-62.5 62.5-163.8 62.5-226.3 0s-62.5-163.8 0-226.3c62.2-62.2 162.7-62.5 225.3-1L327 183c-6.9 6.9-8.9 17.2-5.2 26.2s12.5 14.8 22.2 14.8H463.5z" />
+        </svg>
+        <span class="pl-1.5">problem with displaying post? click there</span>
+    </button>
+    <button id="openProblemModal"
+            class="m-1.5 flex items-center bg-red-500 text-white py-2 px-4 rounded-full shadow-lg hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-blue-500">
+        <svg xmlns="http://www.w3.org/2000/svg" height="1em" viewBox="0 0 512 512">
+            <!--! Font Awesome Free 6.4.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2023 Fonticons, Inc. --><style>svg{fill:#ffffff}</style>
+            <path d="M256 32c14.2 0 27.3 7.5 34.5 19.8l216 368c7.3 12.4 7.3 27.7 .2 40.1S486.3 480 472 480H40c-14.3 0-27.6-7.7-34.7-20.1s-7-27.8 .2-40.1l216-368C228.7 39.5 241.8 32 256 32zm0 128c-13.3 0-24 10.7-24 24V296c0 13.3 10.7 24 24 24s24-10.7 24-24V184c0-13.3-10.7-24-24-24zm32 224a32 32 0 1 0 -64 0 32 32 0 1 0 64 0z" />
+        </svg>
+        <span class="pl-1.5">report problem</span>
+    </button>
 </div>
-
 <div class="container w-full md:max-w-3xl mx-auto pt-20 break-words">
     <div class="w-full px-4 md:px-6 text-xl text-gray-800 leading-normal" style="font-family:Georgia,serif;">
         <div class="font-sans">
@@ -17,7 +24,9 @@
             </p>
             {% if previewImageId %}
                 <img alt="Preview image"
-                     style="max-height: 65vh; width: auto; margin: auto"
+                     style="max-height: 65vh;
+                            width: auto;
+                            margin: auto"
                      loading="eager"
                      role="presentation"
                      src="https://miro.medium.com/v2/resize:fit:700/{{ previewImageId }}">
@@ -29,7 +38,7 @@
             <div class="flex items-center space-x-4 p-4">
                 <div class="flex-shrink-0">
                     <a href="https://medium.com/@{{ creator.username }}" target="_blank" title="{{ creator.bio }}" class="block relative">
-                        <img src="https://miro.medium.com/v2/resize:fill:88:88/{{ creator.imageId or '1*dmbNkD5D-u45r44go_cf0g.png'}}"
+                        <img src="https://miro.medium.com/v2/resize:fill:88:88/{{ creator.imageId or '1*dmbNkD5D-u45r44go_cf0g.png' }}"
                              alt="{{ creator.name }}"
                              class="rounded-full h-11 w-11 no-lightense">
                         <div class="absolute bottom-0 right-0 h-3 w-3 border-2 border-white bg-green-500 rounded-full"></div>
@@ -71,7 +80,7 @@
             </div>
         </div>
         <div class="main-content mt-8">
-        {% for paragraph in content %}{{ paragraph }}{% endfor %}
+            {% for paragraph in content %}{{ paragraph }}{% endfor %}
         </div>
         <div class="flex flex-wrap gap-2 mt-5">
             {% for tag in tags %}<a title="{{ tag.displayTitle }}" target="_blank" href="https://medium.com/tag/{{ tag.normalizedTagSlug }}"><span class="text-green-500 bg-green-100 px-2 py-1 rounded-full text-xs">#{{ tag.normalizedTagSlug }}</span></a>{% endfor %}
@@ -80,24 +89,28 @@
     </div>
     <div id="problemModal" class="modal hidden fixed inset-0 w-full h-full flex items-center justify-center">
         <div class="modal-overlay absolute w-full h-full bg-gray-900 opacity-50"></div>
-
         <div class="modal-container bg-white w-11/12 md:max-w-md mx-auto rounded shadow-lg z-50 overflow-y-auto">
             <div class="modal-content py-4 text-left px-6">
                 <h1 class="text-3xl font-bold">Report a Problem</h1>
                 <form action="#" method="POST" class="mt-4">
                     <div class="mb-4">
                         <label for="problem-description" class="block text-gray-700 font-bold mb-2">Problem Description</label>
-                        <textarea id="problem-description" name="problem-description" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" rows="4" required></textarea>
+                        <textarea id="problem-description"
+                                  name="problem-description"
+                                  class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                                  rows="4"
+                                  required></textarea>
                     </div>
                     <div>
-                    <button type="submit" class="m-2 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">Submit</button>
-                    <button type="button" class="m-2 modal-close bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">Cancel</button>
+                        <button type="submit"
+                                class="m-2 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">Submit</button>
+                        <button type="button"
+                                class="m-2 modal-close bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">Cancel</button>
                     </div>
                 </form>
             </div>
         </div>
     </div>
-
     <script>
         const openModalButton = document.getElementById('openProblemModal');
         const closeModalButton = document.querySelector('.modal-close');
@@ -156,7 +169,6 @@
 
         submitButton.addEventListener('click', submitForm);
     </script>
-
     <style>
 .main-content {
  letter-spacing: -0.06px;
@@ -173,7 +185,6 @@ p code, ul code, li code {
     font-size: 75%;
 }
     </style>
-
     <script>
 document.addEventListener('DOMContentLoaded', (event) => {
   document.querySelectorAll('pre code').forEach((el) => {
@@ -197,11 +208,11 @@ document.addEventListener('DOMContentLoaded', (event) => {
          });
 });
   });
- </script>
- <style>
+    </script>
+    <style>
      .hljs-copy {
          float: right;
          cursor: pointer;
          margin: 5px;
      }
- </style>
+    </style>
