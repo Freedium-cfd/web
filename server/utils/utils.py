@@ -3,7 +3,7 @@ import random
 import re
 import socket
 from functools import wraps
-from urllib.parse import urlparse
+# from urllib.parse import urlparse
 
 from loguru import logger
 
@@ -15,11 +15,12 @@ DEFAULT_PROTOCOL = "https://"
 
 @trace
 def correct_url(url: str) -> str:
+    # Workaround for Safari bug
     url = re.sub(r"https?://?", DEFAULT_PROTOCOL, url)
 
-    parsed_url = urlparse(url)
-    if not bool(parsed_url.netloc and parsed_url.scheme):
-        return DEFAULT_PROTOCOL + url
+    # parsed_url = urlparse(url)
+    # if not bool(parsed_url.netloc and parsed_url.scheme):
+    #     return DEFAULT_PROTOCOL + url
 
     # if not re.match(r'http[s]?://', url):
     #     url = DEFAULT_PROTOCOL + url

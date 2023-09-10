@@ -5,10 +5,23 @@ from loguru import logger
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.requests import Request
 from starlette.responses import Response, StreamingResponse
+from starlette.types import Message
 
 from server import transponder_code_correlation, url_correlation, xkcd_passwd, xp
 from server.utils.error import generate_error
 from server.utils.utils import string_to_number_ascii
+
+
+async def set_body(request: Request, body: bytes):
+     async def receive() -> Message:
+         return {"type": "http.request", "body": body}
+     request._receive = receive
+
+
+async def get_body(request: Request) -> bytes:
+     body = await request.body()
+     await set_body(request, body)
+     return body
 
 
 class LoggerMiddleware(BaseHTTPMiddleware):
@@ -36,10 +49,13 @@ class LoggerMiddleware(BaseHTTPMiddleware):
                 value = self._sanitize_header_value(name, value)
                 logger.debug(f"\t< {name}: {value}")
 
-            if hasattr(request, "cookies"):
+            if hasattr(request, "cookies") and request.cookies:
                 logger.debug("< Coockies:")
                 for name, value in request.cookies.items():
                     logger.debug(f"\t< {name}: {value}")
+
+            # Workaround for stupid Starlette bug: https://github.com/tiangolo/fastapi/issues/394
+            await get_body(request)
 
             try:
                 response = await call_next(request)

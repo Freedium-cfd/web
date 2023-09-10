@@ -163,3 +163,4 @@ user_data/
 *.dist/
 *.build/
 medium_cache.sqlite
+ban_post_list.db

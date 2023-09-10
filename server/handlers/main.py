@@ -1,17 +1,18 @@
 import sentry_sdk
+from pydantic import BaseModel
+from aiohttp_client_cache import CachedSession, SQLiteBackend
 import pickle
 import aiohttp
 from fastapi.responses import HTMLResponse
 from loguru import logger
-from contextlib import suppress
 
-from aiohttp_client_cache import CachedSession, SQLiteBackend
 import random
-from server import MediumParser, base_template, config, main_template, medium_parser_exceptions, minify_html, url_correlation, redis_storage, postleter_template, is_valid_medium_post_id_hexadecimal
+from server import MediumParser, base_template, config, main_template, medium_parser_exceptions, minify_html, url_correlation, redis_storage, postleter_template, is_valid_medium_post_id_hexadecimal, ban_db
 from server.utils.error import (
     generate_error,
 )
 from fastapi import Response
+from fastapi.responses import JSONResponse, RedirectResponse
 from server.utils.logger_trace import trace
 from server.utils.utils import aio_redis_cache, correct_url, safe_check_redis_connection
 from server.utils.notify import send_message
@@ -22,14 +23,49 @@ TIMEOUT = 5
 IFRAME_HEADERS = {'Access-Control-Allow-Origin': '*'}
 
 
+class ReportProblem(BaseModel):
+    page: str
+    description: str
+
+
+async def report_problem(problem: ReportProblem):
+    logger.error("entering report problem")
+    await send_message(f"New problem report: \n{problem.description}\n\n{problem.page}")
+    return JSONResponse({"message": "OK"}, status_code=200)
+
+
 @trace
 async def route_processing(path: str):
     if not path:
         return await main_page()
-    elif path == "render_postleter":
-        return await render_postleter()
     else:
         return await render_medium_post_link(path)
+
+
+@trace
+async def render_no_cache(path_key: str):
+    logger.error("No cache render")
+    logger.error(path_key)
+    if is_valid_medium_post_id_hexadecimal(path_key):
+        medium_parser = MediumParser(path_key)
+    else:
+        url = correct_url(path_key)
+        medium_parser = await MediumParser.from_url(url)
+
+    post_id = medium_parser.post_id
+
+    try:
+        cache = SQLiteBackend('medium_cache.sqlite')
+        await cache.responses.delete(post_id)
+    except Exception as ex:
+        logger.exception(ex)
+
+    if await safe_check_redis_connection(redis_storage):
+        await redis_storage.delete(post_id)
+
+    return RedirectResponse(
+        f'/{path_key}',
+        status_code=302)
 
 
 @trace
@@ -49,6 +85,8 @@ async def render_iframe(iframe_id):
 async def render_postleter(limit: int = 120, as_html: bool = False):
     async with CachedSession(cache=SQLiteBackend('medium_cache.sqlite')) as session:
         post_id_list = [i async for i in session.cache.responses.keys()]
+
+    limit = limit if len(post_id_list) > limit else len(post_id_list)
 
     random_post_id_list = random.choices(post_id_list, k=limit)
 
@@ -70,6 +108,22 @@ async def render_postleter(limit: int = 120, as_html: bool = False):
 
 
 @trace
+async def delete_from_cache(key: str, secret_key: str):
+    if secret_key != config.SECRET_KEY:
+        return JSONResponse({"message": f"Wrong secret key: {secret_key}"}, status_code=403)
+
+    try:
+        cache = SQLiteBackend('medium_cache.sqlite')
+        await cache.responses.delete(key)
+    except Exception as ex:
+        logger.exception(ex)
+        return JSONResponse({"message": f"Couldn't delete from cache: {ex}"}, status_code=500)
+    else:
+        ban_db.set(key, 1)
+        return JSONResponse({"message": "OK"}, status_code=200)
+
+
+@trace
 async def main_page():
     postleter_template = await render_postleter(as_html=True)
     main_template_rendered = await main_template.render_async(postleter=postleter_template)
@@ -81,6 +135,10 @@ async def main_page():
 @trace
 async def render_medium_post_link(path: str):
     redis_available = await safe_check_redis_connection(redis_storage)
+
+    if path.startswith("render_no_cache/"):
+        path = path.removeprefix("render_no_cache/")
+        return await render_no_cache(path)
 
     try:
         if is_valid_medium_post_id_hexadecimal(path):
@@ -94,7 +152,7 @@ async def render_medium_post_link(path: str):
         else:
             redis_result = None
         if not redis_result:
-            await medium_parser.query(timeout=config.TIMEOUT, use_cache=False)
+            await medium_parser.query(timeout=config.TIMEOUT)
             rendered_medium_post = await medium_parser.render_as_html(minify=False, template_folder="server/templates")
         else:
             rendered_medium_post = pickle.loads(redis_result)
@@ -128,9 +186,9 @@ async def render_medium_post_link(path: str):
             "description": rendered_medium_post.description,
         }
         base_template_rendered = await base_template.render_async(base_context)
-        minified_rendered_post = base_template_rendered
 
-        # minified_rendered_post = minify_html(base_template_rendered)
+        # minified_rendered_post = base_template_rendered
+        minified_rendered_post = minify_html(base_template_rendered)
 
         if not redis_result:
             if not redis_available:
@@ -143,7 +201,10 @@ async def render_medium_post_link(path: str):
 
 
 def register_main_router(app):
+    app.add_api_route(path="/delete_from_cache/{key}", endpoint=delete_from_cache, methods=["GET"])
+    app.add_api_route(path="/render_no_cache/{path_key}", endpoint=render_no_cache, methods=["GET"])
     app.add_api_route(path="/render_iframe/{iframe_id}", endpoint=render_iframe, methods=["GET"])
+    app.add_api_route(path="/report-problem", endpoint=report_problem, methods=["POST"])
     app.add_api_route(
         path="/{path:path}",
         endpoint=route_processing,

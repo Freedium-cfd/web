@@ -1,4 +1,4 @@
-wheel
+pickledb==0.9.2
 sentry-sdk[fastapi]==1.29.2
 loguru==0.6.0  # due to: https://github.com/Delgan/loguru/issues/916
 uvicorn==0.20.0

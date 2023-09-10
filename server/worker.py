@@ -6,7 +6,7 @@ import gunicorn.app.base
 import uvicorn
 from loguru import logger
 
-from server import config
+from server import config, ban_db
 from server.main import app
 from server.utils.logger import GunicornLogger
 from server.utils.logger_trace import trace
@@ -19,6 +19,11 @@ def post_worker_init(worker):
     # https://github.com/benoitc/gunicorn/issues/1391#issuecomment-467010209
     logger.trace("Removing atexit handler")
     atexit.unregister(_exit_function)
+
+
+def on_exit():
+    logger.debug("GUNICORN: On exit")
+    ban_db.dump()
 
 
 @trace
@@ -57,5 +62,6 @@ def execute_server_worker(host: str, port: int):
         "preload_app": True,
         "post_worker_init": post_worker_init,
         "timeout": config.WORKER_TIMEOUT,
+        # "on_exit": on_exit,
     }
     GunicornStandaloneApplication(app, options).run()

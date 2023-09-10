@@ -4,9 +4,9 @@
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <meta http-equiv="X-UA-Compatible" content="ie=edge" />
-        <title>{{ title or "Breaking medium.com's Paywall!" }} - Freedium RC</title>
+        <title>{{ title or "Breaking Medium paywall!" }} - Freedium</title>
         {% if creator %}<meta name="author" content="{{ creator.name }}" />{% endif %}
-        <meta name="description" content="{{ description or 'Your paywall breakthrough for medium.com!' }}" />
+        <meta name="description" content="{{ description or 'Your paywall breakthrough for Medium!' }}" />
         <meta name="keywords" content="medium, paywall, medium.com, paywall breakthrough" />
         <link rel="stylesheet" href="https://unpkg.com/tailwindcss@2.2.19/dist/tailwind.min.css" />
         <link href="https://glyph.medium.com/css/unbound.css" rel="stylesheet">
@@ -61,11 +61,13 @@
   </div>
 
         <nav id="header" class="fixed w-full z-10 top-0">
+                <!--
             {% if enable_ads_header %}
                 <div class="w-full bg-yellow-400 text-center py-1 px-4">
                     <p class="text-yellow-900">Place your advertisement here! Contact us at advertise@freedium.com</p>
                 </div>
             {% endif %}
+                -->
             <div id="progress"
                  class="h-1 z-20 top-0"
                  style="background:linear-gradient(to right, #4dc0b5 var(--scroll), transparent 0)"></div>
@@ -73,7 +75,7 @@
                 <div class="pl-4">
                     <a class="text-green-500 text-base no-underline hover:no-underline font-extrabold text-xl"
                        href="/"
-                       onclick="navigateToOrigin()">Freedium RC</a>
+                       onclick="navigateToOrigin()">Freedium</a>
                 </div>
                 <div class="block lg:hidden pr-4">
                     <button id="nav-toggle"
@@ -84,7 +86,7 @@
                         </svg>
                     </button>
                 </div>
-                <div class="w-full flex-grow lg:flex lg:items-center lg:w-auto hidden lg:block mt-2 lg:mt-0 bg-gray-100 z-20"
+                <div class="w-full flex-grow lg:flex lg:items-center lg:w-auto hidden lg:block mt-2 lg:mt-0 bg-gray-100 "
                      id="nav-content">
                     <ul class="list-reset lg:flex justify-end flex-1 items-center">
                         <!--

@@ -1,5 +1,6 @@
 import datetime as dt
 from multiprocessing import Lock, Manager
+import pickledb
 import logging
 from contextvars import ContextVar
 from typing import Optional
@@ -40,6 +41,8 @@ url_correlation: ContextVar[Optional[str]] = ContextVar("url_correlation", defau
 transponder_code_correlation: ContextVar[Optional[str]] = ContextVar("transponder_code_correlation", default="unknown transponder location... Beep!")
 
 manager = Manager()
+
+ban_db = pickledb.load('ban_post_list.db', True)
 
 # TODO: workaround
 db_backup_startup_correlation = manager.dict(registered=False)
