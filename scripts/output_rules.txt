@@ -109,3 +109,31 @@
     handle_path /ads.txt {
         respond "Access denied" 403
     }
+
+    handle_path /apple-touch-icon-precomposed.png {
+        respond "Access denied" 403
+    }
+
+    handle_path /rss.xml {
+        respond "Access denied" 403
+    }
+
+    handle_path /.git/* {
+        respond "Access denied" 403
+    }
+
+    handle_path /apple-touch-icon-120x120.png {
+        respond "Access denied" 403
+    }
+
+    handle_path /apple-touch-icon-120x120-precomposed.png {
+        respond "Access denied" 403
+    }
+
+    handle_path /apple-touch-icon-152x152.png {
+        respond "Access denied" 403
+    }
+
+    handle_path /apple-touch-icon-152x152-precomposed.png {
+        respond "Access denied" 403
+    }
