@@ -20,8 +20,8 @@ from server.utils.notify import send_message
 CACHE_LIFE_TIME = 60 * 60 * 24
 TIMEOUT = 5
 
-IFRAME_HEADERS = {'Access-Control-Allow-Origin': '*'}
-
+# IFRAME_HEADERS = {'Content-Security-Policy': "default-src 'self'; connect-src https://localhost 'self'; font-src data: https://*.amazonaws.com https://*.medium.com https://glyph.medium.com https://glyph-sandbox.medium.sh https://medium.com https://*.gstatic.com https://dnqgz544uhbo8.cloudfront.net https://cdn-static-1.medium.com 'self'; frame-src chromenull: https: webviewprogressproxy: blob: medium: 'self'; img-src blob: data: https: 'self'; media-src https://*.cdn.vine.co https://d1fcbxp97j4nb2.cloudfront.net https://d262ilb51hltx0.cloudfront.net https://*.medium.com https://gomiro.medium.com https://miro.medium.com https://pbs.twimg.com 'self' blob:; object-src 'self'; script-src 'unsafe-eval' 'unsafe-inline' about: https: 'self'; style-src 'unsafe-inline' data: https: 'self'", "X-Frame-Options": "sameorigin"}
+IFRAME_HEADERS = {"Access-Control-Allow-Origin": "*"}
 
 class ReportProblem(BaseModel):
     page: str
