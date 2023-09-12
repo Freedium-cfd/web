@@ -28,6 +28,11 @@ class ReportProblem(BaseModel):
     description: str
 
 
+class DeleteFromCache(BaseModel):
+    key: str
+    secret_key: str
+
+
 async def report_problem(problem: ReportProblem):
     logger.error("entering report problem")
     await send_message(f"New problem report: \n{problem.description}\n\n{problem.page}")
@@ -108,18 +113,18 @@ async def render_postleter(limit: int = 120, as_html: bool = False):
 
 
 @trace
-async def delete_from_cache(key: str, secret_key: str):
-    if secret_key != config.SECRET_KEY:
-        return JSONResponse({"message": f"Wrong secret key: {secret_key}"}, status_code=403)
+async def delete_from_cache(key_data: DeleteFromCache):
+    if key_data.secret_key != config.SECRET_KEY:
+        return JSONResponse({"message": f"Wrong secret key: {key_data.secret_key}"}, status_code=403)
 
     try:
         cache = SQLiteBackend('medium_cache.sqlite')
-        await cache.responses.delete(key)
+        await cache.responses.delete(key_data.key)
     except Exception as ex:
         logger.exception(ex)
         return JSONResponse({"message": f"Couldn't delete from cache: {ex}"}, status_code=500)
     else:
-        ban_db.set(key, 1)
+        ban_db.set(key_data.key, 1)
         return JSONResponse({"message": "OK"}, status_code=200)
 
 
@@ -201,7 +206,7 @@ async def render_medium_post_link(path: str):
 
 
 def register_main_router(app):
-    app.add_api_route(path="/delete_from_cache/{key}", endpoint=delete_from_cache, methods=["GET"])
+    app.add_api_route(path="/delete_from_cache", endpoint=delete_from_cache, methods=["POST"])
     app.add_api_route(path="/render_no_cache/{path_key}", endpoint=render_no_cache, methods=["GET"])
     app.add_api_route(path="/render_iframe/{iframe_id}", endpoint=render_iframe, methods=["GET"])
     app.add_api_route(path="/report-problem", endpoint=report_problem, methods=["POST"])

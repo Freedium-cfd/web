@@ -66,7 +66,7 @@ class LoggerMiddleware(BaseHTTPMiddleware):
             logger.trace(response.__dict__)
 
             response.headers["X-Request-ID"] = generated_id
-            response.headers["Access-Control-Expose-Headers"] = "X-Request-ID, Origin, X-Requested-With, Content-Type, Accept"
+            # response.headers["Access-Control-Expose-Headers"] = "X-Request-ID, Origin, X-Requested-With, Content-Type, Accept"
 
             logger.debug(f"> HTTP/{request['http_version']} {response.status_code}")
 
