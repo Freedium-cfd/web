@@ -137,3 +137,7 @@
     handle_path /apple-touch-icon-152x152-precomposed.png {
         respond "Access denied" 403
     }
+
+    handle_path /.well-known/* {
+        respond "Access denied" 403
+    }

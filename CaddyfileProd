@@ -143,6 +143,10 @@ freedium.cfd {
         respond "Access denied" 403
     }
 
+    handle_path /.well-known/* {
+        respond "Access denied" 403
+    }
+
     route /* {
 		reverse_proxy localhost:7080
 	}
