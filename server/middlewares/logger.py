@@ -1,3 +1,4 @@
+import asyncio
 import time
 from typing import Awaitable, Callable
 
@@ -7,7 +8,7 @@ from starlette.requests import Request
 from starlette.responses import Response, StreamingResponse
 from starlette.types import Message
 
-from server import transponder_code_correlation, url_correlation, xkcd_passwd, xp
+from server import transponder_code_correlation, url_correlation, xkcd_passwd, xp, config
 from server.utils.error import generate_error
 from server.utils.utils import string_to_number_ascii
 
@@ -58,7 +59,7 @@ class LoggerMiddleware(BaseHTTPMiddleware):
             await get_body(request)
 
             try:
-                response = await call_next(request)
+                response = await asyncio.wait_for(call_next(request), timeout=config.REQUEST_TIMEOUT)
             except Exception as ex:
                 logger.exception(ex)
                 response = await generate_error()
