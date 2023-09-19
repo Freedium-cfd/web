@@ -52,10 +52,10 @@ async def render_no_cache(path_key: str):
     logger.error("No cache render")
     logger.error(path_key)
     if is_valid_medium_post_id_hexadecimal(path_key):
-        medium_parser = MediumParser(path_key)
+        medium_parser = MediumParser(path_key, timeout=config.TIMEOUT)
     else:
         url = correct_url(path_key)
-        medium_parser = await MediumParser.from_url(url)
+        medium_parser = await MediumParser.from_url(url, timeout=config.TIMEOUT)
 
     post_id = medium_parser.post_id
 
@@ -98,7 +98,7 @@ async def render_postleter(limit: int = 120, as_html: bool = False):
     outlenget_posts_list = []
     for post_id in random_post_id_list:
         try:
-            post = MediumParser(post_id)
+            post = MediumParser(post_id, timeout=config.TIMEOUT)
             await post.query()
             post_metadata = await post.generate_metadata(as_dict=True)
             outlenget_posts_list.append(post_metadata)
@@ -147,17 +147,17 @@ async def render_medium_post_link(path: str):
 
     try:
         if is_valid_medium_post_id_hexadecimal(path):
-            medium_parser = MediumParser(path)
+            medium_parser = MediumParser(path, timeout=config.TIMEOUT)
         else:
             url = correct_url(path)
-            medium_parser = await MediumParser.from_url(url)
+            medium_parser = await MediumParser.from_url(url, timeout=config.TIMEOUT)
         medium_post_id = medium_parser.post_id
         if redis_available:
             redis_result = await redis_storage.get(medium_post_id)
         else:
             redis_result = None
         if not redis_result:
-            await medium_parser.query(timeout=config.TIMEOUT)
+            await medium_parser.query()
             rendered_medium_post = await medium_parser.render_as_html(minify=False, template_folder="server/templates")
         else:
             rendered_medium_post = pickle.loads(redis_result)
