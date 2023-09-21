@@ -1,11 +1,30 @@
 # Freedium.cfd web site implementation
 
 ## Browser extension:
+Huge thanks to `mathix420`
 
-You can use this Violentmonkey/Tampermonkey user script to automatically redirect medium pages to [freedium.cfd](https://freedium.cfd/):
+You can use this Violentmonkey/Tampermonkey user script to automatically redirect Medium pages to [Freedium](https://freedium.cfd/):
 https://gist.github.com/mathix420/e0604ab0e916622972372711d2829555
 
-## Start:
+## Bookmark:
+Huge thanks to `blazeknifecatcher`. Source: https://www.reddit.com/r/paywall/comments/15jsr6z/bypass_mediumcom_paywall/
+
+To create bookmark that redirects current Medium page to Freedium, create a new bookmark, but instead of adding the URL, add this:
+
+```
+javascript:window.location="https://freedium.cfd/"+encodeURIComponent(window.location)
+```
+
+This will make it so when you click on that bookmark button, it will open the bypassed version of it on freedium.cfd.
+
+Alternatively, if you want the bookmarklet to open in a new tab instead of the current tab, use this:
+
+```
+javascript:(function(){window.open("https://freedium.cfd/"+encodeURIComponent(window.location))})();
+```
+This will make it so that when you click on that bookmark button, it will open the bypassed version of it.
+
+## Execute local:
 ```bash
 # Clone this repo and init all submodules:
 git clone https://github.com/Freedium-cfd/web ~/web
