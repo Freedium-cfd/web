@@ -1,5 +1,10 @@
 # Freedium.cfd web site implementation
 
+## Browser extension:
+
+You can use this Violentmonkey/Tampermonkey user script to automatically redirect medium pages to [freedium.cfd](https://freedium.cfd/):
+https://gist.github.com/mathix420/e0604ab0e916622972372711d2829555
+
 ## Start:
 ```bash
 # Clone this repo and init all submodules:
