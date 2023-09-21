@@ -1,4 +1,4 @@
-# Freedium.cfd web site implementation
+# Freedium web site implementation
 
 ## Browser extension:
 Huge thanks to `mathix420`
