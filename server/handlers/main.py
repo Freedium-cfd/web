@@ -103,7 +103,8 @@ async def render_postleter(limit: int = 120, as_html: bool = False):
             post_metadata = await post.generate_metadata(as_dict=True)
             outlenget_posts_list.append(post_metadata)
         except Exception as ex:
-            await send_message(f"Couldn't render post_id for postleter: {post_id}, ex: {ex}")
+            logger.error(f"Couldn't render post_id for postleter: {post_id}, ex: {ex}")
+            # await send_message(f"Couldn't render post_id for postleter: {post_id}, ex: {ex}")
 
     postleter_template_rendered = await postleter_template.render_async(post_list=outlenget_posts_list)
     postleter_template_rendered_minified = minify_html(postleter_template_rendered)
@@ -118,8 +119,8 @@ async def delete_from_cache(key_data: DeleteFromCache):
         return JSONResponse({"message": f"Wrong secret key: {key_data.secret_key}"}, status_code=403)
 
     try:
-        cache = SQLiteBackend('medium_cache.sqlite')
-        await cache.responses.delete(key_data.key)
+        post = MediumParser(key_data.key, timeout=config.TIMEOUT)
+        await post.delete_from_cache()
     except Exception as ex:
         logger.exception(ex)
         return JSONResponse({"message": f"Couldn't delete from cache: {ex}"}, status_code=500)

@@ -94,6 +94,10 @@
          file_server
     }
 
+    handle_path /onboarding/* {
+        respond "Access denied" 403
+    }
+
     handle_path /wp-* {
         respond "Access denied" 403
     }
