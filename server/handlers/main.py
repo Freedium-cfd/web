@@ -14,8 +14,8 @@ from server.utils.error import (
 from fastapi import Response
 from fastapi.responses import JSONResponse, RedirectResponse
 from server.utils.logger_trace import trace
-from server.utils.utils import aio_redis_cache, correct_url, safe_check_redis_connection
-from server.utils.notify import send_message
+from server.utils.utils import correct_url, safe_check_redis_connection
+from server.utils.cache import aio_redis_cache
 
 CACHE_LIFE_TIME = 60 * 60 * 24
 
