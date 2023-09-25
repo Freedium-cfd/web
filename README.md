@@ -46,6 +46,5 @@ python3 -m server server
 ```
 
 ## TODO:
- - Add support for embed link preview & iframe support
+ - Speed up using Cython
  - Introducing Freedium as a fully functional open source frontend for Medium.com!
- - Speed up with Cython
