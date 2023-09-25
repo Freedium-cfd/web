@@ -18,6 +18,7 @@
         <meta name="msapplication-TileColor" content="#00aba9">
         <meta name="theme-color" content="#ffffff">
         <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/vanilla-lazyload@17.8.4/dist/lazyload.min.js"></script>
         <link rel="stylesheet" href="https://unpkg.com/@highlightjs/cdn-assets@11.8.0/styles/atom-one-dark.min.css">
         <script src="https://cdn.jsdelivr.net/npm/lightense-images@1.0.17/dist/lightense.min.js"></script>
         <style>
@@ -39,6 +40,24 @@
       text-align: center;
     }
         </style>
+        <script>
+    window._resizeIframe = function (iframeData)
+    {
+            iframeData.iframe.height = iframeData.height
+            _resizeIframeWidth()
+    }
+
+    function _resizeIframeWidth(){ var element = document.querySelector(".main-content");
+    var width = element.offsetWidth;
+
+    iframes = document.getElementsByTagName("iframe");
+    for (var i = 0; i < iframes.length; i++) {
+            iframes[i].width = width
+    }
+
+    window.onresize = _resizeIframeWidth
+ }
+        </script>
     </head>
     <body class="bg-gray-100 font-sans leading-normal tracking-normal" style="text-rendering: optimizeLegibility;">
         <!-- Notification Container -->
@@ -169,3 +188,7 @@ document.addEventListener('scroll', function () {
         </script>
     </body>
 </html>
+<script>
+            var lazyLoadInstance = new LazyLoad({
+});
+</script>

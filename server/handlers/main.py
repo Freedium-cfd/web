@@ -18,10 +18,9 @@ from server.utils.utils import aio_redis_cache, correct_url, safe_check_redis_co
 from server.utils.notify import send_message
 
 CACHE_LIFE_TIME = 60 * 60 * 24
-TIMEOUT = 5
 
-# IFRAME_HEADERS = {'Content-Security-Policy': "default-src 'self'; connect-src https://localhost 'self'; font-src data: https://*.amazonaws.com https://*.medium.com https://glyph.medium.com https://glyph-sandbox.medium.sh https://medium.com https://*.gstatic.com https://dnqgz544uhbo8.cloudfront.net https://cdn-static-1.medium.com 'self'; frame-src chromenull: https: webviewprogressproxy: blob: medium: 'self'; img-src blob: data: https: 'self'; media-src https://*.cdn.vine.co https://d1fcbxp97j4nb2.cloudfront.net https://d262ilb51hltx0.cloudfront.net https://*.medium.com https://gomiro.medium.com https://miro.medium.com https://pbs.twimg.com 'self' blob:; object-src 'self'; script-src 'unsafe-eval' 'unsafe-inline' about: https: 'self'; style-src 'unsafe-inline' data: https: 'self'", "X-Frame-Options": "sameorigin"}
-IFRAME_HEADERS = {"Access-Control-Allow-Origin": "*"}
+IFRAME_HEADERS = {"Access-Control-Allow-Origin": "*", "X-Frame-Options": "SAMEORIGIN"}
+
 
 class ReportProblem(BaseModel):
     page: str
@@ -52,10 +51,10 @@ async def render_no_cache(path_key: str):
     logger.error("No cache render")
     logger.error(path_key)
     if is_valid_medium_post_id_hexadecimal(path_key):
-        medium_parser = MediumParser(path_key, timeout=config.TIMEOUT)
+        medium_parser = MediumParser(path_key, timeout=config.TIMEOUT, host_address=config.HOST_ADDRESS)
     else:
         url = correct_url(path_key)
-        medium_parser = await MediumParser.from_url(url, timeout=config.TIMEOUT)
+        medium_parser = await MediumParser.from_url(url, timeout=config.TIMEOUT, host_address=config.HOST_ADDRESS)
 
     post_id = medium_parser.post_id
 
@@ -75,14 +74,16 @@ async def render_no_cache(path_key: str):
 
 @trace
 async def render_iframe(iframe_id):
+    # How Medium embeds works: https://stackoverflow.com/questions/56594766/medium-embed-ly-notifyresize-does-not-work-on-safari
     async with aiohttp.ClientSession() as client:
         request = await client.get(
             f"https://medium.com/media/{iframe_id}",
-            timeout=TIMEOUT,
+            timeout=config.TIMEOUT,
             headers={"User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.116 Safari/537.36"},
         )
         request_content = await request.text()
-    return Response(content=request_content, media_type="text/html; charset=utf-8", headers=IFRAME_HEADERS)
+        request_content = request_content.replace("document.domain = document.domain", "console.log('[FREEDIUM] iframe workaround')")
+    return Response(content=request_content, media_type="text/html", headers=IFRAME_HEADERS)
 
 
 @trace
@@ -98,7 +99,7 @@ async def render_postleter(limit: int = 120, as_html: bool = False):
     outlenget_posts_list = []
     for post_id in random_post_id_list:
         try:
-            post = MediumParser(post_id, timeout=config.TIMEOUT)
+            post = MediumParser(post_id, timeout=config.TIMEOUT, host_address=config.HOST_ADDRESS)
             await post.query()
             post_metadata = await post.generate_metadata(as_dict=True)
             outlenget_posts_list.append(post_metadata)
@@ -119,7 +120,7 @@ async def delete_from_cache(key_data: DeleteFromCache):
         return JSONResponse({"message": f"Wrong secret key: {key_data.secret_key}"}, status_code=403)
 
     try:
-        post = MediumParser(key_data.key, timeout=config.TIMEOUT)
+        post = MediumParser(key_data.key, timeout=config.TIMEOUT, host_address=config.HOST_ADDRESS)
         await post.delete_from_cache()
     except Exception as ex:
         logger.exception(ex)
@@ -148,10 +149,10 @@ async def render_medium_post_link(path: str):
 
     try:
         if is_valid_medium_post_id_hexadecimal(path):
-            medium_parser = MediumParser(path, timeout=config.TIMEOUT)
+            medium_parser = MediumParser(path, timeout=config.TIMEOUT, host_address=config.HOST_ADDRESS)
         else:
             url = correct_url(path)
-            medium_parser = await MediumParser.from_url(url, timeout=config.TIMEOUT)
+            medium_parser = await MediumParser.from_url(url, timeout=config.TIMEOUT, host_address=config.HOST_ADDRESS)
         medium_post_id = medium_parser.post_id
         if redis_available:
             redis_result = await redis_storage.get(medium_post_id)
