@@ -1,6 +1,6 @@
-# https://futurestud.io/tutorials/caddy-reverse-proxy-a-node-js-app
 :6752 {
 	# header Server "nginx"
+    encode gzip
 	header -Server
 
 {{ template }}

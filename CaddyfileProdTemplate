@@ -1,6 +1,7 @@
 # https://futurestud.io/tutorials/caddy-reverse-proxy-a-node-js-app
 freedium.cfd {
 	# header Server "nginx"
+    encode gzip
 	header -Server
 
     {{ template }}
