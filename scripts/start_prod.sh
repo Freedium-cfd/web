@@ -35,7 +35,7 @@ do
   CHECK_CADDY_PID=$(ps -A| grep $CADDY_PID |wc -l)
   if [[ $CHECK_CADDY_PID -eq 0 ]]; then
           sendMessageTelegram "Restarting caddy, since it's down"
-          ./bin/$arch/caddy start --config CaddyfileProd &
+          ./bin/$arch/caddy run --config CaddyfileProd &
           CADDY_PID=$!
   fi
 
@@ -43,7 +43,7 @@ do
   if [[ $CHECK_SERVER_PID -eq 0 ]]; then
         sendMessageTelegram "Restarting server, since it's down"
         python3 -m server server &
-        SERVER_PID=%!
+        SERVER_PID=$!
   fi
 
   sleep 5
@@ -64,7 +64,7 @@ do
   if [ "$reverse_status_code" -lt 308 ]; then
     sendMessageTelegram "Restarting reverse, since it's down"
     kill $CADDY_PID
-    ./bin/$arch/caddy start --config CaddyfileProd &
+    ./bin/$arch/caddy run --config CaddyfileProd &
     CADDY_PID=$!
   fi
 
