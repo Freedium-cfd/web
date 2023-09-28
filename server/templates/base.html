@@ -22,9 +22,8 @@
         <link rel="stylesheet" href="https://unpkg.com/@highlightjs/cdn-assets@11.8.0/styles/atom-one-dark.min.css">
         <script src="https://cdn.jsdelivr.net/npm/lightense-images@1.0.17/dist/lightense.min.js"></script>
         <style>
-    /* Custom CSS */
     .notification-container {
-      display: none; /* Initially hidden */
+      display: none;
       position: fixed;
       top: 20px;
       padding: 2%;
@@ -59,8 +58,8 @@
  }
         </script>
     </head>
+    <!--
     <body class="bg-gray-100 font-sans leading-normal tracking-normal" style="text-rendering: optimizeLegibility;">
-        <!-- Notification Container -->
         <div class="notification-container">
             <div class="notification-card">
                 <p class="text-2xl pb-5">Medium has changed its paywall! Sorry for inconvenience.</p>
@@ -77,14 +76,8 @@
                 <button class="bg-gray-800 mx-1 text-white font-semibold py-1 px-2 rounded mt-2">GitHub organization repository</button>
             </div>
         </div>
+        -->
         <nav id="header" class="fixed w-full z-10 top-0">
-            <!--
-            {% if enable_ads_header %}
-                <div class="w-full bg-yellow-400 text-center py-1 px-4">
-                    <p class="text-yellow-900">Place your advertisement here! Contact us at advertise@freedium.com</p>
-                </div>
-            {% endif %}
-                -->
             <div id="progress" class="h-1 z-20 top-0" style="background:linear-gradient(to right, #4dc0b5 var(--scroll), transparent 0)"></div>
             <div class="w-full md:max-w-4xl mx-auto flex flex-wrap items-center justify-between mt-0 py-3">
                 <div class="pl-4">
@@ -103,31 +96,21 @@
                 </div>
                 <div class="w-full flex-grow lg:flex lg:items-center lg:w-auto hidden lg:block mt-2 lg:mt-0 bg-gray-100 " id="nav-content">
                     <ul class="list-reset lg:flex justify-end flex-1 items-center">
-                        <!--
-					<li class="mr-3">
-						<a class="inline-block py-2 px-4 text-gray-900 font-bold no-underline" href="#">Active</a>
-					</li>
--->
                         <li class="mr-3">
                             <a class="inline-block text-gray-600 no-underline hover:text-gray-900 hover:text-underline py-2 px-4"
                                href="https://medium.com/">Medium.com</a>
                         </li>
-                        <!--
-					<li class="mr-3">
-						<a class="inline-block text-gray-600 no-underline hover:text-gray-900 hover:text-underline py-2 px-4" href="#">link</a>
-					</li>
--->
                     </ul>
                 </div>
             </div>
         </nav>
-        {% if enable_ads_header %}<div class="container w-full md:max-w-3xl mx-auto pt-8"></div>{% endif %}
         {{ body_template }}
         <script>
   function navigateToOrigin() {
     window.location.href = window.location.origin;
   }
         </script>
+        <!--
         <script>
     // Wait for the DOM to load
     document.addEventListener('DOMContentLoaded', () => {
@@ -156,6 +139,7 @@
       showNotification();
     });
         </script>
+        -->
         <script>
 const h = document.documentElement, b = document.body;
 const st = 'scrollTop';
@@ -190,5 +174,8 @@ document.addEventListener('scroll', function () {
 </html>
 <script>
             var lazyLoadInstance = new LazyLoad({
+                    callback_loaded: function(element) {
+        Lightense(element);
+    }
 });
 </script>

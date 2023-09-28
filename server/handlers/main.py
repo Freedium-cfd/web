@@ -110,6 +110,7 @@ async def render_postleter(limit: int = 120, as_html: bool = False):
 
     postleter_template_rendered = await postleter_template.render_async(post_list=outlenget_posts_list)
     postleter_template_rendered_minified = minify_html(postleter_template_rendered)
+    # postleter_template_rendered_minified = postleter_template_rendered
     if as_html:
         return postleter_template_rendered_minified
     return HTMLResponse(postleter_template_rendered_minified)
@@ -195,8 +196,8 @@ async def render_medium_post_link(path: str):
         }
         base_template_rendered = await base_template.render_async(base_context)
 
-        # minified_rendered_post = base_template_rendered
-        minified_rendered_post = minify_html(base_template_rendered)
+        minified_rendered_post = base_template_rendered
+        # minified_rendered_post = minify_html(base_template_rendered)
 
         if not redis_result:
             if not redis_available:

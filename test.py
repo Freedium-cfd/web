@@ -7,5 +7,6 @@ url_for_test = [
     "https://medium.com/swlh/35-actionable-tips-to-grow-your-medium-blog-4e4017b89905",
     "https://valeman.medium.com/benchmarking-neural-prophet-part-i-neural-prophet-vs-prophet-252990763468",
     "https://freedium.cfd/https://valeman.medium.com/python-vs-r-for-time-series-forecasting-395390432598",
-    "https://medium.com/@aleb/how-to-generate-random-user-agents-with-an-api-22aad3d232cb"
+    "https://medium.com/@aleb/how-to-generate-random-user-agents-with-an-api-22aad3d232cb",
+    "https://medium.com/angular-in-depth/the-best-way-to-unsubscribe-rxjs-observable-in-the-angular-applications-d8f9aa42f6a0"
 ]
