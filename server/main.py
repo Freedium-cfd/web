@@ -7,7 +7,7 @@ from fastapi import FastAPI, Depends, APIRouter
 from loguru import logger
 from fastapi_limiter import FastAPILimiter
 from fastapi_limiter.depends import RateLimiter
-from server import config, redis_storage, bot, db_backup_startup_correlation, db_backup_startup_lock
+from server import config, redis_storage
 from server.exceptions.main import register_main_error_handler
 from server.handlers.main import register_main_router
 from server.middlewares import register_middlewares
@@ -51,27 +51,10 @@ app = FastAPI(**FASTAPI_APPLICATION_CONFIG)
 router = APIRouter(dependencies=[Depends(RateLimiter(times=5, seconds=2, identifier=limiter_identifier, callback=limiter_callback))])
 
 
-async def send_db_backup_task():
-    while True:
-        if bot:
-            with suppress(Exception):
-                with open("medium_cache.sqlite", "rb") as db_file:
-                    await bot.send_document(chat_id=config.TELEGRAM_ADMIN_ID, document=db_file)
-        else:
-            logger.warning("No bot instance")
-        await asyncio.sleep(60 * 60 * 24)
-
-
 @app.on_event("startup")
 async def startup():
     if await safe_check_redis_connection(redis_storage):
         await FastAPILimiter.init(redis_storage)
-
-    with db_backup_startup_lock:
-        if not db_backup_startup_correlation.get("registered"):
-            logger.warning("Register db backup task")
-            asyncio.create_task(send_db_backup_task())
-            db_backup_startup_correlation["registered"] = True
 
 
 @app.on_event("shutdown")
@@ -81,7 +64,6 @@ async def shutdown():
     if config.SENTRY_SDK_DSN:
         logger.debug("Flush Sentry messages")
         sentry_sdk.flush()
-
 
 
 register_main_router(router)
