@@ -1,4 +1,4 @@
-# Freedium web site implementation
+# Freedium
 
 ## Browser extension:
 Huge thanks to `mathix420`
@@ -24,7 +24,7 @@ javascript:(function(){window.open("https://freedium.cfd/"+encodeURIComponent(wi
 ```
 This will make it so that when you click on that bookmark button, it will open the bypassed version of it.
 
-## Execute local:
+## Runing local instance:
 ```bash
 # Clone this repo and init all submodules:
 git clone https://github.com/Freedium-cfd/web ~/web
@@ -40,6 +40,7 @@ python3 -m venv venv
 source venv/bin/activate
 # Install all requirements
 pip install -r requirements.txt
+pip install -r server/toolkits/core/requirements.txt
 # if you have linux, execute `start_dev.sh` and open in browser 'localhost:6752'. That will execute Caddy reverse proxy.
 # if you have other OS or want without reverse proxy, you can execute server module without reverse proxy and access by address '0.0.0.0:7080':
 python3 -m server server
