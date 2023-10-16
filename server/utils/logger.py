@@ -44,18 +44,18 @@ def logger_register():
             "level": LOG_LEVEL,
             "format": LOG_FORMAT,
             "enqueue": ENQUEUE,
-        },
-        {
-            "sink": f"{LOG_FOLDER_PATH}/debug_{pid}_log_server",
-            "level": "DEBUG",
-            "format": LOG_FORMAT,
-            "enqueue": ENQUEUE,
-        },
+        }
     ]
     if config.IS_DEV:
         handlers.append({
             "sink": f"{LOG_FOLDER_PATH}/trace_{pid}_log_server",
             "level": "TRACE",
+            "format": LOG_FORMAT,
+            "enqueue": ENQUEUE,
+        })
+        handlers.append({
+            "sink": f"{LOG_FOLDER_PATH}/debug_{pid}_log_server",
+            "level": "DEBUG",
             "format": LOG_FORMAT,
             "enqueue": ENQUEUE,
         })
