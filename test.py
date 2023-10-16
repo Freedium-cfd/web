@@ -11,7 +11,8 @@ url_for_test = {
     "https://valeman.medium.com/python-vs-r-for-time-series-forecasting-395390432598",
     "https://medium.com/@aleb/how-to-generate-random-user-agents-with-an-api-22aad3d232cb",
     "https://medium.com/angular-in-depth/the-best-way-to-unsubscribe-rxjs-observable-in-the-angular-applications-d8f9aa42f6a0",
-    "515dd5a43948"
+    "515dd5a43948",
+    "https://anudeep-vysyaraju.medium.com/how-any-gitamite-can-get-free-linkedin-premium-membership-d4222bd1a0b3"  # <--- Check for non properly aligned emojies
 }
 
 
