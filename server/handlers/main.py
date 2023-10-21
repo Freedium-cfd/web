@@ -109,8 +109,8 @@ async def render_postleter(limit: int = 120, as_html: bool = False):
             # await send_message(f"Couldn't render post_id for postleter: {post_id}, ex: {ex}")
 
     postleter_template_rendered = await postleter_template.render_async(post_list=outlenget_posts_list)
-    postleter_template_rendered_minified = minify_html(postleter_template_rendered)
-    # postleter_template_rendered_minified = postleter_template_rendered
+    # postleter_template_rendered_minified = minify_html(postleter_template_rendered)
+    postleter_template_rendered_minified = postleter_template_rendered
     if as_html:
         return postleter_template_rendered_minified
     return HTMLResponse(postleter_template_rendered_minified)
