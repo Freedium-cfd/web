@@ -11,7 +11,7 @@ from server import MediumParser, base_template, config, main_template, medium_pa
 from server.utils.error import (
     generate_error,
 )
-from fastapi import Response
+from fastapi import Response, Request
 from fastapi.responses import JSONResponse, RedirectResponse
 from server.utils.logger_trace import trace
 from server.utils.utils import correct_url, safe_check_redis_connection
@@ -40,11 +40,16 @@ async def report_problem(problem: ReportProblem):
 
 
 @trace
-async def route_processing(path: str):
+async def route_processing(path: str, request: Request):
     if not path:
         return await main_page()
     else:
-        return await render_medium_post_link(path)
+        if request.scope.get("query_string"):
+            url = request.url.path + "?" + request.scope["query_string"].decode()
+        else:
+            url = request.url.path
+        url = url.removeprefix("/")
+        return await render_medium_post_link(url)
 
 
 @trace
@@ -143,6 +148,7 @@ async def main_page():
 
 @trace
 async def render_medium_post_link(path: str):
+    logger.error(path)
     redis_available = await safe_check_redis_connection(redis_storage)
 
     if path.startswith("render_no_cache/"):
@@ -172,7 +178,7 @@ async def render_medium_post_link(path: str):
             "Unable to identify the Medium article URL.",
             status_code=404,
         )
-    except (medium_parser_exceptions.InvalidMediumPostURL, medium_parser_exceptions.InvalidMediumPostID, medium_parser_exceptions.MediumPostQueryError) as ex:
+    except (medium_parser_exceptions.InvalidMediumPostURL, medium_parser_exceptions.InvalidMediumPostID, medium_parser_exceptions.MediumPostQueryError, medium_parser_exceptions.PageLoadingError) as ex:
         logger.exception(ex)
         sentry_sdk.capture_exception(ex)
         return await generate_error(
@@ -183,6 +189,8 @@ async def render_medium_post_link(path: str):
         logger.exception(ex)
         sentry_sdk.capture_exception(ex)
         return await generate_error("Unable to identify the Medium article ID.", status_code=500)
+    except medium_parser_exceptions.NotValidMediumURL as ex:
+        return await generate_error("You sure that this is a valid Medium.com URL?", status_code=404, quiet=True)
     except Exception as ex:
         logger.exception(ex)
         sentry_sdk.capture_exception(ex)

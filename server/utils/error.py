@@ -36,13 +36,14 @@ ERROR_MSG_LIST = [
 
 
 @trace
-async def generate_error(error_msg: str = None, title: str = "Error", status_code: int = 500):
+async def generate_error(error_msg: str = None, title: str = "Error", status_code: int = 500, quiet: bool = False):
     if not error_msg:
         error_msg = random.choice(ERROR_MSG_LIST)
 
-    await send_message(
-        f"📛 Error while processing url: <code>{url_correlation.get()}</code>, transponder_code: <code>{transponder_code_correlation.get()}</code>, error: <code>{error_msg}</code>"
-    )
+    if not quiet:
+        await send_message(
+            f"📛 Error while processing url: <code>{url_correlation.get()}</code>, transponder_code: <code>{transponder_code_correlation.get()}</code>, error: <code>{error_msg}</code>"
+        )
 
     error_template_rendered = await error_template.render_async(error_msg=error_msg, transponder_code=transponder_code_correlation.get())
     base_context = {
