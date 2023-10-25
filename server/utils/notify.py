@@ -27,4 +27,8 @@ async def task_send_message(text: str, silent: bool = False, status: MessageStat
     else:
         bot = bad_bot
 
+    if len(text) > 4000:
+        logger.warning(f"Message is too long ({len(text)}): {text}")
+        text = text[:4000]
+
     await bot.send_message(ADMIN_ID, text, parse_mode="HTML", disable_notification=silent)
