@@ -148,7 +148,6 @@ async def main_page():
 
 @trace
 async def render_medium_post_link(path: str):
-    logger.error(path)
     redis_available = await safe_check_redis_connection(redis_storage)
 
     if path.startswith("render_no_cache/"):
