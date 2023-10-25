@@ -11,7 +11,7 @@ echo $arch
 redis-cli flushall
 ./bin/$arch/caddy run --config CaddyfileDev &
 CADDY_PID=$!
-python3 -m server server &
+PYTHONASYNCIODEBUG=1 python3 -m server server &
 SERVER_PID=$!
 
 function onexit() {
@@ -44,7 +44,7 @@ do
   CHECK_SERVER_PID=$(ps -A| grep $SERVER_PID |wc -l)
   if [[ $CHECK_SERVER_PID -eq 0 ]]; then
         # sendMessageTelegram "Restarting server, since it's down"
-        python3 -m server server &
+        PYTHONASYNCIODEBUG=1 python3 -m server server &
         SERVER_PID=%!
   fi
 
@@ -56,7 +56,7 @@ do
   if [ "$backend_status_code" -lt 200 ]; then
     sendMessageTelegram "Restarting backend, since it's down"
     kill $SERVER_PID
-    python3 -m server server &
+    PYTHONASYNCIODEBUG=1 python3 -m server server &
     SERVER_PID=$!
   fi
 
