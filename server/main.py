@@ -16,6 +16,7 @@ from server.utils.utils import safe_check_redis_connection
 NAME = "Freedium"
 VERSION = "1.0"
 DISABLE_EXTERNAL_DOCS = True
+DISABLE_RATE_LIMITER = True
 
 APP_TITLE = f"{NAME}'s REST API"
 APP_VERSION = VERSION
@@ -48,12 +49,16 @@ async def limiter_identifier(request):
 
 
 app = FastAPI(**FASTAPI_APPLICATION_CONFIG)
-router = APIRouter(dependencies=[Depends(RateLimiter(times=5, seconds=2, identifier=limiter_identifier, callback=limiter_callback))])
+
+if DISABLE_RATE_LIMITER:
+    router = APIRouter()
+else:
+    router = APIRouter(dependencies=[Depends(RateLimiter(times=5, seconds=2, identifier=limiter_identifier, callback=limiter_callback))])
 
 
 @app.on_event("startup")
 async def startup():
-    if await safe_check_redis_connection(redis_storage):
+    if not DISABLE_RATE_LIMITER and await safe_check_redis_connection(redis_storage):
         await FastAPILimiter.init(redis_storage)
 
 
