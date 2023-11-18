@@ -23,7 +23,8 @@ async def task_send_message(text: str, silent: bool = False, status: MessageStat
         return
 
     if status == MessageStatus.GOOD.value:
-        bot = good_bot
+        # bot = good_bot
+        return True
     else:
         bot = bad_bot
 
