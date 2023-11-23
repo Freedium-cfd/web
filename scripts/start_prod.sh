@@ -32,6 +32,8 @@ sendMessageTelegram(){
 
 while true
 do
+  sleep 5
+
   CHECK_CADDY_PID=$(ps -A| grep $CADDY_PID |wc -l)
   if [[ $CHECK_CADDY_PID -eq 0 ]]; then
           sendMessageTelegram "Restarting caddy, since it's down"
