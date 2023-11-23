@@ -21,7 +21,7 @@ for file in static_files:
     OUTPUT_RULES.append(file_template)
 
 
-ACCESS_DENIED_PATHS = ["onboarding/*", "wp-*", ".env", "api*", "ads.txt", "apple-touch-icon-precomposed.png", "rss.xml", ".git/*", "apple-touch-icon-120x120.png", "apple-touch-icon-120x120-precomposed.png", "apple-touch-icon-152x152.png", "apple-touch-icon-152x152-precomposed.png", ".well-known/*"]
+ACCESS_DENIED_PATHS = ["onboarding/*", "wp-*", ".env", "api*", "apple-touch-icon-precomposed.png", "rss.xml", ".git/*", "apple-touch-icon-120x120.png", "apple-touch-icon-120x120-precomposed.png", "apple-touch-icon-152x152.png", "apple-touch-icon-152x152-precomposed.png", ".well-known/*"]
 
 access_denied_paths_template = """
     handle_path /{{ file }} {
