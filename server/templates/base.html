@@ -124,6 +124,45 @@
         </div>
     </nav>
     <body class="dark:bg-gray-800">{{ body_template }}</body>
+    <div id="problemModal" class="modal hidden fixed inset-0 w-full h-full flex items-center justify-center">
+        <div class="modal-overlay absolute w-full h-full bg-gray-900 opacity-50"></div>
+        <div class="modal-container bg-white dark:bg-black w-11/12 md:max-w-md mx-auto rounded shadow-lg z-50 overflow-y-auto">
+            <div class="modal-content py-4 text-left px-6">
+                <h1 class="text-3xl font-bold">Reporting a Problem</h1>
+                <div class="mt-3">
+                    <p>Sometimes we have problems displaying some Medium posts. Before reporting a problem, please read this checklist:</p>
+                    <ol class="ml-4 my-3 list-decimal">
+                        <li>If you have a problem that some images aren't loading - try using VPN. Probably you have problem with access to Medium CDN (or fucking Cloudflare's bot detection algorithms are blocking you).</li>
+                        <li>
+                            If the page does not load completely - try to
+                            <button class="text-red-500" onclick="navigateNoCache()">PRESS HERE</button>
+                            to reload the post from the Medium servers. Sometimes Medium does not give us complete articles and we try to re-download them.
+                        </li>
+                        <li>If you see that code blocks are broken - don't report it, I know about it. Unfortunately it's a Medium problem, for now I can't do anything about it because of the Medium problem. So, I'm sorry.</li>
+                        <li>If you have any other problem or found a bug, please report bellow.</li>
+                    </ol>
+                    <p>Thanks! Cheers.</p>
+                </div>
+                <form action="#" method="POST" class="mt-4" id="problem-form">
+                    <div class="mb-4">
+                        <label for="problem-description" class="block text-gray-700 dark:text-white font-bold mb-2">Problem Description</label>
+                        <textarea id="problem-description"
+                                  name="problem-description"
+                                  placeholder="Describe your problem here..."
+                                  class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 dark:text-white leading-tight focus:outline-none focus:shadow-outline"
+                                  rows="4"
+                                  required></textarea>
+                    </div>
+                    <div>
+                        <button type="submit"
+                                class="m-2 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">Submit</button>
+                        <button type="button"
+                                class="m-2 modal-close bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">Cancel</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
     <script>
     tailwind.config = {
         darkMode: 'class',
@@ -185,6 +224,8 @@ if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.match
         const submitForm = async (event) => {
             event.preventDefault();
 
+            console.log('Form submiting is started!');
+
             // Get the problem description from the input field
             const problemDescription = problemDescriptionInput.value;
             const currentPage = window.location.href;
@@ -213,7 +254,7 @@ if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.match
             }
         };
 
-        submitButton.addEventListener('click', submitForm);
+        document.getElementById('problem-form').onsubmit = submitForm;
     </script>
     <script>
 const h = document.documentElement, b = document.body;
