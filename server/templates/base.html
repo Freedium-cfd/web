@@ -8,7 +8,8 @@
         {% if creator %}<meta name="author" content="{{ creator.name }}" />{% endif %}
         <meta name="description" content="{{ description or 'Your paywall breakthrough for Medium!' }}" />
         <meta name="keywords" content="medium, paywall, medium.com, paywall breakthrough" />
-        <link rel="stylesheet" href="https://unpkg.com/tailwindcss@2.2.19/dist/tailwind.min.css" />
+        <script src="https://cdn.tailwindcss.com"></script>
+        <script src="https://cdn.tailwindcss.com?plugins=forms,typography,aspect-ratio"></script>
         <link href="https://glyph.medium.com/css/unbound.css" rel="stylesheet">
         <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
         <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
@@ -21,6 +22,17 @@
         <script src="https://cdn.jsdelivr.net/npm/vanilla-lazyload@17.8.4/dist/lazyload.min.js"></script>
         <link rel="stylesheet" href="https://unpkg.com/@highlightjs/cdn-assets@11.8.0/styles/atom-one-dark.min.css">
         <script src="https://cdn.jsdelivr.net/npm/lightense-images@1.0.17/dist/lightense.min.js"></script>
+        <script>
+            if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+  document.documentElement.classList.add('dark');
+  //document.getElementById('darkIcon').classList.remove('hidden');
+  //document.getElementById('lightIcon').classList.add('hidden')
+} else {
+  document.documentElement.classList.remove('dark')
+  //document.getElementById('lightIcon').classList.remove('hidden');
+  //document.getElementById('darkIcon').classList.add('hidden');
+}
+        </script>
         <style>
     .notification-container {
       display: none;
@@ -58,26 +70,28 @@
  }
         </script>
     </head>
-    <!--
-    <body class="bg-gray-100 font-sans leading-normal tracking-normal" style="text-rendering: optimizeLegibility;">
-        <div class="notification-container">
-            <div class="notification-card">
-                <p class="text-2xl pb-5">Medium has changed its paywall! Sorry for inconvenience.</p>
-                <p class="pb-3">
-                    We are working hard to make Medium.com's paywalled posts more accessible to you. As part of our commitment to improving the user experience, we are exploring options such as adding a donation feature or enabling relevant advertising. These steps will help us maintain the quality of our service while providing alternative ways to access premium articles.
-                    <br>
-                    <br>
-                    Your support through donations or advertising will directly help to sustain the valuable information and insights that Medium provides. We believe that by incorporating these options, we can strike a balance between accessibility and the continued creation of the high-quality content you've come to expect from Medium.com.
-                </p>
-                <a href="https://patreon.com/Freedium" target="_blank" title="Patreon">
-                    <button class="bg-red-400 mx-1 text-white font-semibold py-1 px-2 rounded mt-2">Patreon</button>
-                </a>
-                <button class="bg-gray-300 mx-1 hover:bg-gray-400 text-gray-800 font-semibold py-1 px-2 rounded mt-2 close-button">Close</button>
-                <button class="bg-gray-800 mx-1 text-white font-semibold py-1 px-2 rounded mt-2">GitHub organization repository</button>
-            </div>
-        </div>
-        -->
-    <nav id="header" class="fixed w-full z-10 top-0">
+    <div class="fixed bottom-4 left-4" style="z-index: 999999;">
+        <button id="openProblemModal"
+                class="m-1.5 flex items-center bg-red-500 text-white py-2 px-4 rounded-full shadow-lg hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <svg xmlns="http://www.w3.org/2000/svg" height="1em" viewBox="0 0 512 512">
+                <!--! Font Awesome Free 6.4.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2023 Fonticons, Inc. --><style>svg{fill:#ffffff}</style>
+                <path d="M256 32c14.2 0 27.3 7.5 34.5 19.8l216 368c7.3 12.4 7.3 27.7 .2 40.1S486.3 480 472 480H40c-14.3 0-27.6-7.7-34.7-20.1s-7-27.8 .2-40.1l216-368C228.7 39.5 241.8 32 256 32zm0 128c-13.3 0-24 10.7-24 24V296c0 13.3 10.7 24 24 24s24-10.7 24-24V184c0-13.3-10.7-24-24-24zm32 224a32 32 0 1 0 -64 0 32 32 0 1 0 64 0z" />
+            </svg>
+        </button>
+        <button id="darkModeToggle"
+                class="m-1.5 flex items-center bg-blue-500 text-white py-2 px-4 rounded-full shadow-lg hover:bg-blue-600 focus:outline-none">
+            <svg id="darkIcon" xmlns="http://www.w3.org/2000/svg" height="1em" viewBox="0 0 384 512">
+                <!--! Font Awesome Free 6.4.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2023 Fonticons, Inc. -->
+                <path d="M223.5 32C100 32 0 132.3 0 256S100 480 223.5 480c60.6 0 115.5-24.2 155.8-63.4c5-4.9 6.3-12.5 3.1-18.7s-10.1-9.7-17-8.5c-9.8 1.7-19.8 2.6-30.1 2.6c-96.9 0-175.5-78.8-175.5-176c0-65.8 36-123.1 89.3-153.3c6.1-3.5 9.2-10.5 7.7-17.3s-7.3-11.9-14.3-12.5c-6.3-.5-12.6-.8-19-.8z" />
+            </svg>
+            <!-- SVG icon for light mode (e.g., a sun) -->
+            <svg class="hidden" id="lightIcon" xmlns="http://www.w3.org/2000/svg" height="1em" viewBox="0 0 512 512">
+                <!--! Font Awesome Free 6.4.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2023 Fonticons, Inc. -->
+                <path d="M361.5 1.2c5 2.1 8.6 6.6 9.6 11.9L391 121l107.9 19.8c5.3 1 9.8 4.6 11.9 9.6s1.5 10.7-1.6 15.2L446.9 256l62.3 90.3c3.1 4.5 3.7 10.2 1.6 15.2s-6.6 8.6-11.9 9.6L391 391 371.1 498.9c-1 5.3-4.6 9.8-9.6 11.9s-10.7 1.5-15.2-1.6L256 446.9l-90.3 62.3c-4.5 3.1-10.2 3.7-15.2 1.6s-8.6-6.6-9.6-11.9L121 391 13.1 371.1c-5.3-1-9.8-4.6-11.9-9.6s-1.5-10.7 1.6-15.2L65.1 256 2.8 165.7c-3.1-4.5-3.7-10.2-1.6-15.2s6.6-8.6 11.9-9.6L121 121 140.9 13.1c1-5.3 4.6-9.8 9.6-11.9s10.7-1.5 15.2 1.6L256 65.1 346.3 2.8c4.5-3.1 10.2-3.7 15.2-1.6zM160 256a96 96 0 1 1 192 0 96 96 0 1 1 -192 0zm224 0a128 128 0 1 0 -256 0 128 128 0 1 0 256 0z" />
+            </svg>
+        </button>
+    </div>
+    <nav id="header" class="fixed w-full z-10 top-0 dark:bg-gray-800 dark:text-white bg-white shadow">
         <div id="progress" class="h-1 z-20 top-0" style="background:linear-gradient(to right, #4dc0b5 var(--scroll), transparent 0)"></div>
         <div class="w-full md:max-w-4xl mx-auto flex flex-wrap items-center justify-between mt-0 py-3">
             <div class="pl-4">
@@ -87,63 +101,120 @@
             </div>
             <div class="block lg:hidden pr-4">
                 <button id="nav-toggle"
-                        class="flex items-center px-3 py-2 border rounded text-gray-500 border-gray-600 hover:text-gray-900 hover:border-green-500 appearance-none focus:outline-none">
+                        class="flex items-center px-3 py-2 border rounded text-gray-500 dark:text-white border-gray-600 hover:text-gray-900 dark:hover:text-white hover:border-green-500 appearance-none focus:outline-none">
                     <svg class="fill-current h-3 w-3" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
                         <title>Menu</title>
                         <path d="M0 3h20v2H0V3zm0 6h20v2H0V9zm0 6h20v2H0v-2z" />
                     </svg>
                 </button>
             </div>
-            <div class="w-full flex-grow lg:flex lg:items-center lg:w-auto hidden lg:block mt-2 lg:mt-0" id="nav-content">
+            <div class="w-full flex-grow lg:flex lg:items-center lg:w-auto hidden lg:block mt-2 lg:mt-0 dark:bg-gray-800 bg-white"
+                 id="nav-content">
                 <ul class="list-reset lg:flex justify-end flex-1 items-center">
                     <li class="mr-3">
-                        <a class="inline-block text-gray-600 no-underline hover:text-gray-900 hover:text-underline py-2 px-4"
+                        <a class="inline-block text-gray-600 dark:text-white no-underline hover:text-gray-900 dark:hover:text-white hover:text-underline py-2 px-4"
                            href="https://medium.com/">Medium.com</a>
                     </li>
                     <li class="mr-3">
-                        <a class="inline-block text-gray-600 no-underline hover:text-gray-900 hover:text-underline py-2 px-4"
+                        <a class="inline-block text-gray-600 dark:text-white no-underline hover:text-gray-900 dark:hover:text-white hover:text-underline py-2 px-4"
                            href="https://github.com/Freedium-cfd">Source code - Github</a>
                     </li>
                 </ul>
             </div>
         </div>
     </nav>
-    {{ body_template }}
+    <body class="dark:bg-gray-800">{{ body_template }}</body>
     <script>
+    tailwind.config = {
+        darkMode: 'class',
+    }
+
   function navigateToOrigin() {
     window.location.href = window.location.origin;
   }
+if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+  // document.documentElement.classList.add('dark');
+  document.getElementById('darkIcon').classList.remove('hidden');
+  document.getElementById('lightIcon').classList.add('hidden')
+} else {
+  // document.documentElement.classList.remove('dark')
+  document.getElementById('lightIcon').classList.remove('hidden');
+  document.getElementById('darkIcon').classList.add('hidden');
+}
+
+  document.getElementById('darkModeToggle').addEventListener('click', function() {
+    
+    if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+  document.documentElement.classList.remove('dark');
+  document.getElementById('darkIcon').classList.add('hidden');
+  document.getElementById('lightIcon').classList.remove('hidden')
+  localStorage.setItem("theme", "light")
+} else {
+  document.documentElement.classList.add('dark')
+  document.getElementById('lightIcon').classList.add('hidden');
+  document.getElementById('darkIcon').classList.remove('hidden');
+  localStorage.setItem("theme", "dark")
+}
+});
     </script>
-    <!--
-        <script>
-    // Wait for the DOM to load
-    document.addEventListener('DOMContentLoaded', () => {
-      const notificationContainer = document.querySelector('.notification-container');
-      const closeButton = document.querySelector('.close-button');
+    <script>
+                const openModalButton = document.getElementById('openProblemModal');
+                const closeModalButton = document.querySelector('.modal-close');
+                const modal = document.getElementById('problemModal');
+                const problemDescriptionInput = document.getElementById('problem-description');
+                const submitButton = document.querySelector('form button');
 
-      // Show the notification
-      function showNotification() {
-        // Check storage value 'showNotification5897' and show the notification if it's doesn't exist
-        if (!localStorage.getItem('showNotificationNewMethod5454')) {
-                notificationContainer.style.display = 'block';
+                openModalButton.addEventListener('click', () => {
+            modal.classList.remove('hidden');
+        });
+
+        closeModalButton.addEventListener('click', () => {
+            modal.classList.add('hidden');
+        });
+
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                modal.classList.add('hidden');
+            }
+        });
+
+        function navigateNoCache() {
+                window.location.href = `/render_no_cache${window.location.pathname}`;
         }
-      }
 
-      // Hide the notification
-      function hideNotification() {
-        localStorage.setItem('showNotificationNewMethod5454', 'false');
-        notificationContainer.style.display = 'none';
-      }
+        const submitForm = async (event) => {
+            event.preventDefault();
 
-      // Close button functionality
-      closeButton.addEventListener('click', () => {
-        hideNotification();
-      });
+            // Get the problem description from the input field
+            const problemDescription = problemDescriptionInput.value;
+            const currentPage = window.location.href;
 
-      showNotification();
-    });
-</script>
-        -->
+            try {
+                // Send a POST request to the "report-problem" API endpoint
+                const response = await fetch('/report-problem', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ description: problemDescription, page: currentPage }),
+                });
+
+                if (response.ok) {
+                    // Report submitted successfully, you can add a success message or further actions here
+                    console.log('Problem report submitted successfully.');
+                    modal.classList.add('hidden'); // Close the modal
+                } else {
+                    // Handle errors, such as non-200 responses
+                    console.error('Failed to submit problem report.');
+                }
+            } catch (error) {
+                // Handle network errors or other exceptions
+                console.error('An error occurred:', error);
+            }
+        };
+
+        submitButton.addEventListener('click', submitForm);
+    </script>
     <script>
 const h = document.documentElement, b = document.body;
 const st = 'scrollTop';
@@ -159,10 +230,6 @@ document.addEventListener('scroll', function () {
 
   /* Apply classes for slide in bar */
   const shouldAddClass = window.scrollY > 10;
-
-  header.classList.toggle('bg-white', shouldAddClass);
-  header.classList.toggle('shadow', shouldAddClass);
-  navcontent.classList.toggle('bg-white', shouldAddClass);
 });
 
 		document.getElementById('nav-toggle').onclick = function() {

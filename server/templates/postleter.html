@@ -1,6 +1,6 @@
-<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 w-full">
+<div class="p-2 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 w-full">
     {% for post in post_list %}
-        <div class="p-6 bg-white rounded-xl">
+        <div class="p-6 bg-white dark:bg-gray-600 rounded-xl">
             <a class="group post_view" post_id="{{ post.post_id }}">
                 <div class="max-h-72 items-center d-flex overflow-hidden">
                     {% if post.preview_image_id %}
@@ -12,11 +12,10 @@
                          class="lazy w-full h-auto hover:scale-105 transition transition-all duration-200 ease-in-out">
                 </div>
             {% endif %}
-            <h3 class="mt-6 leading-normal text-gray-800 group-hover:text-purple-400 font-semibold text-xl lg:text-2xl line-clamp-3 transition translation-all duration-200 ease-in-out"
-                title="Lorem Ipsum is simply dummy text of the printing">{{ post.title }}</h3>
+            <h3 class="mt-6 leading-normal text-gray-800 dark:text-gray-100 group-hover:text-purple-400 font-semibold text-xl lg:text-2xl line-clamp-3 transition translation-all duration-200 ease-in-out">{{ post.title }}</h3>
         </a>
         <div class="mt-6">
-            <div class="flex flex-wrap items-center space-x-2 text-sm text-gray-500">
+            <div class="flex flex-wrap items-center space-x-2 text-sm text-gray-500 dark:text-white">
                 {% if post.collection %}
                     <a href="https://medium.com/{{ post.collection.slug }}"
                        title="{{ post.collection.shortDescription }}"
@@ -30,13 +29,13 @@
                     </a>
                     <span>·</span>
                 {% endif %}
-                <span class="text-gray-500">~{{ post.reading_time }} min read</span>
-                <span class="md:inline">·</span>
-                <span class="text-gray-500">{{ post.first_published_at }} (Updated: {{ post.updated_at }})</span>
-                <span class="md:inline">·</span>
-                <span class="text-yellow-500">Free: {{ post.free_access }}</span>
+                <span class="text-gray-500 dark:text-white">~{{ post.reading_time }} min read</span>
+                <span class="md:inline dark:text-white">·</span>
+                <span class="text-gray-500 dark:text-white">{{ post.first_published_at }} (Updated: {{ post.updated_at }})</span>
+                <span class="md:inline dark:text-white">·</span>
+                <span class="text-yellow-500 dark:text-white">Free: {{ post.free_access }}</span>
             </div>
-            <p class="mt-6 leading-normal line-clamp-3 text-gray-600">{{ post.description }}</p>
+            <p class="mt-6 leading-normal line-clamp-3 text-gray-600 dark:text-gray-200">{{ post.description }}</p>
         </div>
         <a post_id="{{ post.post_id }}" class="inline-block mt-6 text-purple-500 hover:text-purple-400 post_view">Read More</a>
     </div>
