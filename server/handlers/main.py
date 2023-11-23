@@ -1,4 +1,6 @@
 import sentry_sdk
+from html5lib.html5parser import parse
+from html5lib import serialize
 from pydantic import BaseModel
 from aiohttp_client_cache import CachedSession, SQLiteBackend
 import pickle
@@ -50,6 +52,20 @@ async def route_processing(path: str, request: Request):
             url = request.url.path
         url = url.removeprefix("/")
         return await render_medium_post_link(url)
+
+
+@trace
+async def miro_proxy(miro_path: str):
+    miro_data = miro_path.removeprefix("@miro/")
+    async with aiohttp.ClientSession() as client:
+        request = await client.get(
+            f"https://miro.medium.com/{miro_data}",
+            timeout=config.TIMEOUT,
+            headers={"User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.116 Safari/537.36"},
+        )
+        request_content = await request.read()
+        content_type = request.headers["Content-Type"]
+    return Response(content=request_content, media_type=content_type)
 
 
 @trace
@@ -142,8 +158,10 @@ async def main_page():
     postleter_template = await render_postleter(as_html=True)
     main_template_rendered = await main_template.render_async(postleter=postleter_template)
     base_template_rendered = await base_template.render_async(body_template=main_template_rendered)
-    base_template_rendered_minified = minify_html(base_template_rendered)
-    return HTMLResponse(base_template_rendered_minified)
+    # base_template_rendered_minified = minify_html(base_template_rendered)
+    parsed_template = parse(base_template_rendered)
+    minified_parsed_template = serialize(parsed_template, encoding='utf-8')
+    return HTMLResponse(minified_parsed_template)
 
 
 @trace
@@ -153,6 +171,8 @@ async def render_medium_post_link(path: str):
     if path.startswith("render_no_cache/"):
         path = path.removeprefix("render_no_cache/")
         return await render_no_cache(path)
+    elif path.startswith("@miro/"):
+        return await miro_proxy(path)
 
     try:
         if is_valid_medium_post_id_hexadecimal(path):
@@ -202,8 +222,8 @@ async def render_medium_post_link(path: str):
             "description": rendered_medium_post.description,
         }
         base_template_rendered = await base_template.render_async(base_context)
-
-        minified_rendered_post = base_template_rendered
+        parsed_base_template = parse(base_template_rendered)
+        minified_rendered_post = serialize(parsed_base_template, encoding='utf-8')
         # minified_rendered_post = minify_html(base_template_rendered)
 
         if not redis_result:
