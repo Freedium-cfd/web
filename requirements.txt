@@ -1,5 +1,5 @@
 pickledb==0.9.2
-html5lib=1.1
+html5lib==1.1
 fastapi-limiter==0.1.5
 sentry-sdk[fastapi]==1.29.2
 loguru==0.6.0  # due to: https://github.com/Delgan/loguru/issues/916
