@@ -31,7 +31,7 @@
                        target="_blank"
                        title="{{ creator.bio }}"
                        class="block font-semibold text-gray-900 dark:text-white">{{ creator.name }}</a>
-                    <button class="text-sm text-white bg-green-500 px-3 py-1 rounded-lg mt-1">
+                    <button class="text-sm text-white bg-green-500 px-3 py-1 rounded-lg mt-1 dark:bg-green-700">
                         <a href="https://medium.com/@{{ creator.username }}"
                            target="_blank"
                            title="{{ creator.bio }}"
@@ -57,7 +57,7 @@
                     <span class="md:inline">·</span>
                     <span class="text-gray-500 dark:text-white">{{ firstPublishedAt }} (Updated: {{ updatedAt }})</span>
                     <span class="md:inline">·</span>
-                    <span class="text-yellow-500">Free: {{ freeAccess }}</span>
+                    <span class="text-yellow-500 dark:text-yellow-400">Free: {{ freeAccess }}</span>
                 </div>
             </div>
         </div>
@@ -65,7 +65,7 @@
             {% for paragraph in content %}{{ paragraph }}{% endfor %}
         </div>
         <div class="flex flex-wrap gap-2 mt-5">
-            {% for tag in tags %}<a title="{{ tag.displayTitle }}" target="_blank" href="https://medium.com/tag/{{ tag.normalizedTagSlug }}"><span class="text-green-500 bg-green-100 px-2 py-1 rounded-full text-xs">#{{ tag.normalizedTagSlug }}</span></a>{% endfor %}
+            {% for tag in tags %}<a title="{{ tag.displayTitle }}" target="_blank" href="https://medium.com/tag/{{ tag.normalizedTagSlug }}"><span class="text-green-500 bg-green-100 px-2 py-1 rounded-full text-xs dark:bg-green-800 dark:text-gray-100">#{{ tag.normalizedTagSlug }}</span></a>{% endfor %}
         </div>
         <div class="container w-full md:max-w-3xl mx-auto pt-12"></div>
     </div>
