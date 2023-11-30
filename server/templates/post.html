@@ -96,7 +96,7 @@ document.addEventListener('DOMContentLoaded', (event) => {
          el.getElementsByClassName('hljs-copy')[0].addEventListener("click", function () {
              this.innerText = 'Copying..';
              if (!navigator.userAgent.toLowerCase().includes('safari')) {
-                 navigator.clipboard.writeText(code);
+                 navigator.clipboard.writeText(this.contentCopy);
              } else {
                  prompt("Clipboard (Select: ⌘+a > Copy:⌘+c)", this.contentCopy);
              }
