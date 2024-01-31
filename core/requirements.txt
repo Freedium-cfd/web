@@ -1,0 +1,8 @@
+loguru==0.6.0
+aiohttp==3.8.5
+aiohttp-retry==2.8.3
+tld==0.13
+bs4==0.0.1
+Jinja2==3.1.2
+beautifulsoup4==4.12.2
+# git+https://github.com/phiresky/sqlite-zstd.git#egg=sqlite_zstd&subdirectory=python

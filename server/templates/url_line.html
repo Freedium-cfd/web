@@ -1,0 +1,25 @@
+<div class="md:max-w-6xl bg-white dark:bg-gray-600 w-full shadow-md rounded-md p-8 mt-8">
+    <div class="flex items-center border rounded-md border-gray-300 px-4 py-2">
+        <svg class="h-5 w-5 text-gray-500 dark:text-gray-100 mr-2"
+             fill="none"
+             stroke="currentColor"
+             viewBox="0 0 24 24"
+             xmlns="http://www.w3.org/2000/svg">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+        </svg>
+        <input id="medium-link-input"
+               type="text"
+               placeholder="Enter Medium post link"
+               class="w-full focus:outline-none text-green-500 dark:bg-gray-600 border-gray-300"
+               onkeydown="if (event.keyCode == 13) document.getElementById('go-button').click()">
+        <button id="go-button" class="ml-2 bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 focus:outline-none">Go</button>
+    </div>
+</div>
+<script>
+const goButton = document.getElementById('go-button');
+
+goButton.addEventListener('click', function() {
+        const mediumLinkInput = document.getElementById('medium-link-input');
+        window.location.href = `${window.location.origin}/${mediumLinkInput.value}`;
+});
+</script>

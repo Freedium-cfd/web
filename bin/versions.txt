@@ -1,0 +1,2 @@
+dragonfly==1.7.1
+caddy==2.7.6

@@ -1,0 +1,21 @@
+<div class="container w-full md:max-w-3xl mx-auto pt-40"></div>
+<div class="container w-full mx-auto pt-20 pb-20 break-words">
+    <div class="flex flex-col items-center justify-center h-90">
+        <div class="bg-green-500 text-white text-6xl font-bold p-6 rounded-lg shadow-lg">Oppps!</div>
+        <div class="flex items-center justify-center mt-12">
+            <p class="dark:text-gray-200 text-gray-700 text-lg">{{ error_msg }}</p>
+        </div>
+        {{ url_line }}
+        <div class="flex md:max-w-2xl items-center justify-center mt-8">
+            <p class="dark:text-gray-200 text-gray-700">We are aware of this error. Please try again later if this was an error on our part, we will fix it as soon as possible.</p>
+        </div>
+        <div class="flex items-center justify-center mt-28">
+            <p class="p-5 bg-black text-white" style="font-family: monospace;">Your emergency transponder code: {{ transponder_code }}</p>
+        </div>
+    </div>
+</div>
+<script>
+const urlMedium = document.getElementById('medium-link-input');
+urlMedium.value = window.location.pathname.slice(1)
+urlMedium.value += window.location.search
+</script>

@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>{{ page_title }}</title>
+	{% if creator %}
+        <meta name="author" content="{{ creator.name }}" />
+	{% endif %}
+    <meta name="description" content="{{ page_description or 'Your paywall breakthrough for medium.com!' }}" />
+    <meta name="keywords" content="medium, paywall, medium.com, paywall breakthrough" />
+    <link rel="stylesheet" href="https://unpkg.com/tailwindcss@2.2.19/dist/tailwind.min.css"/>
+	<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="manifest" href="/site.webmanifest">
+<link rel="mask-icon" href="/safari-pinned-tab.svg" color="#00aba9">
+<meta name="msapplication-TileColor" content="#00aba9">
+<meta name="theme-color" content="#ffffff">
+    <script src="https://cdn.jsdelivr.net/npm/lightense-images@1.0.17/dist/lightense.min.js"></script>
+  </head>
+
+<body class="bg-gray-100 font-sans leading-normal tracking-normal">
+	<nav id="header" class="fixed w-full z-10 top-0">
+	{% if enable_ads_header %}
+    <div class="w-full bg-yellow-400 text-center py-1 px-4"><p class="text-yellow-900">Place your advertisement here! Contact us at advertise@freedium.com</p></div>
+	{% endif %}
+
+		<div id="progress" class="h-1 z-20 top-0" style="background:linear-gradient(to right, #4dc0b5 var(--scroll), transparent 0);"></div>
+
+		<div class="w-full md:max-w-4xl mx-auto flex flex-wrap items-center justify-between mt-0 py-3">
+
+			<div class="pl-4">
+				<a class="text-green-500 text-base no-underline hover:no-underline font-extrabold text-xl" href="/" onclick="navigateToOrigin()">
+					Freedium βeta
+				</a>
+			</div>
+
+			<div class="block lg:hidden pr-4">
+				<button id="nav-toggle" class="flex items-center px-3 py-2 border rounded text-gray-500 border-gray-600 hover:text-gray-900 hover:border-green-500 appearance-none focus:outline-none">
+					<svg class="fill-current h-3 w-3" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+						<title>Menu</title>
+						<path d="M0 3h20v2H0V3zm0 6h20v2H0V9zm0 6h20v2H0v-2z" />
+					</svg>
+				</button>
+			</div>
+
+			<div class="w-full flex-grow lg:flex lg:items-center lg:w-auto hidden lg:block mt-2 lg:mt-0 bg-gray-100 z-20" id="nav-content">
+				<ul class="list-reset lg:flex justify-end flex-1 items-center">
+					<!--
+					<li class="mr-3">
+						<a class="inline-block py-2 px-4 text-gray-900 font-bold no-underline" href="#">Active</a>
+					</li>
+					-->
+					<li class="mr-3">
+						<a class="inline-block text-gray-600 no-underline hover:text-gray-900 hover:text-underline py-2 px-4" href="https://medium.com/">Medium.com</a>
+					</li>
+					<!--
+					<li class="mr-3">
+						<a class="inline-block text-gray-600 no-underline hover:text-gray-900 hover:text-underline py-2 px-4" href="#">link</a>
+					</li>
+				-->
+				</ul>
+			</div>
+		</div>
+	</nav>
+
+{% if enable_ads_header %}
+	<div class="container w-full md:max-w-3xl mx-auto pt-12"></div>
+{% endif %}
+
+{{ body_template }}
+<script>
+  function navigateToOrigin() {
+    window.location.href = window.location.origin;
+  }
+</script>
+
+<script>
+const h = document.documentElement, b = document.body;
+const st = 'scrollTop';
+const sh = 'scrollHeight';
+const progress = document.getElementById('progress');
+const header = document.getElementById('header');
+const navcontent = document.getElementById('nav-content');
+
+document.addEventListener('scroll', function () {
+  /* Refresh scroll % width */
+  const scroll = (h[st] || b[st]) / ((h[sh] || b[sh]) - h.clientHeight) * 100;
+  progress.style.setProperty('--scroll', scroll + '%');
+
+  /* Apply classes for slide in bar */
+  const shouldAddClass = window.scrollY > 10;
+
+  header.classList.toggle('bg-white', shouldAddClass);
+  header.classList.toggle('shadow', shouldAddClass);
+  navcontent.classList.toggle('bg-gray-100', !shouldAddClass);
+  navcontent.classList.toggle('bg-white', shouldAddClass);
+});
+
+		document.getElementById('nav-toggle').onclick = function() {
+			document.getElementById("nav-content").classList.toggle("hidden");
+		}
+
+  window.addEventListener('load', function () {
+       Lightense('img:not(.no-lightense)');
+  }, false);
+</script>
+</body>
+
+</html>
