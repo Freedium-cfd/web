@@ -4,13 +4,8 @@
 	header -Server
 
 
-    handle_path /site.webmanifest {
-        root * ./static/site.webmanifest
-         file_server
-    }
-
-    handle_path /favicon-32x32.png {
-        root * ./static/favicon-32x32.png
+    handle_path /android-chrome-512x512.png {
+        root * ./static/android-chrome-512x512.png
          file_server
     }
 
@@ -19,68 +14,8 @@
          file_server
     }
 
-    handle_path /ads.txt {
-        root * ./static/ads.txt
-         file_server
-    }
-
-    handle_path /humans.txt {
-        root * ./static/humans.txt
-         file_server
-    }
-
-    handle_path /mstile-150x150.png {
-        root * ./static/mstile-150x150.png
-         file_server
-    }
-
-    handle_path /mstile-310x310.png {
-        root * ./static/mstile-310x310.png
-         file_server
-    }
-
-    handle_path /sitemap.xml {
-        root * ./static/sitemap.xml
-         file_server
-    }
-
-    handle_path /99860281ef1143d5a5558ad9a21a470d.txt {
-        root * ./static/99860281ef1143d5a5558ad9a21a470d.txt
-         file_server
-    }
-
-    handle_path /mstile-70x70.png {
-        root * ./static/mstile-70x70.png
-         file_server
-    }
-
-    handle_path /android-chrome-192x192.png {
-        root * ./static/android-chrome-192x192.png
-         file_server
-    }
-
-    handle_path /mstile-310x150.png {
-        root * ./static/mstile-310x150.png
-         file_server
-    }
-
-    handle_path /safari-pinned-tab.svg {
-        root * ./static/safari-pinned-tab.svg
-         file_server
-    }
-
-    handle_path /android-chrome-512x512.png {
-        root * ./static/android-chrome-512x512.png
-         file_server
-    }
-
-    handle_path /favicon-16x16.png {
-        root * ./static/favicon-16x16.png
-         file_server
-    }
-
-    handle_path /favicon.ico {
-        root * ./static/favicon.ico
+    handle_path /site.webmanifest {
+        root * ./static/site.webmanifest
          file_server
     }
 
@@ -94,14 +29,73 @@
          file_server
     }
 
-    handle_path /security.txt {
-        root * ./static/security.txt
+    handle_path /favicon-32x32.png {
+        root * ./static/favicon-32x32.png
          file_server
     }
 
     handle_path /apple-touch-icon.png {
         root * ./static/apple-touch-icon.png
          file_server
+    }
+
+    handle_path /humans.txt {
+        root * ./static/humans.txt
+         file_server
+    }
+
+    handle_path /mstile-150x150.png {
+        root * ./static/mstile-150x150.png
+         file_server
+    }
+
+    handle_path /sitemap.xml {
+        root * ./static/sitemap.xml
+         file_server
+    }
+
+    handle_path /android-chrome-192x192.png {
+        root * ./static/android-chrome-192x192.png
+         file_server
+    }
+
+    handle_path /security.txt {
+        root * ./static/security.txt
+         file_server
+    }
+
+    handle_path /safari-pinned-tab.svg {
+        root * ./static/safari-pinned-tab.svg
+         file_server
+    }
+
+    handle_path /mstile-310x310.png {
+        root * ./static/mstile-310x310.png
+         file_server
+    }
+
+    handle_path /favicon-16x16.png {
+        root * ./static/favicon-16x16.png
+         file_server
+    }
+
+    handle_path /mstile-310x150.png {
+        root * ./static/mstile-310x150.png
+         file_server
+    }
+
+    handle_path /mstile-70x70.png {
+        root * ./static/mstile-70x70.png
+         file_server
+    }
+
+    handle_path /favicon.ico {
+        root * ./static/favicon.ico
+         file_server
+    }
+
+    handle_path /graphql/websocket {
+        respond "Access denied" 403
     }
 
     handle_path /onboarding/* {
