@@ -32,7 +32,7 @@ class MediumParser:
         self.auth_cookies = auth_cookies
 
     @classmethod
-    async def from_url(cls, url: str, timeout: int, host_address: str) -> 'MediumParser':
+    async def from_url(cls, url: str, timeout: int, host_address: str, auth_cookies: str = None) -> 'MediumParser':
         sanitized_url = sanitize_url(url)
         if is_valid_url(url) and not await is_valid_medium_url(sanitized_url, timeout):
             raise InvalidURL(f'Invalid medium URL: {sanitized_url}')
@@ -41,7 +41,7 @@ class MediumParser:
         if not post_id:
             raise InvalidMediumPostURL(f'Could not find medium post ID for URL: {sanitized_url}')
 
-        return cls(post_id, timeout, host_address)
+        return cls(post_id, timeout, host_address, auth_cookies)
 
     @property
     def post_id(self):
@@ -148,7 +148,7 @@ class MediumParser:
                     elif subtitle and subtitle.endswith("…") and len(paragraph["text"]) > 100:
                         subtitle = None
                 elif paragraph["type"] == "IMG":
-                    if paragraph["metadata"]["id"] == preview_image_id:
+                    if paragraph["metadata"] and paragraph["metadata"]["id"] == preview_image_id:
                         logger.trace("Preview image was detected, ignore...")
                         current_pos += 1
                         continue
@@ -221,6 +221,10 @@ class MediumParser:
                     out_paragraphs.append(img_row_template_rendered)
 
                     current_pos = _tmp_current_pos - 1
+                elif paragraph["layout"] == "FULL_WIDTH":
+                    logger.warning("IMG: not implemented FULL_WIDTH layout")
+                    current_pos += 1
+                    continue
                 else:
                     image_template_rendered = await image_template.render_async(paragraph=paragraph)
                     out_paragraphs.append(image_template_rendered)
