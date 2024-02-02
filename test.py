@@ -17,6 +17,7 @@ url_for_test = {
     "https://anudeep-vysyaraju.medium.com/how-any-gitamite-can-get-free-linkedin-premium-membership-d4222bd1a0b3"  # <--- Check for non properly aligned emojies
 }
 
+blacklist_url = {"51e23c5a2aac"}
 
 def main():
     for url in url_for_test:
