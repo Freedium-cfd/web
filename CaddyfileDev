@@ -94,6 +94,14 @@
          file_server
     }
 
+    handle_path /websocket {
+        respond "Access denied" 403
+    }
+
+    handle_path /cdn-cgi/rum {
+        respond "Access denied" 403
+    }
+
     handle_path /graphql/websocket {
         respond "Access denied" 403
     }
