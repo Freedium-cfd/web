@@ -74,6 +74,16 @@
     window.onresize = _resizeIframeWidth
  }
         </script>
+        <!--
+        <script>
+                window.onload = function() {
+    window.parent.postMessage({
+        type: "URL_UPDATE",
+        url: window.location.href
+    }, "*");
+}
+                </script>
+                -->
     </head>
     <div class="fixed bottom-4 left-4" style="z-index: 999999;">
         <button id="openProblemModal"
@@ -99,19 +109,19 @@
     <nav id="header" class="fixed w-full z-9 top-0 dark:bg-gray-800 dark:text-white bg-white shadow">
         <div class="notification-container">
     <div class="notification-card dark:bg-gray-800 bg-white">
-      <p class="text-2xl pb-5 text-black dark:text-white">Achtung !!!</p>
-       <p class="pb-3 text-black dark:text-white">Following an extended period of groundwork, we have at last reached our objective. As it stands, our entire Github organization has likely moved to private mode due to a Medium DMCA report. The Reddit community, which was the birthplace of all our efforts, has also been suspended (presumably by Medium).</br></br>
+      <p class="text-2xl pb-5 text-black dark:text-white">Good news !!!</p>
+      <p class="pb-3 text-black dark:text-white">Following an extended period of groundwork, we have at last reached our objective. As it stands, our entire Github organization has likely moved to private mode due to a Medium DMCA report. The Reddit community, which was the birthplace of all our efforts, has also been suspended (presumably by Medium).</br></br>
 
         We are thrilled to share that we have migrated to Codeberg. We are eager to carry on our journey in this fresh setting. We appreciate the backing we received on Github and Reddit, and we aspire to see our community thrive further on Codeberg.</br></br>
         
-        We extend our gratitude for your comprehension and ongoing support.</br></p>
+        <strong>UPDATE 4.02.2024: In response to potential blocks from Medium, we have also established mirrors to ensure uninterrupted access to our content. This proactive measure aims to safeguard our community's ability to reach our resources without hindrance.</strong></bold>
       <a href="https://patreon.com/Freedium" target="_blank" title="Patreon">
       <button class="bg-red-400 mx-1 text-white hover:bg-red-500 font-semibold py-1 px-2 rounded mt-2">
         Patreon
       </button>
     </a>
     <a href="https://www.buymeacoffee.com/zhymabekroman" target="_blank" title="Buy me a coffee">
-        <button class="bg-orange-500 hover:bg-blue-700 mx-1 text-white font-semibold py-1 px-2 rounded mt-2">
+        <button class="bg-orange-500 hover:bg-orange-700 mx-1 text-white font-semibold py-1 px-2 rounded mt-2">
           Buy me a coffee
         </button>
       </a>
@@ -152,12 +162,20 @@
                 <ul class="list-reset lg:flex justify-end flex-1 items-center">
                     <li class="mr-3">
                         <a class="inline-block text-gray-600 dark:text-white no-underline hover:text-gray-900 dark:hover:text-white hover:text-underline py-2 px-4"
-                           href="https://medium.com/">Medium.com</a>
+                           href="https://codeberg.org/Freedium-cfd/web" target="_blank">Source code</a>
                     </li>
                     <li class="mr-3">
                         <a class="inline-block text-gray-600 dark:text-white no-underline hover:text-gray-900 dark:hover:text-white hover:text-underline py-2 px-4"
-                           href="https://codeberg.org/Freedium-cfd/web">Source code - Codeberg</a>
+                           href="https://freedium-miror-saqg.vercel.app/" target="_blank">Mirror 1</a>
                     </li>
+                    <li class="mr-3">
+                      <a class="inline-block text-gray-600 dark:text-white no-underline hover:text-gray-900 dark:hover:text-white hover:text-underline py-2 px-4"
+                         href="https://freedium-mirror.vercel.app/" target="_blank">Mirror 2</a>
+                  </li>
+                  <li class="mr-3">
+                    <a class="inline-block text-gray-600 dark:text-white no-underline hover:text-gray-900 dark:hover:text-white hover:text-underline py-2 px-4"
+                       href="https://romans-status-page.vercel.app/status/freedium" target="_blank">Status page</a>
+                </li>
                 </ul>
             </div>
         </div>
@@ -347,14 +365,14 @@ document.addEventListener('scroll', function () {
         const closeButton = document.querySelector('.close-button');
   
         function showNotification() {
-          if (!localStorage.getItem('showNotification-github-block')) {
+          if (!localStorage.getItem('showNotification-update146-block')) {
                   notificationContainer.style.display = 'block';
           }
         }
   
         // Hide the notification
         function hideNotification() {
-          localStorage.setItem('showNotification-github-block', 'false');
+          localStorage.setItem('showNotification-update146-block', 'false');
           notificationContainer.style.display = 'none';
         }
   
