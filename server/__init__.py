@@ -8,10 +8,9 @@ from jinja2 import Environment, DebugUndefined, FileSystemLoader
 import redis.asyncio as redis
 from xkcdpass import xkcd_password as xp
 
-from server import config
 from server.utils.loguru_handler import InterceptHandler
 
-redis_storage = redis.Redis(host="localhost", port=6379, db=0)
+redis_storage = redis.Redis(host="dragonfly", port=6379, db=0)
 
 jinja_env = Environment(enable_async=True)
 jinja_safe_env = Environment(undefined=DebugUndefined)
@@ -33,6 +32,7 @@ error_template = jinja_env.from_string(error_template_raw_rendered)
 logging.basicConfig(handlers=[InterceptHandler()], level=0, force=True)
 
 url_correlation: ContextVar[Optional[str]] = ContextVar("url_correlation", default="UNKNOWN_URL")
+home_page_process: ContextVar[Optional[list]] = ContextVar("home_page_process", default=[])
 transponder_code_correlation: ContextVar[Optional[str]] = ContextVar("transponder_code_correlation", default="unknown transponder location... Beep!")
 
 ban_db = pickledb.load('ban_post_list.db', True)

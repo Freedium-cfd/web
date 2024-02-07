@@ -5,12 +5,12 @@ from html5lib.html5parser import parse
 from html5lib import serialize
 from loguru import logger
 
+from server import base_template, config, url_correlation, redis_storage, postleter_template, home_page_process
 from server.utils.error import generate_error
 from server.utils.logger_trace import trace
 from server.utils.notify import send_message
 from server.utils.cache import aio_redis_cache
 from server.utils.utils import correct_url, safe_check_redis_connection
-from server import base_template, config, url_correlation, redis_storage, postleter_template
 
 from medium_parser import medium_parser_exceptions
 from medium_parser import cache as medium_cache
@@ -21,6 +21,7 @@ from medium_parser.utils import is_valid_medium_post_id_hexadecimal
 @aio_redis_cache(10 * 60)
 async def render_postleter(limit: int = 60, as_html: bool = False):
     random_post_id_list = [i[0] for i in medium_cache.random(limit)]
+    home_page_process.set(random_post_id_list)
 
     outlenget_posts_list = []
     for post_id in random_post_id_list:

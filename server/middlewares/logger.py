@@ -8,7 +8,7 @@ from starlette.requests import Request
 from starlette.responses import Response, StreamingResponse
 from starlette.types import Message
 
-from server import transponder_code_correlation, url_correlation, xkcd_passwd, xp, config
+from server import transponder_code_correlation, url_correlation, xkcd_passwd, xp, config, home_page_process
 from server.utils.notify import send_message
 from server.utils.error import generate_error
 from server.utils.utils import string_to_number_ascii
@@ -48,7 +48,7 @@ class LoggerMiddleware(BaseHTTPMiddleware):
 
             logger.debug("< Headers:")
             for name, value in request.headers.items():
-                value = self._sanitize_header_value(name, value)
+                value = self._sanitize_header(name, value)
                 logger.debug(f"\t< {name}: {value}")
 
             if hasattr(request, "cookies") and request.cookies:
@@ -62,8 +62,9 @@ class LoggerMiddleware(BaseHTTPMiddleware):
             try:
                 response = await asyncio.wait_for(call_next(request), timeout=config.REQUEST_TIMEOUT)
             except Exception as ex:
+                exception_class = type(ex)
                 logger.exception(ex)
-                await send_message(f"Error while processing url: <code>{url_correlation.get()}</code>, transponder_code: <code>{transponder_code_correlation.get()}</code>, error: <code>{ex}</code>")
+                await send_message(f"Error while processing url: <code>{url_correlation.get()}</code>, transponder_code: <code>{transponder_code_correlation.get()}</code>, error: <code>{ex}</code>. exception: <code>{exception_class.__name__}</code>. {home_page_process.get()}")
                 response = await generate_error()
 
             logger.trace(response.__dict__)
@@ -75,7 +76,7 @@ class LoggerMiddleware(BaseHTTPMiddleware):
 
             logger.debug("> Headers:")
             for name, value in response.headers.items():
-                value = self._sanitize_header_value(name, value)
+                value = self._sanitize_header(name, value)
                 logger.debug(f"\t> {name}: {value}")
 
             if hasattr(response, "cookies"):
@@ -88,7 +89,7 @@ class LoggerMiddleware(BaseHTTPMiddleware):
 
             return response
 
-    def _sanitize_header_value(self, name, value):
+    def _sanitize_header(self, name, value):
         if name.lower() == "authorization":
             value = f"{value[:25]}******"
         return value

@@ -1,0 +1,66 @@
+version: '3.8'
+
+services:
+  caddy:
+    image: caddy:2-alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./CaddyfileProd:/etc/caddy/Caddyfile
+      - caddy_data:/data
+      - caddy_config:/config
+    networks:
+      - web_network
+    depends_on:
+      - web
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://caddy:6752"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: on-failure
+
+  web:
+    build: .
+    command: python3 -m server server
+    volumes:
+      - .:/app
+    expose:
+      - 7080
+    networks:
+      - web_network
+    depends_on:
+      - dragonfly
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://web:7080"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: on-failure
+
+  dragonfly:
+    image: 'docker.dragonflydb.io/dragonflydb/dragonfly'
+    ulimits:
+      memlock: -1
+    expose:
+      - 6379
+    networks:
+      - web_network
+    volumes:
+      - dragonflydata:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: on-failure
+
+volumes:
+  caddy_data:
+  caddy_config:
+  dragonflydata:
+
+networks:
+  web_network:
+    driver: bridge

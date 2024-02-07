@@ -156,6 +156,6 @@ freedium.cfd {
     }
 
     route /* {
-		reverse_proxy localhost:7080
+		reverse_proxy web:7080
 	}
 }
