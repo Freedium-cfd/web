@@ -5,7 +5,7 @@ from html5lib.html5parser import parse
 from html5lib import serialize
 from loguru import logger
 
-from server import base_template, config, url_correlation, redis_storage, postleter_template, home_page_process
+from server import base_template, config, url_correlation, redis_storage, postleter_template, home_page_process, transponder_code_correlation
 from server.utils.error import generate_error
 from server.utils.logger_trace import trace
 from server.utils.notify import send_message
@@ -19,22 +19,22 @@ from medium_parser.utils import is_valid_medium_post_id_hexadecimal
 
 @trace
 @aio_redis_cache(10 * 60)
-async def render_postleter(limit: int = 60, as_html: bool = False):
+async def render_postleter(limit: int = 30, as_html: bool = False):
     random_post_id_list = [i[0] for i in medium_cache.random(limit)]
-    home_page_process.set(random_post_id_list)
+    home_page_process[transponder_code_correlation.get()] = random_post_id_list
 
-    outlenget_posts_list = []
+    outlet_posts_list = []
     for post_id in random_post_id_list:
         try:
             post = MediumParser(post_id, timeout=config.TIMEOUT, host_address=config.HOST_ADDRESS, auth_cookies=config.MEDIUM_AUTH_COOKIES)
             await post.query()
             post_metadata = await post.generate_metadata(as_dict=True)
-            outlenget_posts_list.append(post_metadata)
+            outlet_posts_list.append(post_metadata)
         except Exception as ex:
             logger.error(f"Couldn't render post_id for postleter: {post_id}, ex: {ex}")
             # await send_message(f"Couldn't render post_id for postleter: {post_id}, ex: {ex}")
 
-    postleter_template_rendered = await postleter_template.render_async(post_list=outlenget_posts_list)
+    postleter_template_rendered = await postleter_template.render_async(post_list=outlet_posts_list)
     if as_html:
         return postleter_template_rendered
     return HTMLResponse(postleter_template_rendered)

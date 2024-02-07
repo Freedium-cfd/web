@@ -64,7 +64,7 @@ class LoggerMiddleware(BaseHTTPMiddleware):
             except Exception as ex:
                 exception_class = type(ex)
                 logger.exception(ex)
-                await send_message(f"Error while processing url: <code>{url_correlation.get()}</code>, transponder_code: <code>{transponder_code_correlation.get()}</code>, error: <code>{ex}</code>. exception: <code>{exception_class.__name__}</code>. {home_page_process.get()}")
+                await send_message(f"Error while processing url: <code>{url_correlation.get()}</code>, transponder_code: <code>{transponder_code_correlation.get()}</code>, error: <code>{ex}</code>. exception: <code>{exception_class.__name__}</code>. {home_page_process.get(transponder_code_correlation.get(), '')}")
                 response = await generate_error()
 
             logger.trace(response.__dict__)

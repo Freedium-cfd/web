@@ -32,8 +32,9 @@ error_template = jinja_env.from_string(error_template_raw_rendered)
 logging.basicConfig(handlers=[InterceptHandler()], level=0, force=True)
 
 url_correlation: ContextVar[Optional[str]] = ContextVar("url_correlation", default="UNKNOWN_URL")
-home_page_process: ContextVar[Optional[list]] = ContextVar("home_page_process", default=[])
 transponder_code_correlation: ContextVar[Optional[str]] = ContextVar("transponder_code_correlation", default="unknown transponder location... Beep!")
+
+home_page_process = {}
 
 ban_db = pickledb.load('ban_post_list.db', True)
 
