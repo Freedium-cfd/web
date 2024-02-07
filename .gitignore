@@ -162,6 +162,5 @@ cython_debug/
 user_data/
 *.dist/
 *.build/
-medium_cache.sqlite
-medium_db_cache.sqlite
+medium_db_cache.sqlite*
 ban_post_list.db
