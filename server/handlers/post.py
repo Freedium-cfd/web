@@ -32,7 +32,7 @@ async def render_postleter(limit: int = 30, as_html: bool = False):
             outlet_posts_list.append(post_metadata)
         except Exception as ex:
             logger.error(f"Couldn't render post_id for postleter: {post_id}, ex: {ex}")
-            # await send_message(f"Couldn't render post_id for postleter: {post_id}, ex: {ex}")
+            # send_message(f"Couldn't render post_id for postleter: {post_id}, ex: {ex}")
 
     postleter_template_rendered = await postleter_template.render_async(post_list=outlet_posts_list)
     if as_html:
@@ -97,9 +97,9 @@ async def render_medium_post_link(path: str, use_cache: bool = True, use_redis: 
 
         if not redis_result:
             if not redis_available:
-                await send_message("ERROR: Redis is not available. Please check your configuration.")
+                send_message("ERROR: Redis is not available. Please check your configuration.")
             elif use_redis:
                 await redis_storage.setex(medium_post_id, config.CACHE_LIFE_TIME, pickle.dumps(rendered_medium_post))
-            await send_message(f"✅ Successfully rendered post: {url_correlation.get()}", True, "GOOD")
+            send_message(f"✅ Successfully rendered post: {url_correlation.get()}", True, "GOOD")
 
         return HTMLResponse(serialized_rendered_post)

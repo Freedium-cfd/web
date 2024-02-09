@@ -1,13 +1,16 @@
+import io
 import atexit
 import multiprocessing
 from multiprocessing.util import _exit_function
 
+import traceback
 import gunicorn.app.base
 import uvicorn
 from loguru import logger
 
 from server import config, ban_db
 from server.main import app
+from server.utils.notify import send_message
 from server.utils.logger import GunicornLogger
 from server.utils.logger_trace import trace
 
@@ -24,6 +27,25 @@ def post_worker_init(worker):
 def on_exit():
     logger.debug("GUNICORN: On exit")
     ban_db.dump()
+
+
+def worker_exit(server, worker):
+    """Called just after a worker has been exited, in the worker process."""
+    logger.warning("Shutting down gunicorn worker.")
+
+    send_message("Shutting down gunicorn worker.", status="ERROR")
+
+
+def worker_abort(worker):
+    """Log the stack trace when a worker timeout occurs"""
+    buffer = io.StringIO()
+    traceback.print_stack(file=buffer)
+    data = buffer.getvalue()
+    buffer.close()
+
+    logger.error(f"Killing worker {worker.pid}\n{data}")
+
+    send_message(f"Killing worker {worker.pid}\n{data}", status="ERROR")
 
 
 @trace
@@ -62,6 +84,8 @@ def execute_server_worker(host: str, port: int):
         "preload_app": True,
         "post_worker_init": post_worker_init,
         "timeout": config.WORKER_TIMEOUT,
+        "worker_exit": worker_exit,
+        "worker_abort": worker_abort,
         # "on_exit": on_exit,
     }
     GunicornStandaloneApplication(app, options).run()

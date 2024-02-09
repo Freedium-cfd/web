@@ -2,6 +2,8 @@ from loguru import logger
 from pydantic import BaseModel
 from fastapi.responses import JSONResponse
 
+from medium_parser.core import MediumParser
+
 from server import config, ban_db
 from server.utils.notify import send_message
 from server.utils.logger_trace import trace
@@ -18,7 +20,7 @@ class DeleteFromCache(BaseModel):
 
 @trace
 async def report_problem(problem: ReportProblem):
-    await send_message(f"New problem report: \n{problem.description}\n\n{problem.page}")
+    send_message(f"New problem report: \n{problem.description}\n\n{problem.page}")
     return JSONResponse({"message": "OK"}, status_code=200)
 
 

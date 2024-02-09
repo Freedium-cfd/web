@@ -12,7 +12,7 @@ class MessageStatus(Enum):
     GOOD = "GOOD"
 
 
-async def send_message(text: str, silent: bool = False, status: MessageStatus = "ERROR") -> None:
+def send_message(text: str, silent: bool = False, status: MessageStatus = "ERROR") -> None:
     asyncio.create_task(task_send_message(text, silent, status))
 
 
