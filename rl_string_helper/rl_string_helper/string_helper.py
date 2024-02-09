@@ -236,7 +236,7 @@ class RLStringHelper:
                     end -= 1
 
             if start == end:
-                logger.warning("Start and end positions are the same")
+                logger.trace("Start and end positions are the same")
                 continue
 
             logger.trace(f"{len(string_pos_matrix)=}")
