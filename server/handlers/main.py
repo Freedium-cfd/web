@@ -4,7 +4,7 @@ from html5lib import serialize
 from server import base_template, main_template, config
 
 from fastapi import Request
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, JSONResponse
 
 from server.handlers.post import render_medium_post_link, render_postleter
 from server.handlers.reverse_proxy import miro_proxy, iframe_proxy
@@ -22,15 +22,18 @@ async def route_processing(path: str, request: Request):
         path = request.url.path
     path = path.removeprefix("/")
 
-    """
     if path.startswith("render-no-cache/"):
+        key_data = request.headers.get("ADMIN_SECRET_KEY")
+
+        if key_data != config.ADMIN_SECRET_KEY:
+            return JSONResponse({"message": f"Wrong secret key: {key_data}"}, status_code=403)
+    
         path = path.removeprefix("render-no-cache/")
         if path.startswith("/no-redis/"):
             path = path.removeprefix("/no-redis/")
             return await render_medium_post_link(path, True, False)
         return await render_medium_post_link(path, False)
-    """
-    if path.startswith("@miro/"):
+    elif path.startswith("@miro/"):
         miro_data = path.removeprefix("@miro/")
         return await miro_proxy(miro_data)
     elif path.startswith("render_iframe/"):

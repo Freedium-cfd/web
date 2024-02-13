@@ -1,6 +1,7 @@
+from fastapi.responses import HTMLResponse
+
 import sentry_sdk
 import pickle
-from fastapi.responses import HTMLResponse
 from html5lib.html5parser import parse
 from html5lib import serialize
 from loguru import logger
