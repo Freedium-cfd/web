@@ -1,8 +1,14 @@
-version: '3.8'
+# https://blog.thelazyfox.xyz/how-to-create-healthchecks-for-docker/
+
+version: '3.7'
 
 services:
   caddy:
-    image: caddy:2-alpine
+    build:
+      context: ./
+      dockerfile: ./DockerfileCaddy
+    cap_add:
+      - NET_ADMIN
     ports:
       - "80:80"
       - "443:443"
@@ -12,17 +18,18 @@ services:
       - caddy_config:/config
     networks:
       - web_network
-    depends_on:
-      - web
     healthcheck:
-      test: ["CMD", "curl", "http://caddy:6752"]
+      test: ["CMD-SHELL", "curl http://caddy:80/ --max-time 80"]
       interval: 30s
-      timeout: 10s
+      start_period: 20s
+      timeout: 80s
       retries: 3
-    restart: on-failure
+    restart: always
 
   web:
-    build: .
+    build:
+      context: ./
+      dockerfile: ./Dockerfile
     command: python3 -m server server
     volumes:
       - .:/app
@@ -30,14 +37,13 @@ services:
       - 7080
     networks:
       - web_network
-    depends_on:
-      - dragonfly
     healthcheck:
-      test: ["CMD", "curl", "http://web:7080"]
+      test: ["CMD-SHELL", "curl http://localhost:7080/ --max-time 60"]
       interval: 30s
-      timeout: 10s
+      start_period: 20s
+      timeout: 80s
       retries: 3
-    restart: on-failure
+    restart: always
 
   dragonfly:
     image: 'docker.dragonflydb.io/dragonflydb/dragonfly'
@@ -52,9 +58,18 @@ services:
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 30s
+      start_period: 20s
       timeout: 10s
       retries: 3
-    restart: on-failure
+    restart: always
+
+  autoheal:
+    restart: always
+    image: willfarrell/autoheal
+    environment:
+      - AUTOHEAL_CONTAINER_LABEL=all
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
 
 volumes:
   caddy_data:
