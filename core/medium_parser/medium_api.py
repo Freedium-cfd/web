@@ -8,7 +8,7 @@ from .utils import generate_random_sha256_hash
 
 
 # https://gist.github.com/vladar/a4e3afd608cfe8b13e5844d75447f0a4
-async def query_post_by_id(post_id: str, timeout: int = 3, auth_cookies: str = None):
+async def query_post_by_id(post_id: str, timeout: int = 3, auth_cookies: str = ""):
     headers = {
         "X-APOLLO-OPERATION-ID": generate_random_sha256_hash(),
         "X-APOLLO-OPERATION-NAME": "FullPostQuery",
@@ -17,11 +17,11 @@ async def query_post_by_id(post_id: str, timeout: int = 3, auth_cookies: str = N
         "X-Obvious-CID": "android",
         "X-Xsrf-Token": "1",
         "X-Client-Date": str(get_unix_ms()),
-        "User-Agent": "donkey/4.5.1187420",  # <---- There is Medium version
+        "User-Agent": "AdsBot-Google-Mobile", # "donkey/4.5.1187420",  # <---- There is Medium version
         "Cache-Control": "public, max-age=-1",
         "Content-Type": "application/json",
         "Connection": "Keep-Alive",
-        "Cookie": auth_cookies,
+        # "Cookie": auth_cookies,
     }
 
     json_data = {
