@@ -1,4 +1,4 @@
-import os
+import asyncio
 import math
 import textwrap
 import urllib.parse
@@ -83,11 +83,21 @@ class MediumParser:
             logger.exception(ex)
             return None
 
-    async def query(self, use_cache: bool = True):
+    async def query(self, use_cache: bool = True, retry: int = 3):
         post_data = await self.get_post_data_from_cache() if use_cache else None
 
-        if not post_data:
-            post_data = await self.get_post_data_from_api()
+        attempt = 0
+        while not post_data and attempt < retry:
+            try:
+                post_data = await self.get_post_data_from_api()
+                if post_data:
+                    break
+            except Exception as e:
+                logger.error(f"Attempt {attempt + 1} failed with error: {e}")
+            finally:
+                logger.info(f"Retrying in {2 ** attempt} seconds...")
+                await asyncio.sleep(2 ** attempt)
+                attempt += 1
 
         if not post_data or not isinstance(post_data, dict) or post_data.get("error") or not post_data.get("data") or not post_data.get("data").get("post"):
             raise MediumPostQueryError(f'Could not query post by ID from API: {self.post_id}')
