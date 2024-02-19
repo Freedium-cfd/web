@@ -17,9 +17,8 @@ from bs4 import BeautifulSoup
 
 VALID_ID_CHARS = set(string.ascii_letters + string.digits)
 
-KNOWN_MEDIUM_NETLOC = ("javascript.plainenglish.io", "python.plainenglish.io", "levelup.gitconnected.com")
-KNOWN_MEDIUM_DOMAINS = ("medium.com", "uxplanet.org", "towardsdatascience.com", "itnext.io", "eand.co", "betterprogramming.pub", "curiouse.co", "betterhumans.pub", "uxdesign.cc")
-
+KNOWN_MEDIUM_NETLOC = ("javascript.plainenglish.io", "python.plainenglish.io", "levelup.gitconnected.com", "betterhumans.coach.me")
+KNOWN_MEDIUM_DOMAINS = ("medium.com", "uxplanet.org", "towardsdatascience.com", "itnext.io", "eand.co", "betterprogramming.pub", "curiouse.co", "betterhumans.pub", "uxdesign.cc", "thebolditalic.com", "arcdigital.media", "codeburst.io", "psiloveyou.xyz", "writingcooperative.com", "entrepreneurshandbook.co", "prototypr.io", "theascent.pub")
 NOT_MEDIUM_DOMAINS = ("github.com", "yandex.ru", "yandex.kz", "youtube.com", "nytimes.com", "wsj.com", "reddit.com", "elpais.com", "forbes.com", "bloomberg.com")
 
 
@@ -61,22 +60,22 @@ def get_unix_ms() -> int:
 
 
 def unquerify_url(url):
-  """
-  Sanitizes a URL by removing all query parameters.
-
-  Args:
-    url: The URL to sanitize.
-
-  Returns:
-    A sanitized URL.
-  """
-
-  parsed_url = urllib.parse.urlparse(url)
-  query = parsed_url.query
-  if query:
-    parsed_url = parsed_url._replace(query='')
-  sanitized_url = urllib.parse.urlunparse(parsed_url)
-  return sanitized_url.removesuffix("/")
+    """
+    Sanitizes a URL by removing all query parameters.
+  
+    Args:
+      url: The URL to sanitize.
+  
+    Returns:
+      A sanitized URL.
+    """
+  
+    parsed_url = urllib.parse.urlparse(url)
+    query = parsed_url.query
+    if query:
+      parsed_url = parsed_url._replace(query='')
+    sanitized_url = urllib.parse.urlunparse(parsed_url)
+    return sanitized_url.removesuffix("/")
 
 
 def sanitize_url(url):
@@ -85,21 +84,21 @@ def sanitize_url(url):
 
 
 def is_valid_medium_post_id_hexadecimal(hex_string: str) -> bool:
-        # Check if the string is a valid hexadecimal string
-        # isalnum()
-        for char in hex_string:
-            if char not in VALID_ID_CHARS:
-                return False
-
-        # Check if the string contains only lowercase hexadecimal characters
-        # if not hex_string.islower():
-        #     return False
-
-        # Check if the length of the string is correct for a hexadecimal string (e.g., 10, 11 or 12 characters)
-        if len(hex_string) not in range(8, 13):
+    # Check if the string is a valid hexadecimal string
+    # isalnum()
+    for char in hex_string:
+        if char not in VALID_ID_CHARS:
             return False
 
-        return True
+    # Check if the string contains only lowercase hexadecimal characters
+    # if not hex_string.islower():
+    #     return False
+
+    # Check if the length of the string is correct for a hexadecimal string (e.g., 10, 11 or 12 characters)
+    if len(hex_string) not in range(8, 13):
+        return False
+
+    return True
 
 
 async def resolve_medium_short_link_v1(short_url_id: str, timeout: int = 5) -> str:

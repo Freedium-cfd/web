@@ -1,10 +1,10 @@
 from starlette.middleware.cors import CORSMiddleware
 from server.middlewares.logger import LoggerMiddleware
 
+origins = ["*"]
 
 def register_middlewares(app):
     app.add_middleware(LoggerMiddleware)
-    origins = ["*"]
     app.add_middleware(
         CORSMiddleware,
         allow_origins=origins,
