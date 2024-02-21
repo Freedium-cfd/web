@@ -34,8 +34,11 @@ Speed up Freedium, and probably create open source Medium frontend in next life
 
 ## Local run:
 Requirements:
-- Medium subscription
 - Python 3.9+
+- pip
+- git
+
+And probably any `Linux` based distro (like Arch btw).
 
 ```bash
 git clone https://github.com/Freedium-cfd/web ./web
