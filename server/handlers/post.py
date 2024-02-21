@@ -33,7 +33,7 @@ async def render_postleter(limit: int = 30, as_html: bool = False):
             outlet_posts_list.append(post_metadata)
         except Exception as ex:
             logger.error(f"Couldn't render post_id for postleter: {post_id}, ex: {ex}")
-            # send_message(f"Couldn't render post_id for postleter: {post_id}, ex: {ex}")
+            send_message(f"Couldn't render post_id for postleter: {post_id}, ex: {ex}")
 
     postleter_template_rendered = await postleter_template.render_async(post_list=outlet_posts_list)
     if as_html:
