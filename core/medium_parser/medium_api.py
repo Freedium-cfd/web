@@ -48,10 +48,10 @@ async def query_post_by_id(post_id: str, timeout: int = 3, auth_cookies: str = "
             except Exception as ex:
                 logger.debug("Failed to parse response data as JSON")
                 logger.exception(ex)
+                raise ex
         else:
             logger.error(f"Failed to fetch post by ID {post_id} with status code: {request.status}")
-    
-        response_data = await request.json()
+            return None
 
     logger.trace(request.headers)
 
