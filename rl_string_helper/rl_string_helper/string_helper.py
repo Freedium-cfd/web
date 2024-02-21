@@ -511,7 +511,7 @@ def parse_markups(markups: list):
         elif markup["type"] == "EM":
             template = "<em>{{text}}</em>"
         elif markup["type"] == "CODE":
-            template = "<code class='p-1 dark:bg-gray-600'>{{text}}</code>"
+            template = "<code class='p-1 bg-gray-300 dark:bg-gray-600'>{{text}}</code>"
         else:
             logger.error(f"Unknown markup type: {markup}")
             continue
