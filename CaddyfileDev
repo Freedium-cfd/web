@@ -154,6 +154,10 @@
         respond "Access denied" 403
     }
 
+    handle_path /cdn-cgi/challenge-platform/h/b/orchestrate/chl_page/v1 {
+        respond "Access denied" 403
+    }
+
     route /* {
 		reverse_proxy web:7080
 	}
