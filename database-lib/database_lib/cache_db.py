@@ -29,15 +29,13 @@ class SQLiteCacheBackend:
     def __init__(self, database: str):
         self.connection = sqlite3.connect(database)
         self.connection.enable_load_extension(True)  # Enable loading of extensions
-        self.connection.execute("PRAGMA foreign_keys = ON")  # Need for working with foreign keys in db
-        self.connection.execute("PRAGMA journal_mode=WAL") # Need to properly work with ZSTD compression
-        self.connection.execute("PRAGMA auto_vacuum=full") # Same as above thing
+        self.connection.execute("PRAGMA foreign_keys = ON;")  # Need for working with foreign keys in db
+        self.connection.execute("PRAGMA journal_mode=WAL;") # Need to properly work with ZSTD compression
+        self.connection.execute("PRAGMA auto_vacuum=full;") # Same as above thing
         self.cursor = self.connection.cursor()
 
         if sqlite_zstd is not None:
             sqlite_zstd.load(self.connection)
-
-        self.migrate_add_index_to_key()
 
     def all(self):
         with self.connection:
@@ -56,18 +54,18 @@ class SQLiteCacheBackend:
             raise ValueError("Can't use zstd compression. Please install 'sqlite_zstd' package")
         
         with self.connection:
-            self.cursor.execute("SELECT zstd_enable_transparent('{\"table\": \"cache\", \"column\": \"value\", \"compression_level\": 9, \"dict_chooser\": \"''a''\"}')")
             try:
-                self.connection.execute("PRAGMA auto_vacuum=full")
+                self.cursor.execute("SELECT zstd_enable_transparent('{\"table\": \"cache\", \"column\": \"value\", \"compression_level\": 9, \"dict_chooser\": \"''a''\"}')")
             except Exception as error:
                 print(error)
+            self.connection.execute("PRAGMA auto_vacuum=full")
             self.cursor.execute("SELECT zstd_incremental_maintenance(null, 1);")
             self.cursor.execute("vacuum;")
 
     def init_db(self):
         with self.connection:
             self.cursor.execute("CREATE TABLE IF NOT EXISTS cache (key TEXT PRIMARY KEY, value TEXT)")
-            self.cursor.execute("CREATE INDEX IF NOT EXISTS idx_key ON cache (key)")
+            # self.cursor.execute("CREATE INDEX IF NOT EXISTS idx_key ON cache (key)")
 
     def pull(self, key: str) -> Union[CacheResponse, None]:
         with self.connection:
@@ -114,6 +112,10 @@ class SQLiteCacheBackend:
                 logger.info("Index 'idx_key' on column 'key' created successfully.")
             else:
                 logger.info("Index 'idx_key' on column 'key' already exists.")
+
+    def show_schema_info(self):
+        with self.connection:
+            return self.connection.execute("SELECT sql FROM sqlite_master").fetchall()
 
     def close(self):
         self.__del__()

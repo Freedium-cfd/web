@@ -6,6 +6,7 @@ from database_lib import SQLiteCacheBackend
 
 cache = SQLiteCacheBackend('medium_db_cache.sqlite')
 cache.init_db()
+cache.enable_zstd()
 
 retry_options = ExponentialRetry(attempts=3)
 
