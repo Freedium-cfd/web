@@ -1,6 +1,7 @@
 from typing import Union
 import sqlite3
 import json
+from loguru import logger
 from warnings import warn
 try:
     import sqlite_zstd
@@ -9,7 +10,7 @@ except ImportError:
     sqlite_zstd = None
 
 class CacheResponse:
-    __slots__ = ('data')
+    __slots__ = ('data',)
     def __init__(self, data: str):
         self.data = data
 
@@ -28,8 +29,8 @@ class SQLiteCacheBackend:
         self.connection = sqlite3.connect(database)
         self.connection.enable_load_extension(True)  # Enable loading of extensions
         self.connection.execute("PRAGMA foreign_keys = ON")  # Need for working with foreign keys in db
-        self.connection.execute("PRAGMA journal_mode=WAL")
-        self.connection.execute("PRAGMA auto_vacuum=full")
+        self.connection.execute("PRAGMA journal_mode=WAL") # Need to properly work with ZSTD compression
+        self.connection.execute("PRAGMA auto_vacuum=full") # Same as above thing
         self.cursor = self.connection.cursor()
 
         if sqlite_zstd is not None:
@@ -45,8 +46,8 @@ class SQLiteCacheBackend:
 
     def random(self, size: int):
         with self.connection:
-            return self.cursor.execute("SELECT * FROM cache ORDER BY RANDOM() LIMIT :0", {'0': size}).fetchall()
-
+            return self.cursor.execute("SELECT * FROM cache ORDER BY RANDOM() LIMIT ?", (size,)).fetchall()
+    
     def enable_zstd(self):
         if sqlite_zstd is None:
             raise ValueError("Can't use zstd compression. Please install 'sqlite_zstd' package")
@@ -68,6 +69,7 @@ class SQLiteCacheBackend:
         with self.connection:
             cache = self.cursor.execute("SELECT value FROM cache WHERE key = :0", {'0': key}).fetchone()
             if cache:
+                logger.debug("Value found in DB, returning it")
                 return CacheResponse(cache[0])
 
     def push(self, key: str, value: str) -> None:

@@ -34,7 +34,7 @@ class LoggerMiddleware(BaseHTTPMiddleware):
         transponder_code_correlation.set(transponder_code)
         url_correlation.set(request.url)
         with logger.contextualize(id=generated_id):
-            logger.trace(f"Current ID '{generated_id}' transponder code is '{transponder_code}'")
+            logger.debug(f"Current ID '{generated_id}' transponder code is '{transponder_code}'")
             logger.trace(request.__dict__)
 
             await request.body()
@@ -64,7 +64,7 @@ class LoggerMiddleware(BaseHTTPMiddleware):
             except Exception as ex:
                 exception_class = type(ex)
                 logger.exception(ex)
-                send_message(f"Error while processing url: <code>{url_correlation.get()}</code>, transponder_code: <code>{transponder_code_correlation.get()}</code>, error: <code>{ex}</code>. exception: <code>{exception_class.__name__}</code>. {home_page_process.get(transponder_code_correlation.get(), '')}")
+                send_message(f"Error while processing url: <code>{url_correlation.get()}</code>, transponder_id: <code>{generated_id}</code>, transponder_code: <code>{transponder_code_correlation.get()}</code>, error: <code>{ex}</code>. exception: <code>{exception_class.__name__}</code>. {home_page_process.get(transponder_code_correlation.get(), '')}")
                 response = await generate_error()
 
             logger.trace(response.__dict__)

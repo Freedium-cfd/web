@@ -72,6 +72,7 @@ class MediumParser:
         if post_data:
             logger.debug("post query was found on cache")
             return post_data.json()
+        logger.debug(f"No data found in cache by {self.post_id}")
         return None
 
     async def get_post_data_from_api(self):
@@ -84,7 +85,11 @@ class MediumParser:
             return None
 
     async def query(self, use_cache: bool = True, retry: int = 3):
+        logger.debug(f"Medium QUERY: {use_cache=}, {retry=}")
         post_data = await self.get_post_data_from_cache() if use_cache else None
+
+        if not post_data:
+            logger.debug("Getting value from cache failed, using API")
 
         attempt = 0
         while not post_data and attempt < retry:
