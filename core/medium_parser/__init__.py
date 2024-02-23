@@ -2,7 +2,7 @@
 from aiohttp_retry import ExponentialRetry
 
 import jinja2
-from .cache_db import SQLiteCacheBackend
+from database_lib import SQLiteCacheBackend
 
 cache = SQLiteCacheBackend('medium_db_cache.sqlite')
 cache.init_db()

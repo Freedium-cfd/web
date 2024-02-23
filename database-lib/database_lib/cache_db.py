@@ -6,6 +6,7 @@ from warnings import warn
 try:
     import sqlite_zstd
 except ImportError:
+    logger.debug("Can't use zstd compression. Please install 'sqlite_zstd' package")
     warn("Can't use zstd compression. Please install 'sqlite_zstd' package")
     sqlite_zstd = None
 
@@ -36,6 +37,8 @@ class SQLiteCacheBackend:
         if sqlite_zstd is not None:
             sqlite_zstd.load(self.connection)
 
+        self.migrate_add_index_to_key()
+
     def all(self):
         with self.connection:
             return self.cursor.execute("SELECT * FROM cache").fetchall()
@@ -64,25 +67,53 @@ class SQLiteCacheBackend:
     def init_db(self):
         with self.connection:
             self.cursor.execute("CREATE TABLE IF NOT EXISTS cache (key TEXT PRIMARY KEY, value TEXT)")
+            self.cursor.execute("CREATE INDEX IF NOT EXISTS idx_key ON cache (key)")
 
-    def pull(self, key: str) -> Union[dict, str]:
+    def pull(self, key: str) -> Union[CacheResponse, None]:
         with self.connection:
             cache = self.cursor.execute("SELECT value FROM cache WHERE key = :0", {'0': key}).fetchone()
             if cache:
                 logger.debug("Value found in DB, returning it")
                 return CacheResponse(cache[0])
+            else:
+                logger.debug(f"No value found for key: {key}")
+                return None
 
-    def push(self, key: str, value: str) -> None:
+    def push(self, key: str, value: Union[str, dict]) -> None:
         if isinstance(value, dict):
-            value = json.dumps(value)
+            try:
+                value = json.dumps(value)
+            except TypeError as e:
+                raise ValueError(f"Unable to serialize value to JSON: {e}")
         elif not isinstance(value, str):
-            raise ValueError(f"value argument should be only string type not {type(value).__name__}")
+            raise ValueError(f"value argument should be a string or dict, not {type(value).__name__}")
         with self.connection:
             self.cursor.execute("INSERT OR REPLACE INTO cache VALUES (:0, :1)", {'0': key, '1': value})
-
+            
     def delete(self, key: str) -> None:
         with self.connection:
-            self.cursor.execute("DELETE FROM cache WHERE key = :0", {'0': key})
+            result = self.cursor.execute("SELECT 1 FROM cache WHERE key = :0", {'0': key}).fetchone()
+            if result:
+                self.cursor.execute("DELETE FROM cache WHERE key = :0", {'0': key})
+                logger.debug(f"Deleted key: {key}")
+            else:
+                logger.debug(f"Attempted to delete non-existing key: {key}")
+    
+    def maintenance(self):
+        with self.connection:
+            self.cursor.execute("VACUUM")
+            self.cursor.execute("ANALYZE")
+
+    def migrate_add_index_to_key(self):
+        with self.connection:
+            # Check if the index already exists
+            index_exists = self.cursor.execute("SELECT name FROM sqlite_master WHERE type='index' AND name='idx_key'").fetchone()
+            if not index_exists:
+                # Create the index if it doesn't exist
+                self.cursor.execute("CREATE INDEX idx_key ON cache (key)")
+                logger.info("Index 'idx_key' on column 'key' created successfully.")
+            else:
+                logger.info("Index 'idx_key' on column 'key' already exists.")
 
     def close(self):
         self.__del__()
