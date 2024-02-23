@@ -86,9 +86,11 @@ class MediumParser:
 
     async def query(self, use_cache: bool = True, retry: int = 3):
         logger.debug(f"Medium QUERY: {use_cache=}, {retry=}")
+        cache_used = True
         post_data = await self.get_post_data_from_cache() if use_cache else None
 
         if not post_data:
+            cache_used = False
             logger.debug("Getting value from cache failed, using API")
 
         attempt = 0
@@ -104,10 +106,24 @@ class MediumParser:
                 await asyncio.sleep(2 ** attempt)
                 attempt += 1
 
-        if not post_data or not isinstance(post_data, dict) or post_data.get("error") or not post_data.get("data") or not post_data.get("data").get("post"):
-            raise MediumPostQueryError(f'Could not query post by ID from API: {self.post_id}')
+        reason = None
 
-        cache.push(self.post_id, post_data)
+        if not post_data:
+            reason = "No post data returned"
+        elif not isinstance(post_data, dict):
+            reason = "Post data is not a dictionary"
+        elif post_data.get("error"):
+            reason = "Post data contains an error"
+        elif not post_data.get("data"):
+            reason = "Post data missing 'data' key"
+        elif not post_data.get("data").get("post"):
+            reason = "Post data missing 'data.post' key"
+
+        if reason:
+            raise MediumPostQueryError(f'Could not query post by ID from API: {self.post_id}. Reason: {reason}')
+
+        if not cache_used:
+            cache.push(self.post_id, post_data)
 
         self.post_data = post_data
         return self.post_data

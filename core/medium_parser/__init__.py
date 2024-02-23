@@ -1,5 +1,6 @@
 
 from aiohttp_retry import ExponentialRetry
+from loguru import logger
 
 import jinja2
 from database_lib import SQLiteCacheBackend
@@ -7,6 +8,8 @@ from database_lib import SQLiteCacheBackend
 cache = SQLiteCacheBackend('medium_db_cache.sqlite')
 cache.init_db()
 cache.enable_zstd()
+
+logger.debug(f"Database length: {cache.all_length()}")
 
 retry_options = ExponentialRetry(attempts=3)
 

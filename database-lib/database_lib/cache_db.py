@@ -3,6 +3,7 @@ import sqlite3
 import json
 from loguru import logger
 from warnings import warn
+import threading
 try:
     import sqlite_zstd
 except ImportError:
@@ -59,8 +60,7 @@ class SQLiteCacheBackend:
             except Exception as error:
                 print(error)
             self.connection.execute("PRAGMA auto_vacuum=full")
-            self.cursor.execute("SELECT zstd_incremental_maintenance(null, 1);")
-            self.cursor.execute("vacuum;")
+            self.maintenance_thread()
 
     def init_db(self):
         with self.connection:
@@ -97,21 +97,30 @@ class SQLiteCacheBackend:
             else:
                 logger.debug(f"Attempted to delete non-existing key: {key}")
     
-    def maintenance(self):
+    def maintenance(self, time: int = None, blocking_time: int = 0.5):
         with self.connection:
+            if time is not None:
+                self.cursor.execute("SELECT zstd_incremental_maintenance(?, ?);", (time, blocking_time))
+            else:
+                self.cursor.execute("SELECT zstd_incremental_maintenance(null, ?);", (blocking_time,))
             self.cursor.execute("VACUUM")
             self.cursor.execute("ANALYZE")
 
-    def migrate_add_index_to_key(self):
-        with self.connection:
-            # Check if the index already exists
-            index_exists = self.cursor.execute("SELECT name FROM sqlite_master WHERE type='index' AND name='idx_key'").fetchone()
-            if not index_exists:
-                # Create the index if it doesn't exist
-                self.cursor.execute("CREATE INDEX idx_key ON cache (key)")
-                logger.info("Index 'idx_key' on column 'key' created successfully.")
-            else:
-                logger.info("Index 'idx_key' on column 'key' already exists.")
+    def maintenance_thread(self):
+        maintenance_thread = threading.Thread(target=self.maintenance, daemon=True)
+        maintenance_thread.start()
+
+    # Doesn't works with sqlite_zstd
+    # def migrate_add_index_to_key(self):
+    #     with self.connection:
+    #         # Check if the index already exists
+    #         index_exists = self.cursor.execute("SELECT name FROM sqlite_master WHERE type='index' AND name='idx_key'").fetchone()
+    #         if not index_exists:
+    #             # Create the index if it doesn't exist
+    #             self.cursor.execute("CREATE INDEX idx_key ON cache (key)")
+    #             logger.info("Index 'idx_key' on column 'key' created successfully.")
+    #         else:
+    #             logger.info("Index 'idx_key' on column 'key' already exists.")
 
     def show_schema_info(self):
         with self.connection:
