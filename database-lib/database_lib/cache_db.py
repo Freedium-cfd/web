@@ -26,8 +26,9 @@ class CacheResponse:
         return self.data
 
 class SQLiteCacheBackend:
-    __slots__ = ('connection', 'cursor')
+    __slots__ = ('connection', 'cursor', 'database')
     def __init__(self, database: str):
+        self.database = database
         self.connection = sqlite3.connect(database)
         self.connection.enable_load_extension(True)  # Enable loading of extensions
         self.connection.execute("PRAGMA foreign_keys = ON;")  # Need for working with foreign keys in db
@@ -98,13 +99,15 @@ class SQLiteCacheBackend:
                 logger.debug(f"Attempted to delete non-existing key: {key}")
     
     def maintenance(self, time: int = None, blocking_time: int = 0.5):
-        with self.connection:
+        connection = sqlite3.connect(self.database)
+        cursor = connection.cursor()
+        with connection:
             if time is not None:
-                self.cursor.execute("SELECT zstd_incremental_maintenance(?, ?);", (time, blocking_time))
+                cursor.execute("SELECT zstd_incremental_maintenance(?, ?);", (time, blocking_time))
             else:
-                self.cursor.execute("SELECT zstd_incremental_maintenance(null, ?);", (blocking_time,))
-            self.cursor.execute("VACUUM")
-            self.cursor.execute("ANALYZE")
+                cursor.execute("SELECT zstd_incremental_maintenance(null, ?);", (blocking_time,))
+            cursor.execute("VACUUM")
+            cursor.execute("ANALYZE")
 
     def maintenance_thread(self):
         maintenance_thread = threading.Thread(target=self.maintenance, daemon=True)

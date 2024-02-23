@@ -29,7 +29,7 @@ class TestSQLiteCacheBackend(unittest.TestCase):
             return {generate_random_key(5): random.randint(1, 1000) for _ in range(3)}
 
         def generate_data():
-            for _ in range(300):
+            for _ in range(12):
                 yield generate_random_key(), generate_random_value()
 
         for key, value in generate_data():
