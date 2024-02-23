@@ -43,6 +43,7 @@ services:
       timeout: 80s
       retries: 3
     restart: always
+    mem_limit: 2g
 
   dragonfly:
     image: 'docker.dragonflydb.io/dragonflydb/dragonfly'

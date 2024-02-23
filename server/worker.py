@@ -51,10 +51,11 @@ def worker_abort(worker):
 @trace
 def number_of_workers():
     cores = multiprocessing.cpu_count()
-    if cores >= 8:
-        workers = cores
-    else:
-        workers = cores * 2
+    workers = cores
+    # if cores >= 8:
+    #     workers = cores
+    # else:
+    #     workers = cores * 2
     # workers = (cores * 2) + 2
     logger.debug(f"Number of workers: {workers}")
     return workers
