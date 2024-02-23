@@ -101,6 +101,12 @@ class SQLiteCacheBackend:
     def maintenance(self, time: int = None, blocking_time: int = 0.5):
         connection = sqlite3.connect(self.database)
         cursor = connection.cursor()
+        connection.enable_load_extension(True)  # Enable loading of extensions
+        connection.execute("PRAGMA foreign_keys = ON;")  # Need for working with foreign keys in db
+        connection.execute("PRAGMA journal_mode=WAL;") # Need to properly work with ZSTD compression
+        connection.execute("PRAGMA auto_vacuum=full;") # Same as above thing
+        if sqlite_zstd is not None:
+            sqlite_zstd.load(connection)
         with connection:
             if time is not None:
                 cursor.execute("SELECT zstd_incremental_maintenance(?, ?);", (time, blocking_time))
