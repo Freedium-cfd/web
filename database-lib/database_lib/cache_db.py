@@ -26,15 +26,16 @@ class CacheResponse:
         return self.data
 
 class SQLiteCacheBackend:
-    __slots__ = ('connection', 'cursor', 'database')
+    __slots__ = ('connection', 'cursor', 'database', 'lock')
     def __init__(self, database: str):
         self.database = database
-        self.connection = sqlite3.connect(database)
+        self.connection = sqlite3.connect(database, timeout=10.0)
         self.connection.enable_load_extension(True)  # Enable loading of extensions
         self.connection.execute("PRAGMA foreign_keys = ON;")  # Need for working with foreign keys in db
         self.connection.execute("PRAGMA journal_mode=WAL;") # Need to properly work with ZSTD compression
         self.connection.execute("PRAGMA auto_vacuum=full;") # Same as above thing
         self.cursor = self.connection.cursor()
+        self.lock = threading.Lock()
 
         if sqlite_zstd is not None:
             sqlite_zstd.load(self.connection)
@@ -86,8 +87,10 @@ class SQLiteCacheBackend:
                 raise ValueError(f"Unable to serialize value to JSON: {e}")
         elif not isinstance(value, str):
             raise ValueError(f"value argument should be a string or dict, not {type(value).__name__}")
-        with self.connection:
-            self.cursor.execute("INSERT OR REPLACE INTO cache VALUES (:0, :1)", {'0': key, '1': value})
+        
+        with self.lock:
+            with self.connection:
+                self.cursor.execute("INSERT OR REPLACE INTO cache VALUES (:0, :1)", {'0': key, '1': value})
             
     def delete(self, key: str) -> None:
         with self.connection:
@@ -105,8 +108,10 @@ class SQLiteCacheBackend:
         connection.execute("PRAGMA foreign_keys = ON;")  # Need for working with foreign keys in db
         connection.execute("PRAGMA journal_mode=WAL;") # Need to properly work with ZSTD compression
         connection.execute("PRAGMA auto_vacuum=full;") # Same as above thing
+        
         if sqlite_zstd is not None:
             sqlite_zstd.load(connection)
+        
         with connection:
             if time is not None:
                 cursor.execute("SELECT zstd_incremental_maintenance(?, ?);", (time, blocking_time))
@@ -114,6 +119,9 @@ class SQLiteCacheBackend:
                 cursor.execute("SELECT zstd_incremental_maintenance(null, ?);", (blocking_time,))
             cursor.execute("VACUUM")
             cursor.execute("ANALYZE")
+        
+        cursor.close()
+        connection.close()
 
     def maintenance_thread(self):
         maintenance_thread = threading.Thread(target=self.maintenance, daemon=True)
