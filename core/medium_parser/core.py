@@ -106,27 +106,32 @@ class MediumParser:
                 await asyncio.sleep(2 ** attempt)
                 attempt += 1
 
-        reason = None
+            reason = None
 
-        if not post_data:
-            reason = "No post data returned"
-        elif not isinstance(post_data, dict):
-            reason = "Post data is not a dictionary"
-        elif post_data.get("error"):
-            reason = "Post data contains an error"
-        elif not post_data.get("data"):
-            reason = "Post data missing 'data' key"
-        elif not post_data.get("data").get("post"):
-            reason = "Post data missing 'data.post' key"
+            if not post_data:
+                reason = "No post data returned"
+            elif not isinstance(post_data, dict):
+                reason = "Post data is not a dictionary"
+            elif post_data.get("error"):
+                reason = "Post data contains an error"
+            elif not post_data.get("data"):
+                reason = "Post data missing 'data' key"
+            elif not post_data.get("data").get("post"):
+                reason = "Post data missing 'data.post' key"
 
-        if reason:
+            if reason is None:
+                break
+        else:
+            if not reason:
+                reason = "Unknown"
+
             raise MediumPostQueryError(f'Could not query post by ID from API: {self.post_id}. Reason: {reason}')
 
         if not cache_used:
             cache.push(self.post_id, post_data)
 
         self.post_data = post_data
-        return self.post_data
+        return post_data
 
     async def _parse_and_render_content_html_post(self, content: dict, title: str, subtitle: str, preview_image_id: str, highlights: list, tags: list) -> tuple[list, str, str]:
         paragraphs = content["bodyModel"]["paragraphs"]
