@@ -84,8 +84,7 @@ class MediumParser:
             logger.exception(ex)
             return None
 
-    async def query(self, use_cache: bool = True, retry: int = 3):
-        logger.debug(f"Medium QUERY: {use_cache=}, {retry=}")
+    async def query_get(self, use_cache: bool):
         cache_used = True
         post_data = await self.get_post_data_from_cache() if use_cache else None
 
@@ -93,14 +92,21 @@ class MediumParser:
             cache_used = False
             logger.debug("Getting value from cache failed, using API")
 
+            post_data = await self.get_post_data_from_api()
+
+        return post_data, cache_used
+
+    async def query(self, use_cache: bool = True, retry: int = 3):
+        logger.debug(f"Medium QUERY: {use_cache=}, {retry=}")
+
+        post_data, is_cache_used = None, False
+
         attempt = 0
         while not post_data and attempt < retry:
             try:
-                post_data = await self.get_post_data_from_api()
-                if post_data:
-                    break
+                post_data, is_cache_used = await self.query_get(use_cache)
             except Exception as e:
-                logger.error(f"Attempt {attempt + 1} failed with error: {e}")
+                logger.error(f"Attempt {attempt + 1} failed with exception: {e}")
             finally:
                 logger.info(f"Retrying in {2 ** attempt} seconds...")
                 await asyncio.sleep(2 ** attempt)
@@ -127,7 +133,7 @@ class MediumParser:
 
             raise MediumPostQueryError(f'Could not query post by ID from API: {self.post_id}. Reason: {reason}')
 
-        if not cache_used:
+        if not is_cache_used:
             cache.push(self.post_id, post_data)
 
         self.post_data = post_data
