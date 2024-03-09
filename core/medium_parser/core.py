@@ -106,27 +106,26 @@ class MediumParser:
         while not post_data and attempt < retry:
             try:
                 post_data, is_cache_used = await self.query_get(use_cache)
+
+                if not post_data:
+                    reason = "No post data returned"
+                elif not isinstance(post_data, dict):
+                    reason = "Post data is not a dictionary"
+                elif post_data.get("error"):
+                    reason = "Post data contains an error"
+                elif not post_data.get("data"):
+                    reason = "Post data missing 'data' key"
+                elif not post_data.get("data").get("post"):
+                    reason = "Post data missing 'data.post' key"
+
+                if reason is None:
+                    break
             except Exception as e:
                 logger.error(f"Attempt {attempt + 1} failed with exception: {e}")
-                continue
-
-            if not post_data:
-                reason = "No post data returned"
-            elif not isinstance(post_data, dict):
-                reason = "Post data is not a dictionary"
-            elif post_data.get("error"):
-                reason = "Post data contains an error"
-            elif not post_data.get("data"):
-                reason = "Post data missing 'data' key"
-            elif not post_data.get("data").get("post"):
-                reason = "Post data missing 'data.post' key"
-
-            if reason is None:
-                break
-
-            logger.info(f"Retrying in {2 ** attempt} seconds...")
-            await asyncio.sleep(2 ** attempt)
-            attempt += 1
+            finally:
+                logger.info(f"Retrying in {2 ** attempt} seconds...")
+                await asyncio.sleep(2 ** attempt)
+                attempt += 1
         else:
             if not reason:
                 reason = "Unknown"
