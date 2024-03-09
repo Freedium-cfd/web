@@ -102,17 +102,13 @@ class MediumParser:
         post_data, is_cache_used = None, False
 
         attempt = 0
+        reason = None
         while not post_data and attempt < retry:
             try:
                 post_data, is_cache_used = await self.query_get(use_cache)
             except Exception as e:
                 logger.error(f"Attempt {attempt + 1} failed with exception: {e}")
-            finally:
-                logger.info(f"Retrying in {2 ** attempt} seconds...")
-                await asyncio.sleep(2 ** attempt)
-                attempt += 1
-
-            reason = None
+                continue
 
             if not post_data:
                 reason = "No post data returned"
@@ -127,6 +123,10 @@ class MediumParser:
 
             if reason is None:
                 break
+
+            logger.info(f"Retrying in {2 ** attempt} seconds...")
+            await asyncio.sleep(2 ** attempt)
+            attempt += 1
         else:
             if not reason:
                 reason = "Unknown"
