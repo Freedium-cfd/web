@@ -19,6 +19,7 @@ def cli():
 
 def server_cmd(cmd, opts):
     from server.utils.utils import is_port_in_use
+    import threading
 
     if is_port_in_use(opts.port):
         cmd.error(f"Port {opts.port} is in use or permission denied")
@@ -26,6 +27,5 @@ def server_cmd(cmd, opts):
     from server.worker import execute_server_worker
     from server.utils.maintenance_scheduler import enable_maintenance_mode
 
-    enable_maintenance_mode()
-
+    threading.Thread(target=enable_maintenance_mode, daemon=True).start()
     execute_server_worker(host="0.0.0.0", port=opts.port)
