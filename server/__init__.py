@@ -3,6 +3,7 @@ import pickledb
 import logging
 from contextvars import ContextVar
 from typing import Optional
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
 from jinja2 import Environment, DebugUndefined, FileSystemLoader
 import redis.asyncio as redis
@@ -11,6 +12,8 @@ from xkcdpass import xkcd_password as xp
 from server.utils.loguru_handler import InterceptHandler
 
 redis_storage = redis.Redis(host="dragonfly", port=6379, db=0)
+
+scheduler = AsyncIOScheduler()
 
 jinja_env = Environment(enable_async=True)
 jinja_safe_env = Environment(undefined=DebugUndefined)
@@ -42,3 +45,5 @@ START_TIME = dt.datetime.now().strftime("%H-%M-%S")
 WORDS_LIST_FILE = "xkcdpass/static/legac"
 
 xkcd_passwd = xp.generate_wordlist(wordfile=WORDS_LIST_FILE, min_length=5, max_length=8)
+
+maintenance_mode = False

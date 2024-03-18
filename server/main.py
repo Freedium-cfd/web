@@ -1,7 +1,5 @@
 from math import ceil
 import sentry_sdk
-import asyncio
-from contextlib import suppress
 from fastapi.exceptions import HTTPException
 from fastapi import FastAPI, Depends, APIRouter
 from loguru import logger

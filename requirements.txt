@@ -10,3 +10,4 @@ starlette==0.24.0
 gunicorn==21.2.0
 redis[hiredis]==4.6.0
 xkcdpass==1.19.3
+apscheduler==3.10.4

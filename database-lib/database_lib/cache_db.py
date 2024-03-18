@@ -4,12 +4,14 @@ import json
 from loguru import logger
 from warnings import warn
 import threading
+
 try:
     import sqlite_zstd
 except ImportError:
     logger.debug("Can't use zstd compression. Please install 'sqlite_zstd' package")
     warn("Can't use zstd compression. Please install 'sqlite_zstd' package")
     sqlite_zstd = None
+
 
 class CacheResponse:
     __slots__ = ('data',)
@@ -24,6 +26,7 @@ class CacheResponse:
 
     def __str__(self):
         return self.data
+
 
 class SQLiteCacheBackend:
     __slots__ = ('connection', 'cursor', 'database', 'lock')
@@ -51,18 +54,17 @@ class SQLiteCacheBackend:
     def random(self, size: int):
         with self.connection:
             return self.cursor.execute("SELECT * FROM cache ORDER BY RANDOM() LIMIT ?", (size,)).fetchall()
-    
+
     def enable_zstd(self):
         if sqlite_zstd is None:
             raise ValueError("Can't use zstd compression. Please install 'sqlite_zstd' package")
-        
+
         with self.connection:
             try:
                 self.cursor.execute("SELECT zstd_enable_transparent('{\"table\": \"cache\", \"column\": \"value\", \"compression_level\": 9, \"dict_chooser\": \"''a''\"}')")
             except Exception as error:
                 print(error)
             self.connection.execute("PRAGMA auto_vacuum=full")
-            self.maintenance_thread()
 
     def init_db(self):
         with self.connection:
@@ -87,11 +89,11 @@ class SQLiteCacheBackend:
                 raise ValueError(f"Unable to serialize value to JSON: {e}")
         elif not isinstance(value, str):
             raise ValueError(f"value argument should be a string or dict, not {type(value).__name__}")
-        
+
         with self.lock:
             with self.connection:
                 self.cursor.execute("INSERT OR REPLACE INTO cache VALUES (:0, :1)", {'0': key, '1': value})
-            
+
     def delete(self, key: str) -> None:
         with self.connection:
             result = self.cursor.execute("SELECT 1 FROM cache WHERE key = :0", {'0': key}).fetchone()
@@ -100,7 +102,7 @@ class SQLiteCacheBackend:
                 logger.debug(f"Deleted key: {key}")
             else:
                 logger.debug(f"Attempted to delete non-existing key: {key}")
-    
+
     def maintenance(self, time: int = None, blocking_time: int = 0.5):
         connection = sqlite3.connect(self.database)
         cursor = connection.cursor()
@@ -108,10 +110,10 @@ class SQLiteCacheBackend:
         connection.execute("PRAGMA foreign_keys = ON;")  # Need for working with foreign keys in db
         connection.execute("PRAGMA journal_mode=WAL;") # Need to properly work with ZSTD compression
         connection.execute("PRAGMA auto_vacuum=full;") # Same as above thing
-        
+
         if sqlite_zstd is not None:
             sqlite_zstd.load(connection)
-        
+
         with connection:
             if time is not None:
                 cursor.execute("SELECT zstd_incremental_maintenance(?, ?);", (time, blocking_time))
@@ -119,25 +121,13 @@ class SQLiteCacheBackend:
                 cursor.execute("SELECT zstd_incremental_maintenance(null, ?);", (blocking_time,))
             cursor.execute("VACUUM")
             cursor.execute("ANALYZE")
-        
+
         cursor.close()
         connection.close()
 
     def maintenance_thread(self):
         maintenance_thread = threading.Thread(target=self.maintenance, daemon=True)
         maintenance_thread.start()
-
-    # Doesn't works with sqlite_zstd
-    # def migrate_add_index_to_key(self):
-    #     with self.connection:
-    #         # Check if the index already exists
-    #         index_exists = self.cursor.execute("SELECT name FROM sqlite_master WHERE type='index' AND name='idx_key'").fetchone()
-    #         if not index_exists:
-    #             # Create the index if it doesn't exist
-    #             self.cursor.execute("CREATE INDEX idx_key ON cache (key)")
-    #             logger.info("Index 'idx_key' on column 'key' created successfully.")
-    #         else:
-    #             logger.info("Index 'idx_key' on column 'key' already exists.")
 
     def show_schema_info(self):
         with self.connection:

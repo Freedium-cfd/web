@@ -24,5 +24,8 @@ def server_cmd(cmd, opts):
         cmd.error(f"Port {opts.port} is in use or permission denied")
 
     from server.worker import execute_server_worker
+    from server.utils.maintenance_scheduler import enable_maintenance_mode
+
+    enable_maintenance_mode()
 
     execute_server_worker(host="0.0.0.0", port=opts.port)

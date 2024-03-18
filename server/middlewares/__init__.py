@@ -1,5 +1,6 @@
 from starlette.middleware.cors import CORSMiddleware
 from server.middlewares.logger import LoggerMiddleware
+from server.middlewares.maintenance_mode import MaintenanceModeMiddleware
 
 origins = ["*"]
 
@@ -12,4 +13,4 @@ def register_middlewares(app):
         allow_methods=["*"],
         allow_headers=["*"],
     )
-
+    app.add_middleware(MaintenanceModeMiddleware)
