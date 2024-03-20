@@ -62,6 +62,3 @@ pip install ./rl_string_helper
 ```
 
 Now we need configure our Freedium instance. Copy `.env_template` to `.env` configuration file and set values, required for you.
-
-If you have linux, execute `./script/start_dev.sh` and open in browser 'localhost:6752'. That will execute Caddy reverse proxy.
-If you have other OS or want test without reverse proxy, you can execute server using command `python3 -m server server` and access by address 'localhost:7080':
