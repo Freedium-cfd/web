@@ -26,6 +26,6 @@ def enable_maintenance_mode():
     logger.debug("Maintenance mode disabled")
     send_message("Maintenance mode disabled")
 
-scheduler.add_job(enable_maintenance_mode, 'cron', hour=1)
+scheduler.add_job(enable_maintenance_mode, 'cron', hour='*/2')
 
 scheduler.start()
