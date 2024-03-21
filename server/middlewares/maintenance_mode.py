@@ -26,7 +26,7 @@ HTML_RESPONSE_BODY = """
 
 class MaintenanceModeMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
-        if maintenance_mode:
+        if maintenance_mode.value:
             return HTMLResponse(
                 content=HTML_RESPONSE_BODY,
                 status_code=503

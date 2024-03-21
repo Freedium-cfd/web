@@ -1,5 +1,6 @@
 import datetime as dt
 import pickledb
+from multiprocessing import Value, Manager
 import logging
 from contextvars import ContextVar
 from typing import Optional
@@ -46,4 +47,4 @@ WORDS_LIST_FILE = "xkcdpass/static/legac"
 
 xkcd_passwd = xp.generate_wordlist(wordfile=WORDS_LIST_FILE, min_length=5, max_length=8)
 
-maintenance_mode = False
+maintenance_mode = Value('b', False)

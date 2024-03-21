@@ -10,7 +10,7 @@ from loguru import logger
 
 def enable_maintenance_mode():
     global maintenance_mode
-    maintenance_mode = True
+    maintenance_mode.value = True
     logger.debug("Maintenance mode enabled")
 
     send_message("Maintenance mode enabled")
@@ -22,7 +22,7 @@ def enable_maintenance_mode():
     with suppress(Exception):
         medium_cache.maintenance()
 
-    maintenance_mode = False
+    maintenance_mode.value = False
     logger.debug("Maintenance mode disabled")
     send_message("Maintenance mode disabled")
 
