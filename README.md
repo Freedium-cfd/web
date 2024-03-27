@@ -45,12 +45,13 @@ Speed up Freedium, and probably create open source Medium frontend in next life
 Requirements:
 
 - Docker
+- git
 - Linux. Officially, we can't guarantee that Freedium will work on other OS.
 
 We need configure our Freedium instance. Copy `.env_template` to `.env` configuration file and set values, required for you.
 
 ```
-git clone https://github.com/Freedium-cfd/web ./web
+git clone https://codeberg.org/Freedium-cfd/web/ ./web --depth 1
 cd ./web
 cp .env_template .env
 # do some changes in .env, if you want
