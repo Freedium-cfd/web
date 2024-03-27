@@ -1,3 +1,3 @@
-from server.cli import cli
+from server.services.cli import cli
 
 cli()

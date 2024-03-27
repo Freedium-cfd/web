@@ -44,21 +44,17 @@ Speed up Freedium, and probably create open source Medium frontend in next life
 
 Requirements:
 
-- Python 3.9+
-- pip
-- git
+- Docker
+- Linux. Officially, we can't guarantee that Freedium will work on other OS.
 
-And probably any `Linux` based distro (like Arch btw).
-
-```bash
-git clone https://github.com/Freedium-cfd/web ./web
-cd ./web
-pip install -r requirements.txt
-# for linux also do: pip install -r requirements-fast.txt
-pip install ./database-lib
-pip install ./core
-pip install ./rl_string_helper
+We need configure our Freedium instance. Copy `.env_template` to `.env` configuration file and set values, required for you.
 
 ```
+git clone https://github.com/Freedium-cfd/web ./web
+cd ./web
+cp .env_template .env
+# do some changes in .env, if you want
+sudo docker-compose -f docker-compose-dev.yml up
+```
 
-Now we need configure our Freedium instance. Copy `.env_template` to `.env` configuration file and set values, required for you.
+And now you can access local instance of Freedium by opening browser and type `http://localhost:6752`.

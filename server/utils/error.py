@@ -2,13 +2,8 @@ import random
 
 from fastapi.responses import HTMLResponse
 
-from server import (
-    base_template,
-    config,
-    error_template,
-    transponder_code_correlation,
-    url_correlation
-)
+from server import config, transponder_code_correlation, url_correlation
+from server.services.jinja import base_template, error_template
 from server.utils.logger_trace import trace
 from server.utils.notify import send_message
 
@@ -28,7 +23,7 @@ ERROR_MSG_LIST = [
     "Oops! We've encountered a problem, but don't worry, it's not as disastrous as my attempt at karaoke! 🎤",
     "Sorry to hear that, but we've got a problem that's more stubborn than a toddler refusing to eat their veggies! 👶🥦",
     "Apologies, but we've run into a problem - it's not as amusing as my dog trying to catch its tail, but it's a problem! 🐶",
-    "Sorry to hear that, but we've got a problem that's more elusive than the end of a rainbow! 🌈"
+    "Sorry to hear that, but we've got a problem that's more elusive than the end of a rainbow! 🌈",
 ]
 
 
@@ -38,9 +33,7 @@ async def generate_error(error_msg: str = None, title: str = "Error", status_cod
         error_msg = random.choice(ERROR_MSG_LIST)
 
     if not quiet:
-        send_message(
-            f"📛 Error while processing url: <code>{url_correlation.get()}</code>, transponder_code: <code>{transponder_code_correlation.get()}</code>, error: <code>{error_msg}</code>"
-        )
+        send_message(f"📛 Error while processing url: <code>{url_correlation.get()}</code>, transponder_code: <code>{transponder_code_correlation.get()}</code>, error: <code>{error_msg}</code>")
 
     error_template_rendered = await error_template.render_async(error_msg=error_msg, transponder_code=transponder_code_correlation.get())
     base_context = {
@@ -50,4 +43,3 @@ async def generate_error(error_msg: str = None, title: str = "Error", status_cod
     }
     base_template_rendered = await base_template.render_async(base_context, HOST_ADDRESS=config.HOST_ADDRESS)
     return HTMLResponse(base_template_rendered, status_code=status_code)
-

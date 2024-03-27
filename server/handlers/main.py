@@ -1,11 +1,11 @@
 from html5lib.html5parser import parse
 from html5lib import serialize
 
-from server import base_template, main_template, config
-
 from fastapi import Request
 from fastapi.responses import HTMLResponse, JSONResponse
 
+from server import config
+from server.services.jinja import base_template, main_template
 from server.handlers.post import render_medium_post_link, render_postleter
 from server.handlers.reverse_proxy import miro_proxy, iframe_proxy
 from server.handlers.misc import report_problem, delete_from_cache

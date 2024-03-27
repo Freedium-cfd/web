@@ -6,7 +6,8 @@ from html5lib.html5parser import parse
 from html5lib import serialize
 from loguru import logger
 
-from server import base_template, config, url_correlation, redis_storage, postleter_template, home_page_process, transponder_code_correlation
+from server import config, url_correlation, redis_storage, home_page_process, transponder_code_correlation
+from server.services.jinja import base_template, postleter_template
 from server.utils.error import generate_error
 from server.utils.logger_trace import trace
 from server.utils.notify import send_message
