@@ -109,18 +109,13 @@
     <nav id="header" class="fixed w-full z-9 top-0 dark:bg-gray-800 dark:text-white bg-white shadow" style="z-index: 999999;">
         <div class="notification-container">
     <div class="notification-card dark:bg-gray-800 bg-white">
-      <p class="text-2xl pb-5 text-black dark:text-white">Great news !!!</p>
-      <p class="pb-3 text-black dark:text-white">We are finally unblocked on GitHub! Check it out!</br></br></p>
-      <a href="https://patreon.com/Freedium" target="_blank" title="Patreon">
+      <p class="text-2xl pb-5 text-black dark:text-white">Bad news</p>
+      <p class="pb-3 text-black dark:text-white">We regret to inform you that our account on BuyMeACoffee has been suspended due to a violation of their terms of service. This was an unexpected development, and we are currently addressing the matter with utmost priority.</br></br>However, our mission at Freedium remains unchanged, and your support is more crucial than ever. We are transitioning to Patreon, a platform that aligns with our values and offers us the freedom to share our work with you.</br></br>Please join us on Patreon and continue to support our endeavors. Your contributions are invaluable to us, and we are committed to delivering the quality content you’ve come to expect from Freedium.</br></br>Thank you for your understanding and unwavering support.</br></br>Support Us on Patreon</br></br>Warm regards, The Freedium Team</p>
+      <a href="https://noref.io/#https://patreon.com/Freedium" target="_blank" title="Patreon">
       <button class="bg-red-400 mx-1 text-white hover:bg-red-500 font-semibold py-1 px-2 rounded mt-2">
         Patreon
       </button>
     </a>
-    <a href="https://www.buymeacoffee.com/zhymabekroman" target="_blank" title="Buy me a coffee">
-        <button class="bg-orange-500 hover:bg-orange-700 mx-1 text-white font-semibold py-1 px-2 rounded mt-2">
-          Buy me a coffee
-        </button>
-      </a>
 
       <button class="bg-gray-300 mx-1 hover:bg-gray-400 text-gray-800 font-semibold py-1 px-2 rounded mt-2 close-button">
         Close
@@ -177,6 +172,10 @@
                     <a class="inline-block text-gray-600 dark:text-white no-underline hover:text-gray-900 dark:hover:text-white hover:text-underline py-2 px-4"
                        href="https://romans-status-page.vercel.app/status/freedium" target="_blank">Status page</a>
                 </li>
+                <li class="mr-3">
+                  <a class="inline-block text-gray-600 dark:text-white no-underline hover:text-gray-900 dark:hover:text-white hover:text-underline py-2 px-4"
+                     href="https://noref.io/#https://patreon.com/Freedium" target="_blank">Patreon - Support us</a>
+              </li>
                 </ul>
             </div>
         </div>
@@ -364,16 +363,16 @@ document.addEventListener('scroll', function () {
       document.addEventListener('DOMContentLoaded', () => {
         const notificationContainer = document.querySelector('.notification-container');
         const closeButton = document.querySelector('.close-button');
-  
+        const notificationFlagString = "showNotification-buymeacoffe-ban-block"
+
         function showNotification() {
-          if (!localStorage.getItem('showNotification-update46-block')) {
+          if (!localStorage.getItem(notificationFlagString)) {
                   notificationContainer.style.display = 'block';
           }
         }
   
-        // Hide the notification
         function hideNotification() {
-          localStorage.setItem('showNotification-update46-block', 'false');
+          localStorage.setItem(notificationFlagString, 'false');
           notificationContainer.style.display = 'none';
         }
   
