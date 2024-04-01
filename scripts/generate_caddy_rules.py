@@ -11,7 +11,7 @@ static_files = [f for f in listdir("./static") if isfile(join("./static", f))]
 static_file_template = """
     handle_path /{{ file }} {
         root * ./static/{{ file }}
-         file_server
+        file_server
     }
 """
 static_file_template_jinja = Template(static_file_template)
@@ -21,7 +21,7 @@ for file in static_files:
     OUTPUT_RULES.append(file_template)
 
 
-ACCESS_DENIED_PATHS = ["websocket", "cdn-cgi/rum", "graphql/websocket", "onboarding/*", "wp-*", ".env", "api*", "apple-touch-icon-precomposed.png", "rss.xml", ".git/*", "apple-touch-icon-120x120.png", "apple-touch-icon-120x120-precomposed.png", "apple-touch-icon-152x152.png", "apple-touch-icon-152x152-precomposed.png", ".well-known/*", "cdn-cgi/challenge-platform/h/b/orchestrate/chl_page/v1"]
+ACCESS_DENIED_PATHS = ["websocket", "cdn-cgi/rum", "graphql/websocket", "onboarding/*", "wp-*", ".env", "api*", "apple-touch-icon-precomposed.png", "rss.xml", ".git/*", "apple-touch-icon-120x120.png", "apple-touch-icon-120x120-precomposed.png", "apple-touch-icon-152x152.png", "apple-touch-icon-152x152-precomposed.png", ".well-known/*", "cdn-cgi/challenge-platform/h/b/orchestrate/chl_page/v1", "cdn-cgi/challenge-platform/h/g/orchestrate/chl_page/v1"]
 
 access_denied_paths_template = """
     handle_path /{{ file }} {
