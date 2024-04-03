@@ -34,9 +34,13 @@
 }
         </script>
         <style>
+          .overflow-hidden {
+              overflow: hidden !important;
+          }
+
         .shadow-lf {
             box-shadow: inset 3px 0 0 0 rgb(209 207 239 / var(--tw-bg-opacity));
-        }   
+        }
         </style>
         <style>
     .notification-container {
@@ -44,7 +48,8 @@
       position: fixed;
       top: 20px;
       padding: 2%;
-      z-index: 1000;
+      max-height: 95vh; /* Set a maximum height for the container */
+    overflow-y: auto; /* Enable vertical scrolling */
     }
 
     .notification-card {
@@ -82,7 +87,7 @@
         url: window.location.href
     }, "*");
 }
-                </script>
+</script>
                 -->
     </head>
     <div class="fixed bottom-4 left-4" style="z-index: 999999;">
@@ -106,111 +111,129 @@
             </svg>
         </button>
     </div>
-    <nav id="header" class="fixed w-full z-9 top-0 dark:bg-gray-800 dark:text-white bg-white shadow" style="z-index: 999999;">
-        <div class="notification-container">
-    <div class="notification-card dark:bg-gray-800 bg-white">
-      <p class="text-2xl pb-5 text-black dark:text-white">Bad news</p>
-      <p class="pb-3 text-black dark:text-white">We regret to inform you that our account on BuyMeACoffee has been suspended due to a violation of their terms of service. This was an unexpected development, and we are currently addressing the matter with utmost priority.</br></br>However, our mission at Freedium remains unchanged, and your support is more crucial than ever. We are transitioning to Patreon, a platform that aligns with our values and offers us the freedom to share our work with you.</br></br>Please join us on Patreon and continue to support our endeavors. Your contributions are invaluable to us, and we are committed to delivering the quality content you’ve come to expect from Freedium.</br></br>Thank you for your understanding and unwavering support.</br></br>Support Us on Patreon</br></br>Warm regards, The Freedium Team</p>
-      <a href="https://noref.io/#https://patreon.com/Freedium" target="_blank" title="Patreon">
-      <button class="bg-red-400 mx-1 text-white hover:bg-red-500 font-semibold py-1 px-2 rounded mt-2">
-        Patreon
-      </button>
-    </a>
-
-      <button class="bg-gray-300 mx-1 hover:bg-gray-400 text-gray-800 font-semibold py-1 px-2 rounded mt-2 close-button">
-        Close
-      </button>
-      <a href="https://codeberg.org/Freedium-cfd/web" target="_blank" title="Codeberg">
-      <button class="bg-blue-800 hover:bg-blue-900 mx-1 text-white font-semibold py-1 px-2 rounded mt-2">
-        Source code - Codeberg
-      </button>
-      </a>
-      <a href="https://github.com/Freedium-cfd/web" target="_blank" title="GitHub"></a>
-      <button class="bg-gray-700 hover:bg-gray-600 mx-1 text-white font-semibold py-1 px-2 rounded mt-2">
-        Source code - GitHub
-      </button>
-      </a>
-    </div>
-  </div>
-
-        {% if enable_ads_header %}
-    <div class="w-full bg-yellow-400 text-center py-1 px-4"><p class="text-yellow-900">Place your advertisement here! Contact us at advertise@freedium.com</p></div>
-	{% endif %}
-    
-        <div id="progress" class="h-1 z-20 top-0" style="background:linear-gradient(to right, #4dc0b5 var(--scroll), transparent 0)"></div>
-        <div class="w-full md:max-w-4xl mx-auto flex flex-wrap items-center justify-between mt-0 py-3">
-            <div class="pl-4">
-                <a class="text-green-500 text-base no-underline hover:no-underline font-extrabold text-xl"
-                   href="/"
-                   onclick="navigateToOrigin()">Freedium</a>
-            </div>
-            <div class="block lg:hidden pr-4">
-                <button id="nav-toggle"
-                        class="flex items-center px-3 py-2 border rounded text-gray-500 dark:text-white border-gray-600 hover:text-gray-900 dark:hover:text-white hover:border-green-500 appearance-none focus:outline-none">
-                    <svg class="fill-current h-3 w-3" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                        <title>Menu</title>
-                        <path d="M0 3h20v2H0V3zm0 6h20v2H0V9zm0 6h20v2H0v-2z" />
-                    </svg>
-                </button>
-            </div>
-            <div class="w-full flex-grow lg:flex lg:items-center lg:w-auto hidden lg:block mt-2 lg:mt-0 dark:bg-gray-800 bg-white"
-                 id="nav-content">
-                <ul class="list-reset lg:flex justify-end flex-1 items-center">
-                    <li class="mr-3">
-                        <a class="inline-block text-gray-600 dark:text-white no-underline hover:text-gray-900 dark:hover:text-white hover:text-underline py-2 px-4"
-                           href="https://codeberg.org/Freedium-cfd/web" target="_blank">Source code</a>
-                    </li>
-                    <li class="mr-3">
-                        <a class="inline-block text-gray-600 dark:text-white no-underline hover:text-gray-900 dark:hover:text-white hover:text-underline py-2 px-4"
-                           href="https://freedium-miror-saqg.vercel.app/" target="_blank">Mirror 1</a>
-                    </li>
-                    <li class="mr-3">
-                      <a class="inline-block text-gray-600 dark:text-white no-underline hover:text-gray-900 dark:hover:text-white hover:text-underline py-2 px-4"
-                         href="https://freedium-mirror.vercel.app/" target="_blank">Mirror 2</a>
-                  </li>
-                  <li class="mr-3">
+    <div class="notification-container" style="z-index: 999999;">
+        <div class="notification-card dark:bg-gray-800 bg-white">
+            <p class="text-2xl pb-5 text-black dark:text-white">Bad news</p>
+            <p class="pb-3 text-black dark:text-white">
+                We regret to inform you that our account on BuyMeACoffee has been suspended due to a violation of their terms of service. This was an unexpected development, and we are currently addressing the matter with utmost priority.
+            </br>
+        </br>
+        However, our mission at Freedium remains unchanged, and your support is more crucial than ever. We are transitioning to Patreon, a platform that aligns with our values and offers us the freedom to share our work with you.
+    </br>
+</br>
+Please join us on Patreon and continue to support our endeavors. Your contributions are invaluable to us, and we are committed to delivering the quality content you’ve come to expect from Freedium.
+</br>
+</br>
+Thank you for your understanding and unwavering support.
+</br>
+</br>
+Support Us on Patreon
+</br>
+</br>
+Warm regards, The Freedium Team
+</p>
+<a href="https://noref.io/#https://patreon.com/Freedium" target="_blank" title="Patreon">
+    <button class="bg-red-400 mx-1 text-white hover:bg-red-500 font-semibold py-1 px-2 rounded mt-2">Patreon</button>
+</a>
+<button class="bg-gray-300 mx-1 hover:bg-gray-400 text-gray-800 font-semibold py-1 px-2 rounded mt-2 close-button">Close</button>
+<a href="https://codeberg.org/Freedium-cfd/web" target="_blank" title="Codeberg">
+    <button class="bg-blue-800 hover:bg-blue-900 mx-1 text-white font-semibold py-1 px-2 rounded mt-2">Source code - Codeberg</button>
+</a>
+<a href="https://github.com/Freedium-cfd/web" target="_blank" title="GitHub"></a>
+<button class="bg-gray-700 hover:bg-gray-600 mx-1 text-white font-semibold py-1 px-2 rounded mt-2">Source code - GitHub</button>
+</a>
+</div>
+</div>
+<nav id="header" class="fixed w-full z-9 top-0 dark:bg-gray-800 dark:text-white bg-white shadow" style="z-index: 999990;">
+    {% if enable_ads_header %}
+        <div class="w-full bg-yellow-400 text-center py-1 px-4">
+            <p class="text-yellow-900">Place your advertisement here! Contact us at advertise@freedium.com</p>
+        </div>
+    {% endif %}
+    <div id="progress" class="h-1 z-20 top-0" style="background:linear-gradient(to right, #4dc0b5 var(--scroll), transparent 0)"></div>
+    <div class="w-full md:max-w-4xl mx-auto flex flex-wrap items-center justify-between mt-0 py-3">
+        <div class="pl-4">
+            <a class="text-green-500 text-base no-underline hover:no-underline font-extrabold text-xl"
+               href="/"
+               onclick="navigateToOrigin()">Freedium</a>
+        </div>
+        <div class="block lg:hidden pr-4">
+            <button id="nav-toggle"
+                    class="flex items-center px-3 py-2 border rounded text-gray-500 dark:text-white border-gray-600 hover:text-gray-900 dark:hover:text-white hover:border-green-500 appearance-none focus:outline-none">
+                <svg class="fill-current h-3 w-3" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                    <title>Menu</title>
+                    <path d="M0 3h20v2H0V3zm0 6h20v2H0V9zm0 6h20v2H0v-2z" />
+                </svg>
+            </button>
+        </div>
+        <div class="w-full flex-grow lg:flex lg:items-center lg:w-auto hidden lg:block mt-2 lg:mt-0 dark:bg-gray-800 bg-white"
+             id="nav-content">
+            <ul class="list-reset lg:flex justify-end flex-1 items-center">
+                <li class="mr-3">
                     <a class="inline-block text-gray-600 dark:text-white no-underline hover:text-gray-900 dark:hover:text-white hover:text-underline py-2 px-4"
-                       href="https://romans-status-page.vercel.app/status/freedium" target="_blank">Status page</a>
+                       href="https://codeberg.org/Freedium-cfd/web"
+                       target="_blank">Source code</a>
                 </li>
                 <li class="mr-3">
-                  <a class="inline-block text-gray-600 dark:text-white no-underline hover:text-gray-900 dark:hover:text-white hover:text-underline py-2 px-4"
-                     href="https://noref.io/#https://patreon.com/Freedium" target="_blank">Patreon - Support us</a>
-              </li>
-                </ul>
-            </div>
-        </div>
-    </nav>
-    <body class="dark:bg-gray-800 bg-white">{{ body_template }}</body>
-    <div id="problemModal"
-         class="modal hidden fixed inset-0 w-full h-full flex items-center justify-center overflow-y-auto z-10 bg-black bg-opacity-50">
-        <div class="modal-container w-11/12 md:max-w-xl mx-auto rounded shadow-lg max-h-screen">
-            <div class="modal-content bg-white dark:bg-gray-800 dark:text-white my-8 py-4 text-left px-6">
-                <h1 class="text-3xl font-bold">Reporting a Problem</h1>
-                <div class="mt-3">
-                    <p>Sometimes we have problems displaying some Medium posts.</br></br></p>
-                    <p>If you have a problem that some images aren't loading - try using VPN. Probably you have problem with access to Medium CDN (or fucking Cloudflare's bot detection algorithms are blocking you).</p>
-                </div>
-                <form action="#" method="POST" class="mt-4" id="problem-form">
-                    <div class="mb-4">
-                        <label for="problem-description" class="block text-gray-700 dark:text-white font-bold mb-2">Problem Description</label>
-                        <textarea id="problem-description"
-                                  name="problem-description"
-                                  placeholder="Describe your problem here..."
-                                  class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                                  rows="4"
-                                  required></textarea>
-                    </div>
-                    <div>
-                        <button type="submit"
-                                class="m-2 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">Submit</button>
-                        <button type="button"
-                                class="m-2 modal-close bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">Cancel</button>
-                    </div>
-                </form>
-            </div>
+                    <a class="inline-block text-gray-600 dark:text-white no-underline hover:text-gray-900 dark:hover:text-white hover:text-underline py-2 px-4"
+                       href="https://freedium-miror-saqg.vercel.app/"
+                       target="_blank">Mirror 1</a>
+                </li>
+                <li class="mr-3">
+                    <a class="inline-block text-gray-600 dark:text-white no-underline hover:text-gray-900 dark:hover:text-white hover:text-underline py-2 px-4"
+                       href="https://freedium-mirror.vercel.app/"
+                       target="_blank">Mirror 2</a>
+                </li>
+                <li class="mr-3">
+                    <a class="inline-block text-gray-600 dark:text-white no-underline hover:text-gray-900 dark:hover:text-white hover:text-underline py-2 px-4"
+                       href="https://romans-status-page.vercel.app/status/freedium"
+                       target="_blank">Status page</a>
+                </li>
+                <li class="mr-3">
+                    <a class="inline-block text-gray-600 dark:text-white no-underline hover:text-gray-900 dark:hover:text-white hover:text-underline py-2 px-4"
+                       href="https://noref.io/#https://patreon.com/Freedium"
+                       target="_blank">Patreon - Support us</a>
+                </li>
+            </ul>
         </div>
     </div>
-    <script>
+</nav>
+<body class="dark:bg-gray-800 bg-white">{{ body_template }}</body>
+<div id="problemModal"
+     class="modal hidden fixed inset-0 w-full h-full flex items-center justify-center overflow-y-auto bg-black bg-opacity-50"
+     style="z-index: 999999">
+    <div class="modal-container w-11/12 md:max-w-xl mx-auto rounded shadow-lg max-h-screen">
+        <div class="modal-content bg-white dark:bg-gray-800 dark:text-white my-8 py-4 text-left px-6">
+            <h1 class="text-3xl font-bold">Reporting a Problem</h1>
+            <div class="mt-3">
+                <p>
+                    Sometimes we have problems displaying some Medium posts.
+                </br>
+            </br>
+        </p>
+        <p>If you have a problem that some images aren't loading - try using VPN. Probably you have problem with access to Medium CDN (or fucking Cloudflare's bot detection algorithms are blocking you).</p>
+    </div>
+    <form action="#" method="POST" class="mt-4" id="problem-form">
+        <div class="mb-4">
+            <label for="problem-description" class="block text-gray-700 dark:text-white font-bold mb-2">Problem Description</label>
+            <textarea id="problem-description"
+                      name="problem-description"
+                      placeholder="Describe your problem here..."
+                      class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                      rows="4"
+                      required></textarea>
+        </div>
+        <div>
+            <button type="submit"
+                    class="m-2 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">Submit</button>
+            <button type="button"
+                    class="m-2 modal-close bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">Cancel</button>
+        </div>
+    </form>
+</div>
+</div>
+</div>
+<script>
     tailwind.config = {
         darkMode: 'class',
     }
@@ -229,7 +252,7 @@ if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.match
 }
 
   document.getElementById('darkModeToggle').addEventListener('click', function() {
-    
+
     if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
   document.documentElement.classList.remove('dark');
   document.getElementById('darkIcon').classList.add('hidden');
@@ -244,14 +267,14 @@ if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.match
   localStorage.setItem("theme", "dark")
 }
 });
-    </script>
-    <script>
+</script>
+<script>
                 const openModalButton = document.getElementById('openProblemModal');
                 const closeModalButton = document.querySelector('.modal-close');
                 const modal = document.getElementById('problemModal');
                 const problemDescriptionInput = document.getElementById('problem-description');
                 const submitButton = document.querySelector('form button');
-                const body = document.body;
+                const body = document.querySelector('body');
 
                 openModalButton.addEventListener('click', () => {
                     body.classList.add('overflow-hidden'); // Prevent scrolling on the body
@@ -311,8 +334,8 @@ if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.match
         };
 
         document.getElementById('problem-form').onsubmit = submitForm;
-    </script>
-    <script>
+</script>
+<script>
 const h = document.documentElement, b = document.body;
 const st = 'scrollTop';
 const sh = 'scrollHeight';
@@ -336,14 +359,14 @@ document.addEventListener('scroll', function () {
   window.addEventListener('load', function () {
        Lightense('img:not(.no-lightense)');
   }, false);
-    </script>
+</script>
 </body>
 </html>
 <script>
             var lazyLoadInstance = new LazyLoad({
                     callback_loaded: function(element) {
         Lightense(element);
-    }, 
+    },
     callback_error: (img) => {
         console.log(img);
         if (img.hasAttribute("data-src")) {
@@ -358,30 +381,32 @@ document.addEventListener('scroll', function () {
     function navigateToOrigin() {
       window.location.href = window.location.origin;
     }
-          </script>
-  <script>
+</script>
+<script>
       document.addEventListener('DOMContentLoaded', () => {
         const notificationContainer = document.querySelector('.notification-container');
         const closeButton = document.querySelector('.close-button');
         const notificationFlagString = "showNotification-buymeacoffe-ban-block"
+        const body = document.querySelector('body');
 
         function showNotification() {
           if (!localStorage.getItem(notificationFlagString)) {
                   notificationContainer.style.display = 'block';
+                  body.classList.add('overflow-hidden');
           }
         }
-  
+
         function hideNotification() {
           localStorage.setItem(notificationFlagString, 'false');
           notificationContainer.style.display = 'none';
+          body.classList.remove('overflow-hidden');
         }
-  
+
         // Close button functionality
         closeButton.addEventListener('click', () => {
           hideNotification();
         });
-  
+
         showNotification();
       });
-    </script>
-  
+</script>
