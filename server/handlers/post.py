@@ -29,7 +29,7 @@ async def render_postleter(limit: int = 30, as_html: bool = False):
     for post_id in random_post_id_list:
         try:
             post = MediumParser(post_id, timeout=config.TIMEOUT, host_address=config.HOST_ADDRESS, auth_cookies=config.MEDIUM_AUTH_COOKIES)
-            await post.query()
+            await post.query(force_cache=True, retry=1)
             post_metadata = await post.generate_metadata(as_dict=True)
             outlet_posts_list.append(post_metadata)
         except Exception as ex:

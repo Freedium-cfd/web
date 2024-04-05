@@ -27,7 +27,7 @@ async def route_processing(path: str, request: Request):
 
         if key_data != config.ADMIN_SECRET_KEY:
             return JSONResponse({"message": f"Wrong secret key: {key_data}"}, status_code=403)
-    
+
         path = path.removeprefix("render-no-cache/")
         if path.startswith("/no-redis/"):
             path = path.removeprefix("/no-redis/")

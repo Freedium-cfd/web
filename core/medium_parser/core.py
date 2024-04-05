@@ -84,20 +84,19 @@ class MediumParser:
             logger.exception(ex)
             return None
 
-    async def query_get(self, use_cache: bool):
+    async def query_get(self, use_cache: bool, force_cache: bool = False):
         cache_used = True
         post_data = await self.get_post_data_from_cache() if use_cache else None
 
-        if not post_data:
-            cache_used = False
+        if not post_data and not force_cache:
             logger.debug("Getting value from cache failed, using API")
-
+            cache_used = False
             post_data = await self.get_post_data_from_api()
 
         return post_data, cache_used
 
-    async def query(self, use_cache: bool = True, retry: int = 3):
-        logger.debug(f"Medium QUERY: {use_cache=}, {retry=}")
+    async def query(self, use_cache: bool = True, retry: int = 3, force_cache: bool = False):
+        logger.debug(f"Medium QUERY: {use_cache=}, {retry=}, {force_cache=}")
 
         post_data, is_cache_used = None, False
 
@@ -105,7 +104,7 @@ class MediumParser:
         reason = None
         while not post_data and attempt < retry:
             try:
-                post_data, is_cache_used = await self.query_get(use_cache)
+                post_data, is_cache_used = await self.query_get(use_cache, force_cache)
 
                 if not post_data:
                     reason = "No post data returned"
@@ -194,10 +193,10 @@ class MediumParser:
                         current_pos += 1
                         continue
 
-            if paragraph["text"] is None:
-                text_formater = None
-            else:
+            if paragraph["text"] is not None:
                 text_formater = parse_paragraph_text(paragraph["text"], paragraph["markups"])
+            else:
+                text_formater = None
 
                 for highlight in highlights:
                     for highlight_paragraph in highlight["paragraphs"]:
@@ -343,10 +342,10 @@ class MediumParser:
                         break
 
                     _tmp_current_pos += 1
-            
+
                 code_block_template_rendered = await code_block_template.render_async(text="\n".join(code_list), code_css_class=" ".join(code_css_class))
                 pre_template_rendered = await pre_template.render_async(code_block=code_block_template_rendered)
-                
+
                 out_paragraphs.append(pre_template_rendered)
                 current_pos = _tmp_current_pos - 1
             elif paragraph["type"] == "BQ":

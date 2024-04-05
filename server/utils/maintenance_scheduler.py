@@ -28,7 +28,7 @@ def enable_maintenance_mode():
     send_message("Maintenance mode disabled")
 
 
-def do_maintenance(sleep_time: int = 60 * 60):
+def do_maintenance(sleep_time: int = 60 * 60 * 24):
     while True:
         try:
             enable_maintenance_mode()
