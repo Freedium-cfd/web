@@ -6,23 +6,20 @@ import urllib.parse
 import jinja2
 import tld
 from loguru import logger
+from contextlib import suppress
 
-from rl_string_helper import (RLStringHelper, parse_markups,
-                              split_overlapping_ranges)
+from rl_string_helper import RLStringHelper, parse_markups, split_overlapping_ranges
 
 from . import cache, jinja_env
-from .exceptions import (InvalidMediumPostID, InvalidMediumPostURL, InvalidURL,
-                         MediumParserException, MediumPostQueryError)
+from .exceptions import InvalidMediumPostID, InvalidMediumPostURL, InvalidURL, MediumParserException, MediumPostQueryError
 from .medium_api import query_post_by_id
 from .models.html_result import HtmlResult
 from .time import convert_datetime_to_human_readable
-from .utils import (get_medium_post_id_by_url, getting_percontage_of_match,
-                    is_valid_medium_post_id_hexadecimal, is_valid_medium_url,
-                    is_valid_url, sanitize_url)
+from .utils import get_medium_post_id_by_url, getting_percontage_of_match, is_valid_medium_post_id_hexadecimal, is_valid_medium_url, is_valid_url, sanitize_url
 
 
 class MediumParser:
-    __slots__ = ('__post_id', 'post_data', 'jinja', 'timeout', 'host_address', 'auth_cookies')
+    __slots__ = ("__post_id", "post_data", "jinja", "timeout", "host_address", "auth_cookies")
 
     def __init__(self, post_id: str, timeout: int, host_address: str, auth_cookies: str = None):
         self.timeout = timeout
@@ -32,14 +29,14 @@ class MediumParser:
         self.auth_cookies = auth_cookies
 
     @classmethod
-    async def from_url(cls, url: str, timeout: int, host_address: str, auth_cookies: str = None) -> 'MediumParser':
+    async def from_url(cls, url: str, timeout: int, host_address: str, auth_cookies: str = None) -> "MediumParser":
         sanitized_url = sanitize_url(url)
         if is_valid_url(url) and not await is_valid_medium_url(sanitized_url, timeout):
-            raise InvalidURL(f'Invalid medium URL: {sanitized_url}')
+            raise InvalidURL(f"Invalid Medium URL: {sanitized_url}")
 
         post_id = await get_medium_post_id_by_url(sanitized_url, timeout)
         if not post_id:
-            raise InvalidMediumPostURL(f'Could not find medium post ID for URL: {sanitized_url}')
+            raise InvalidMediumPostURL(f"Could not find Medium post ID for URL: {sanitized_url}")
 
         return cls(post_id, timeout, host_address, auth_cookies)
 
@@ -50,7 +47,7 @@ class MediumParser:
     @post_id.setter
     def post_id(self, value):
         if not is_valid_medium_post_id_hexadecimal(value):
-            raise InvalidMediumPostID(f'Invalid medium post ID: {value}')
+            raise InvalidMediumPostID(f"Invalid medium post ID: {value}")
 
         self.__post_id = value
 
@@ -67,22 +64,34 @@ class MediumParser:
         return True
 
     async def get_post_data_from_cache(self):
-        logger.debug("Using cache backend")
-        post_data = cache.pull(self.post_id)
-        if post_data:
-            logger.debug("post query was found on cache")
-            return post_data.json()
-        logger.debug(f"No data found in cache by {self.post_id}")
+        async def _get_from_cache():
+            logger.debug("Using cache backend")
+            post_data = cache.pull(self.post_id)
+            if post_data:
+                logger.debug("post query was found on cache")
+                return post_data.json()
+            logger.debug(f"No data found in cache by {self.post_id}")
+            return None
+
+        with suppress(Exception):
+            return await asyncio.wait_for(_get_from_cache(), timeout=self.timeout + 1)
+
         return None
 
     async def get_post_data_from_api(self):
-        logger.debug("Cache backend disabled, using API")
-        try:
-            return await query_post_by_id(self.post_id, self.timeout, self.auth_cookies)
-        except Exception as ex:
-            logger.debug("Error while querying post by Medium API")
-            logger.exception(ex)
-            return None
+        async def _get_from_api():
+            logger.debug("Using API backend")
+            try:
+                return await query_post_by_id(self.post_id, self.timeout, self.auth_cookies)
+            except Exception as ex:
+                logger.debug("Error while querying post by Medium API")
+                logger.exception(ex)
+                return None
+
+        with suppress(Exception):
+            return await asyncio.wait_for(_get_from_api(), timeout=self.timeout + 1)
+
+        return None
 
     async def query_get(self, use_cache: bool, force_cache: bool = False):
         cache_used = True
@@ -123,13 +132,13 @@ class MediumParser:
                 logger.error(f"Attempt {attempt + 1} failed with exception: {e}")
             finally:
                 logger.info(f"Retrying in {2 ** attempt} seconds...")
-                await asyncio.sleep(2 ** attempt)
+                await asyncio.sleep(2**attempt)
                 attempt += 1
         else:
             if not reason:
                 reason = "Unknown"
 
-            raise MediumPostQueryError(f'Could not query post by ID from API: {self.post_id}. Reason: {reason}')
+            raise MediumPostQueryError(f"Could not query post by ID from API: {self.post_id}. Reason: {reason}")
 
         if not is_cache_used:
             cache.push(self.post_id, post_data)
@@ -238,9 +247,7 @@ class MediumParser:
                 image_template = jinja_env.from_string(
                     '<div class="mt-7"><img alt="{{ paragraph.metadata.alt }}" style="margin: auto;" class="pt-5 lazy" role="presentation" data-src="https://miro.medium.com/v2/resize:fit:700/{{ paragraph.metadata.id }}"></div>'
                 )
-                image_caption_template = jinja_env.from_string(
-                    "<figcaption class='mt-3 text-sm text-center text-gray-500 dark:text-gray-200'>{{ text }}</figcaption>"
-                )
+                image_caption_template = jinja_env.from_string("<figcaption class='mt-3 text-sm text-center text-gray-500 dark:text-gray-200'>{{ text }}</figcaption>")
                 if paragraph["layout"] == "OUTSET_ROW":
                     image_templates_row = []
                     img_row_template = jinja_env.from_string('<div class="mx-5"><div class="flex flex-row justify-center">{{ images }}</div></div>')
@@ -329,7 +336,7 @@ class MediumParser:
                 if paragraph["codeBlockMetadata"] and paragraph["codeBlockMetadata"]["lang"] is not None:
                     code_css_class.append(f'language-{paragraph["codeBlockMetadata"]["lang"]}')
                 else:
-                    code_css_class.append('nohighlight')
+                    code_css_class.append("nohighlight")
 
                 code_list = []
                 _tmp_current_pos = current_pos
@@ -358,10 +365,12 @@ class MediumParser:
                 pq_template_rendered = await pq_template.render_async(text=text_formater.get_text())
                 logger.trace(pq_template_rendered)
                 out_paragraphs.append(pq_template_rendered)
-            elif paragraph["type"] == 'MIXTAPE_EMBED':
-                embed_template = jinja_env.from_string("""
+            elif paragraph["type"] == "MIXTAPE_EMBED":
+                embed_template = jinja_env.from_string(
+                    """
 <div class="flex border border-gray-300 p-2 mt-7 items-center overflow-hidden"><a rel="noopener follow" href="{{ url }}" target="_blank"> <div class="flex flex-row justify-between p-2 overflow-hidden"><div class="flex flex-col justify-center p-2"><h2 class="text-black dark:text-gray-100 text-base font-bold">{{ embed_title }}</h2><div class="mt-2 block"><h3 class="text-grey-darker text-sm">{{ embed_description }}</h3></div><div class="mt-5" style=""><p class="text-grey-darker text-xs">{{ embed_site }}</p></div></div><div class="relative flex flew-row h-40 w-72"><div class="lazy absolute inset-0 bg-cover bg-center" data-bg="https://miro.medium.com/v2/resize:fit:320/{{ paragraph.mixtapeMetadata.thumbnailImageId }}"></div></div></div> </a></div>
-""")
+"""
+                )
                 if paragraph.get("mixtapeMetadata") is not None:
                     url = paragraph["mixtapeMetadata"]["href"]
                 else:
@@ -379,8 +388,8 @@ class MediumParser:
                 title_range = paragraph["markups"][1]
                 description_range = paragraph["markups"][2]
 
-                embed_title = text_raw[title_range["start"]:title_range["end"]]
-                embed_description = text_raw[description_range["start"]:description_range["end"]]
+                embed_title = text_raw[title_range["start"] : title_range["end"]]
+                embed_description = text_raw[description_range["start"] : description_range["end"]]
                 try:
                     embed_site = tld.get_fld(url)
                 except Exception as ex:
@@ -391,7 +400,9 @@ class MediumParser:
                 embed_template_rendered = await embed_template.render_async(paragraph=paragraph, url=url, embed_title=embed_title, embed_description=embed_description, embed_site=embed_site)
                 out_paragraphs.append(embed_template_rendered)
             elif paragraph["type"] == "IFRAME":
-                iframe_template = jinja_env.from_string('<div class="mt-7"><iframe class="lazy" data-src="{{ host_address }}/render_iframe/{{ iframe_id }}" allowfullscreen="" frameborder="0" scrolling="no"></iframe></div>')
+                iframe_template = jinja_env.from_string(
+                    '<div class="mt-7"><iframe class="lazy" data-src="{{ host_address }}/render_iframe/{{ iframe_id }}" allowfullscreen="" frameborder="0" scrolling="no"></iframe></div>'
+                )
                 iframe_template_rendered = await iframe_template.render_async(host_address=self.host_address, iframe_id=paragraph["iframe"]["mediaResource"]["id"])
                 out_paragraphs.append(iframe_template_rendered)
 
@@ -402,7 +413,7 @@ class MediumParser:
 
         return out_paragraphs, title, subtitle
 
-    async def render_as_html(self, template_folder: str = './templates'):
+    async def render_as_html(self, template_folder: str = "./templates"):
         try:
             result = await self._render_as_html(template_folder)
         except Exception as ex:
@@ -427,28 +438,35 @@ class MediumParser:
         tags = self.post_data["data"]["post"]["tags"]
 
         if as_dict:
-            return {"post_id": self.post_id, "title": title, "subtitle": subtitle, "description": description, "url": url, "creator": creator, "collection": collection, "reading_time": reading_time, "free_access": free_access, "updated_at": updated_at, "first_published_at": first_published_at, "preview_image_id": preview_image_id, "tags": tags}
+            return {
+                "post_id": self.post_id,
+                "title": title,
+                "subtitle": subtitle,
+                "description": description,
+                "url": url,
+                "creator": creator,
+                "collection": collection,
+                "reading_time": reading_time,
+                "free_access": free_access,
+                "updated_at": updated_at,
+                "first_published_at": first_published_at,
+                "preview_image_id": preview_image_id,
+                "tags": tags,
+            }
 
         return title, subtitle, description, url, creator, collection, reading_time, free_access, updated_at, first_published_at, preview_image_id, tags
 
-    async def _render_as_html(self, template_folder: str = './templates') -> 'HtmlResult':
+    async def _render_as_html(self, template_folder: str = "./templates") -> "HtmlResult":
         if not self.post_data:
-            logger.warning(f'No post data found for post ID: {self.post_id}. Querying...')
+            logger.warning(f"No post data found for post ID: {self.post_id}. Querying...")
             await self.query()
 
         jinja_template = jinja2.Environment(loader=jinja2.FileSystemLoader(template_folder), enable_async=True)
-        post_template = jinja_template.get_template('post.html')
+        post_template = jinja_template.get_template("post.html")
 
         title, subtitle, description, url, creator, collection, reading_time, free_access, updated_at, first_published_at, preview_image_id, tags = await self.generate_metadata()
 
-        content, title, subtitle = await self._parse_and_render_content_html_post(
-            self.post_data["data"]["post"]["content"],
-            title,
-            subtitle,
-            preview_image_id,
-            self.post_data["data"]["post"]["highlights"],
-            tags
-        )
+        content, title, subtitle = await self._parse_and_render_content_html_post(self.post_data["data"]["post"]["content"], title, subtitle, preview_image_id, self.post_data["data"]["post"]["highlights"], tags)
 
         post_page_title_raw = "{{ title }} | by {{ creator.name }}"
         if collection:
