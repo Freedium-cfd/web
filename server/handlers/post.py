@@ -1,6 +1,5 @@
 from fastapi.responses import HTMLResponse
 
-import sentry_sdk
 import pickle
 from html5lib.html5parser import parse
 from html5lib import serialize
@@ -13,6 +12,7 @@ from server.utils.logger_trace import trace
 from server.utils.notify import send_message
 from server.utils.cache import aio_redis_cache
 from server.utils.utils import correct_url, safe_check_redis_connection
+from server.utils.exceptions import handle_exception
 
 from medium_parser import medium_parser_exceptions
 from medium_parser import cache as medium_cache
@@ -33,8 +33,7 @@ async def render_postleter(limit: int = 30, as_html: bool = False):
             post_metadata = await post.generate_metadata(as_dict=True)
             outlet_posts_list.append(post_metadata)
         except Exception as ex:
-            logger.error(f"Couldn't render post_id for postleter: {post_id}, ex: {ex}")
-            send_message(f"Couldn't render post_id for postleter: {post_id}, ex: {ex}")
+            await handle_exception(ex, message=f"Couldn't render post_id for postleter: {post_id}")
 
     postleter_template_rendered = await postleter_template.render_async(post_list=outlet_posts_list)
     if as_html:
@@ -63,29 +62,22 @@ async def render_medium_post_link(path: str, use_cache: bool = True, use_redis: 
         else:
             rendered_medium_post = pickle.loads(redis_result)
     except medium_parser_exceptions.InvalidURL as ex:
-        logger.exception(ex)
-        sentry_sdk.capture_exception(ex)
-        return await generate_error(
+        return await handle_exception(ex,
             "Unable to identify the Medium article URL.",
             status_code=404,
         )
     except (medium_parser_exceptions.InvalidMediumPostURL, medium_parser_exceptions.MediumPostQueryError, medium_parser_exceptions.PageLoadingError) as ex:
-        logger.exception(ex)
-        sentry_sdk.capture_exception(ex)
-        return await generate_error(
+        return await handle_exception(
+            ex,
             "Unable to identify the link as a Medium.com article page. Please check the URL for any typing errors.",
             status_code=404,
         )
     except medium_parser_exceptions.InvalidMediumPostID as ex:
-        logger.exception(ex)
-        sentry_sdk.capture_exception(ex)
-        return await generate_error("Unable to identify the Medium article ID.", status_code=500)
+        return await handle_exception(ex, "Unable to identify the Medium article ID.", status_code=500)
     except medium_parser_exceptions.NotValidMediumURL as ex:
-        return await generate_error("You sure that this is a valid Medium.com URL?", status_code=404, quiet=True)
+        return await handle_exception("You sure that this is a valid Medium.com URL?", status_code=404, quiet=True)
     except Exception as ex:
-        logger.exception(ex)
-        sentry_sdk.capture_exception(ex)
-        return await generate_error(status_code=500)
+        return await handle_exception(ex, status_code=500)
     else:
         base_context = {
             "enable_ads_header": config.ENABLE_ADS_BANNER,
