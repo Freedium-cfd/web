@@ -74,7 +74,7 @@ class MediumParser:
             return None
 
         with suppress(Exception):
-            return await asyncio.wait_for(_get_from_cache(), timeout=self.timeout + 1)
+            return await asyncio.wait_for(_get_from_cache(), timeout=3)
 
         return None
 
