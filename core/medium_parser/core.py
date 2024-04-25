@@ -401,7 +401,7 @@ class MediumParser:
                 out_paragraphs.append(embed_template_rendered)
             elif paragraph["type"] == "IFRAME":
                 iframe_template = jinja_env.from_string(
-                    '<div class="mt-7"><iframe class="lazy" data-src="{{ host_address }}/render_iframe/{{ iframe_id }}" allowfullscreen="" frameborder="0" scrolling="no"></iframe></div>'
+                    '<div class="mt-7"><iframe class="lazy w-full h-full" data-src="{{ host_address }}/render_iframe/{{ iframe_id }}" allowfullscreen="" frameborder="0" scrolling="no"></iframe></div>'
                 )
                 iframe_template_rendered = await iframe_template.render_async(host_address=self.host_address, iframe_id=paragraph["iframe"]["mediaResource"]["id"])
                 out_paragraphs.append(iframe_template_rendered)
