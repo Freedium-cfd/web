@@ -15,7 +15,7 @@ from .exceptions import InvalidMediumPostID, InvalidMediumPostURL, InvalidURL, M
 from .medium_api import query_post_by_id
 from .models.html_result import HtmlResult
 from .time import convert_datetime_to_human_readable
-from .utils import get_medium_post_id_by_url, getting_percontage_of_match, is_valid_medium_post_id_hexadecimal, is_valid_medium_url, is_valid_url, sanitize_url
+from .utils import resolve_medium_url, getting_percontage_of_match, is_valid_medium_post_id_hexadecimal, is_valid_medium_url, is_valid_url, sanitize_url
 
 
 class MediumParser:
@@ -34,7 +34,7 @@ class MediumParser:
         if is_valid_url(url) and not await is_valid_medium_url(sanitized_url, timeout):
             raise InvalidURL(f"Invalid Medium URL: {sanitized_url}")
 
-        post_id = await get_medium_post_id_by_url(sanitized_url, timeout)
+        post_id = await resolve_medium_url(sanitized_url, timeout)
         if not post_id:
             raise InvalidMediumPostURL(f"Could not find Medium post ID for URL: {sanitized_url}")
 

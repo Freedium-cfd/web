@@ -111,10 +111,10 @@ async def resolve_medium_short_link_v1(short_url_id: str, timeout: int = 5) -> s
             allow_redirects=False,
         )
         post_url = request.headers["Location"]
-    return await get_medium_post_id_by_url(post_url)
+    return await resolve_medium_url(post_url)
 
 
-async def get_medium_post_id_by_url(url: str, timeout: int = 5) -> str:
+async def resolve_medium_url(url: str, timeout: int = 5) -> str:
     parsed_url = urlparse(url)
     if parsed_url.path.startswith("/p/"):
         post_id = parsed_url.path.rsplit("/p/")[1]
@@ -122,34 +122,34 @@ async def get_medium_post_id_by_url(url: str, timeout: int = 5) -> str:
         parsed_query = parse_qs(parsed_url.query)
         if parsed_query.get("u") and len(parsed_query["u"]) == 1:
             post_url = parsed_query["u"][0]
-            return await get_medium_post_id_by_url(post_url)
+            return await resolve_medium_url(post_url)
         return False
     elif parsed_url.netloc == "webcache.googleusercontent.com" and parsed_url.path.startswith("/search"):
         parsed_query = parse_qs(parsed_url.query)
         if parsed_query.get("q") and len(parsed_query["q"]) == 1:
             post_url = parsed_query["q"][0].removeprefix("cache:")
-            return await get_medium_post_id_by_url(post_url)
+            return await resolve_medium_url(post_url)
         return False
     elif parsed_url.netloc == "www.google.com" and parsed_url.path.startswith("/url"):
         parsed_query = parse_qs(parsed_url.query)
         if parsed_query.get("url") and len(parsed_query["url"]) == 1:
             post_url = parsed_query["url"][0]
-            return await get_medium_post_id_by_url(post_url)
+            return await resolve_medium_url(post_url)
         elif parsed_query.get("q") and len(parsed_query["q"]) == 1:
             post_url = parsed_query["q"][0]
-            return await get_medium_post_id_by_url(post_url)
+            return await resolve_medium_url(post_url)
         return False
     elif parsed_url.netloc == "12ft.io":
         parsed_query = parse_qs(parsed_url.query)
         if parsed_query.get("q") and len(parsed_query["q"]) == 1:
             post_url = parsed_query["q"][0]
-            return await get_medium_post_id_by_url(post_url)
+            return await resolve_medium_url(post_url)
         return False
     elif parsed_url.path.startswith("/m/global-identity-2"):
         parsed_query = parse_qs(parsed_url.query)
         if parsed_query.get("redirectUrl") and len(parsed_query["redirectUrl"]) == 1:
             post_url = parsed_query["redirectUrl"][0]
-            return await get_medium_post_id_by_url(post_url)
+            return await resolve_medium_url(post_url)
         return False
     elif parsed_url.netloc == "link.medium.com":
         short_url_id = parsed_url.path.removeprefix("/")
@@ -164,7 +164,7 @@ async def get_medium_post_id_by_url(url: str, timeout: int = 5) -> str:
     return post_id
 
 
-async def get_medium_post_id_by_url_old(url: str, timeout: int = 5) -> str:
+async def resolve_medium_url_old(url: str, timeout: int = 5) -> str:
     async with aiohttp.ClientSession() as session:
         retry_client = RetryClient(client_session=session, raise_for_status=False, retry_options=retry_options)
         request = await retry_client.get(url, timeout=timeout)
