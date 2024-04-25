@@ -17,8 +17,8 @@ from bs4 import BeautifulSoup
 
 VALID_ID_CHARS = set(string.ascii_letters + string.digits)
 
-KNOWN_MEDIUM_NETLOC = ("javascript.plainenglish.io", "python.plainenglish.io", "levelup.gitconnected.com", "betterhumans.coach.me")
-KNOWN_MEDIUM_DOMAINS = ("medium.com", "uxplanet.org", "towardsdatascience.com", "itnext.io", "eand.co", "betterprogramming.pub", "curiouse.co", "betterhumans.pub", "uxdesign.cc", "thebolditalic.com", "arcdigital.media", "codeburst.io", "psiloveyou.xyz", "writingcooperative.com", "entrepreneurshandbook.co", "prototypr.io", "theascent.pub")
+KNOWN_MEDIUM_NETLOC = ("javascript.plainenglish.io", "python.plainenglish.io", "blog.stackademic.com", "ai.gopubby.com", "blog.devops.dev", "levelup.gitconnected.com", "betterhumans.coach.me", "ai.plainenglish.io")
+KNOWN_MEDIUM_DOMAINS = ("medium.com", "uxplanet.org", "towardsdatascience.com", "thetaoist.online", "devopsquare.com", "bettermarketing.pub", "itnext.io", "eand.co", "betterprogramming.pub", "curiouse.co", "betterhumans.pub", "uxdesign.cc", "thebolditalic.com", "arcdigital.media", "codeburst.io", "psiloveyou.xyz", "writingcooperative.com", "entrepreneurshandbook.co", "prototypr.io", "theascent.pub")
 NOT_MEDIUM_DOMAINS = ("github.com", "yandex.ru", "yandex.kz", "youtube.com", "nytimes.com", "wsj.com", "reddit.com", "elpais.com", "forbes.com", "bloomberg.com")
 
 
