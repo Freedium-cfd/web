@@ -2,7 +2,7 @@
     {% for post in post_list %}
         <div class="p-6 bg-white dark:bg-gray-600 rounded-xl">
             <a class="group post_view" post_id="{{ post.post_id }}">
-                <div class="max-h-72 items-center d-flex overflow-hidden">
+                <div class="max-h-60 min-h-60 m-auto overflow-hidden flex items-center justify-center">
                     {% if post.preview_image_id %}
                         <img data-src="https://miro.medium.com/v2/resize:fit:700/{{ post.preview_image_id }}"
                              class="lazy w-full h-auto hover:scale-105 transition transition-all duration-200 ease-in-out">
