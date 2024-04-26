@@ -23,7 +23,15 @@ async def route_processing(path: str, request: Request):
 
     logger.trace(f"no_cache: {db_cache}, no_redis: {redis}")
 
-    path = request.url.path.removeprefix("/")
+    path = path.removeprefix("/")
+    url = str(request.url)
+
+    logger.debug(f"Path: {path}, URL: {url}")
+    logger.trace(request.url.netloc)
+    logger.trace(request.url.scheme)
+
+    url = url.removeprefix(f"{request.url.scheme}://{request.url.netloc}/")
+    logger.trace(url)
 
     if not db_cache or not redis:
         key_data = request.headers.get("ADMIN_SECRET_KEY")
@@ -38,7 +46,7 @@ async def route_processing(path: str, request: Request):
         iframe_id = path.removeprefix("render_iframe/")
         return await iframe_proxy(iframe_id)
 
-    return await render_medium_post_link(path, db_cache, redis)
+    return await render_medium_post_link(url, db_cache, redis)
 
 
 @trace
