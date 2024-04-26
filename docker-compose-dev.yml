@@ -31,7 +31,27 @@ services:
       dockerfile: ./Dockerfile
     command: python3 -m server server
     volumes:
+      # - ./.env:/app/.env
+      # - ./server/user_data/logs:/app/server/user_data/logs
       - .:/app
+    develop:
+      watch:
+        - action: rebuild
+          path: ./server
+          target: /app/server
+        - action: rebuild
+          path: ./core
+          target: /app/core
+        - action: rebuild
+          path: ./rl_string_helper
+          target: /app/rl_string_helper
+        - action: rebuild
+          path: ./database-lib
+          target: /app/database-lib
+        - action: rebuild
+          path: "**/requirements.txt"
+        - action: rebuild
+          path: "**/requirements-fast.txt"
     expose:
       - 7080
     networks:

@@ -3,7 +3,7 @@ from datetime import datetime
 
 from server import maintenance_mode
 from server.utils.notify import send_message
-from medium_parser import cache as medium_cache
+from server import medium_cache
 
 from time import sleep
 from loguru import logger

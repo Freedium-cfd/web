@@ -1,4 +1,5 @@
 import datetime as dt
+from loguru import logger
 import pickledb
 from multiprocessing import Value
 import logging
@@ -9,9 +10,14 @@ import redis.asyncio as redis
 from xkcdpass import xkcd_password as xp
 
 from server.utils.loguru_handler import InterceptHandler
+from database_lib import SQLiteCacheBackend
+
+medium_cache = SQLiteCacheBackend('medium_db_cache.sqlite')
+medium_cache.init_db()
+medium_cache.enable_zstd()
+logger.debug(f"Database length: {medium_cache.all_length()}")
 
 redis_storage = redis.Redis(host="dragonfly", port=6379, db=0)
-
 
 logging.basicConfig(handlers=[InterceptHandler()], level=0, force=True)
 

@@ -9,6 +9,7 @@ RUN apt-get update && \
 COPY ./requirements.txt ./
 COPY ./requirements-fast.txt ./
 
+COPY ./server ./server
 COPY ./core ./core
 COPY ./rl_string_helper ./rl_string_helper
 COPY ./database-lib ./database-lib

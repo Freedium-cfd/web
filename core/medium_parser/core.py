@@ -1,44 +1,63 @@
 import asyncio
 import math
 import textwrap
+import typing
 import urllib.parse
+from contextlib import suppress
 
 import jinja2
 import tld
 from loguru import logger
-from contextlib import suppress
 
-from rl_string_helper import RLStringHelper, parse_markups, split_overlapping_ranges
+from rl_string_helper import (RLStringHelper, parse_markups,
+                              split_overlapping_ranges)
 
-from . import cache, jinja_env
-from .exceptions import InvalidMediumPostID, InvalidMediumPostURL, InvalidURL, MediumParserException, MediumPostQueryError
+from . import jinja_env
+from .exceptions import (InvalidMediumPostID, InvalidMediumPostURL, InvalidURL,
+                         MediumParserException, MediumPostQueryError)
 from .medium_api import query_post_by_id
 from .models.html_result import HtmlResult
 from .time import convert_datetime_to_human_readable
-from .utils import resolve_medium_url, getting_percontage_of_match, is_valid_medium_post_id_hexadecimal, is_valid_medium_url, is_valid_url, sanitize_url
+from .utils import (correct_url, getting_percontage_of_match,
+                    is_valid_medium_post_id_hexadecimal, is_valid_medium_url,
+                    is_valid_url, resolve_medium_url)
 
+if typing.TYPE_CHECKING:
+    from database_lib import SQLiteCacheBackend
 
 class MediumParser:
-    __slots__ = ("__post_id", "post_data", "jinja", "timeout", "host_address", "auth_cookies")
+    __slots__ = ("__post_id", "auth_cookies", "cache", "host_address", "jinja", "post_data", "timeout")
 
-    def __init__(self, post_id: str, timeout: int, host_address: str, auth_cookies: str = None):
+    def __init__(self, post_id: str, cache: "SQLiteCacheBackend", timeout: int, host_address: str, auth_cookies: str = None):
         self.timeout = timeout
+        self.cache = cache
         self.host_address = host_address
         self.post_id = post_id
         self.post_data = None
         self.auth_cookies = auth_cookies
 
     @classmethod
-    async def from_url(cls, url: str, timeout: int, host_address: str, auth_cookies: str = None) -> "MediumParser":
-        sanitized_url = sanitize_url(url)
-        if is_valid_url(url) and not await is_valid_medium_url(sanitized_url, timeout):
+    async def from_unknown(cls, unknown: str, cache: "SQLiteCacheBackend", timeout: int, host_address: str, auth_cookies: str = None) -> "MediumParser":
+        logger.debug(f"We got some unknown data: {unknown=}, with {cache=}, {timeout=}, {host_address=}, {auth_cookies=}. Trying resolve them...///")
+
+        if is_valid_medium_post_id_hexadecimal(unknown):
+            logger.debug("Seems like it's valid post_id")
+            return cls(unknown, cache=cache, timeout=timeout, host_address=host_address, auth_cookies=auth_cookies)
+
+        logger.debug("...maybe it's URL. Let's checkout...")
+        return await cls.from_url(unknown, cache=cache, timeout=timeout, host_address=host_address, auth_cookies=auth_cookies)
+
+    @classmethod
+    async def from_url(cls, url: str, cache: "SQLiteCacheBackend", timeout: int, host_address: str, auth_cookies: str = None) -> "MediumParser":
+        sanitized_url = correct_url(url)
+        if not is_valid_url(url) or not await is_valid_medium_url(sanitized_url):
             raise InvalidURL(f"Invalid Medium URL: {sanitized_url}")
 
         post_id = await resolve_medium_url(sanitized_url, timeout)
         if not post_id:
             raise InvalidMediumPostURL(f"Could not find Medium post ID for URL: {sanitized_url}")
 
-        return cls(post_id, timeout, host_address, auth_cookies)
+        return cls(post_id, cache=cache, timeout=timeout, host_address=host_address, auth_cookies=auth_cookies)
 
     @property
     def post_id(self):
@@ -59,14 +78,14 @@ class MediumParser:
         if not post_id:
             post_id = self.post_id
 
-        cache.delete(post_id)
+        self.cache.delete(post_id)
 
         return True
 
     async def get_post_data_from_cache(self):
         async def _get_from_cache():
             logger.debug("Using cache backend")
-            post_data = cache.pull(self.post_id)
+            post_data = self.cache.pull(self.post_id)
             if post_data:
                 logger.debug("post query was found on cache")
                 return post_data.json()
@@ -80,11 +99,11 @@ class MediumParser:
 
     async def get_post_data_from_api(self):
         async def _get_from_api():
-            logger.debug("Using API backend")
+            logger.debug("Using API to gather post data")
             try:
                 return await query_post_by_id(self.post_id, self.timeout, self.auth_cookies)
             except Exception as ex:
-                logger.debug("Error while querying post by Medium API")
+                logger.debug("Error while querying post data from Medium API")
                 logger.exception(ex)
                 return None
 
@@ -127,11 +146,11 @@ class MediumParser:
                     reason = "Post data missing 'data.post' key"
 
                 if reason is None:
+                    logger.debug("Post data was successfully queried")
                     break
             except Exception as e:
                 logger.error(f"Attempt {attempt + 1} failed with exception: {e}")
-            finally:
-                logger.info(f"Retrying in {2 ** attempt} seconds...")
+                logger.debug(f"Retrying in {2 ** attempt} seconds...")
                 await asyncio.sleep(2**attempt)
                 attempt += 1
         else:
@@ -141,9 +160,11 @@ class MediumParser:
             raise MediumPostQueryError(f"Could not query post by ID from API: {self.post_id}. Reason: {reason}")
 
         if not is_cache_used:
-            cache.push(self.post_id, post_data)
+            logger.debug("Pushing post data to cache")
+            self.cache.push(self.post_id, post_data)
 
         self.post_data = post_data
+        logger.trace(f"Query: done")
         return post_data
 
     async def _parse_and_render_content_html_post(self, content: dict, title: str, subtitle: str, preview_image_id: str, highlights: list, tags: list) -> tuple[list, str, str]:
@@ -179,7 +200,11 @@ class MediumParser:
             if current_pos in range(4):
                 if paragraph["type"] in ["H3", "H4", "H2"]:
                     if getting_percontage_of_match(paragraph["text"], title) > 80:
-                        logger.trace("Title was detected, ignore...")
+                        if title.endswith("…"):
+                            logger.trace("Title was detected, replace...")
+                            title = paragraph["text"]
+                        else:
+                            logger.trace("Title was detected, ignore...")
                         current_pos += 1
                         continue
                 if paragraph["type"] in ["H4"]:
@@ -366,7 +391,7 @@ class MediumParser:
                 logger.trace(pq_template_rendered)
                 out_paragraphs.append(pq_template_rendered)
             elif paragraph["type"] == "MIXTAPE_EMBED":
-                # TODO: redirect all Medium embeding artickles to Fredium 
+                # TODO: redirect all Medium embeding articles to Fredium
                 embed_template = jinja_env.from_string(
                     """
 <div class="border border-gray-300 p-2 mt-7 items-center overflow-hidden"><a rel="noopener follow" href="{{ url }}" target="_blank"> <div class="flex flex-row justify-between p-2 overflow-hidden"><div class="flex flex-col justify-center p-2"><h2 class="text-black dark:text-gray-100 text-base font-bold">{{ embed_title }}</h2><div class="mt-2 block"><h3 class="text-grey-darker text-sm">{{ embed_description }}</h3></div><div class="mt-5" style=""><p class="text-grey-darker text-xs">{{ embed_site }}</p></div></div><div class="relative flex flew-row h-40 w-60"><div class="lazy absolute inset-0 bg-cover bg-center" data-bg="https://miro.medium.com/v2/resize:fit:320/{{ paragraph.mixtapeMetadata.thumbnailImageId }}"></div></div></div> </a></div>
@@ -389,14 +414,23 @@ class MediumParser:
                 title_range = paragraph["markups"][1]
                 description_range = paragraph["markups"][2]
 
+                logger.trace(f"{title_range=}")
+                logger.trace(f"{description_range=}")
+
                 embed_title = text_raw[title_range["start"] : title_range["end"]]
                 embed_description = text_raw[description_range["start"] : description_range["end"]]
+
+                logger.trace(f"{embed_title=}")
+                logger.trace(f"{embed_description=}")
+
                 try:
                     embed_site = tld.get_fld(url)
                 except Exception as ex:
                     logger.warning(f"Can't get embed site fld: {ex}. Using custom logic...")
                     parsed_url = urllib.parse.urlparse(url)
                     embed_site = parsed_url.hostname
+
+                logger.trace(f"{embed_site=}")
 
                 embed_template_rendered = await embed_template.render_async(paragraph=paragraph, url=url, embed_title=embed_title, embed_description=embed_description, embed_site=embed_site)
                 out_paragraphs.append(embed_template_rendered)

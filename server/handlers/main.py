@@ -1,14 +1,14 @@
-from html5lib.html5parser import parse
-from html5lib import serialize
-
 from fastapi import Request
 from fastapi.responses import HTMLResponse, JSONResponse
+from html5lib import serialize
+from html5lib.html5parser import parse
+from loguru import logger
 
 from server import config
-from server.services.jinja import base_template, main_template
+from server.handlers.misc import delete_from_cache, report_problem
 from server.handlers.post import render_medium_post_link, render_postleter
-from server.handlers.reverse_proxy import miro_proxy, iframe_proxy
-from server.handlers.misc import report_problem, delete_from_cache
+from server.handlers.reverse_proxy import iframe_proxy, miro_proxy
+from server.services.jinja import base_template, main_template
 from server.utils.logger_trace import trace
 
 
@@ -16,31 +16,29 @@ from server.utils.logger_trace import trace
 async def route_processing(path: str, request: Request):
     if not path:
         return await main_page()
-    if request.scope.get("query_string"):
-        path = request.url.path + "?" + request.scope["query_string"].decode()
-    else:
-        path = request.url.path
-    path = path.removeprefix("/")
 
-    if path.startswith("render-no-cache/"):
+    query_params = request.query_params
+    redis = not "no-redis" in query_params
+    db_cache = not "no-db-cache" in query_params
+
+    logger.trace(f"no_cache: {db_cache}, no_redis: {redis}")
+
+    path = request.url.path.removeprefix("/")
+
+    if not db_cache or not redis:
         key_data = request.headers.get("ADMIN_SECRET_KEY")
 
         if key_data != config.ADMIN_SECRET_KEY:
             return JSONResponse({"message": f"Wrong secret key: {key_data}"}, status_code=403)
 
-        path = path.removeprefix("render-no-cache/")
-        if path.startswith("/no-redis/"):
-            path = path.removeprefix("/no-redis/")
-            return await render_medium_post_link(path, True, False)
-        return await render_medium_post_link(path, False)
-    elif path.startswith("@miro/"):
+    if path.startswith("@miro/"):
         miro_data = path.removeprefix("@miro/")
         return await miro_proxy(miro_data)
     elif path.startswith("render_iframe/"):
         iframe_id = path.removeprefix("render_iframe/")
         return await iframe_proxy(iframe_id)
 
-    return await render_medium_post_link(path)
+    return await render_medium_post_link(path, db_cache, redis)
 
 
 @trace
