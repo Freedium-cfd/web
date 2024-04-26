@@ -4,6 +4,7 @@ import pickle
 from fastapi.responses import HTMLResponse
 from html5lib import serialize
 from html5lib.html5parser import parse
+from async_lru import alru_cache
 from loguru import logger
 from medium_parser import medium_parser_exceptions
 from medium_parser.core import MediumParser
@@ -46,7 +47,7 @@ async def render_postleter(limit: int = 30, as_html: bool = False):
     return HTMLResponse(postleter_template_rendered)
 
 
-@trace
+@alru_cache(maxsize=20)
 async def render_medium_post_link(path: str, use_cache: bool = True, use_redis: bool = True):
     redis_available = await safe_check_redis_connection(redis_storage)
     logger.debug("Redis available: {}", redis_available)

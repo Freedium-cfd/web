@@ -81,6 +81,7 @@ NOT_MEDIUM_DOMAINS = (
     "bloomberg.com",
     "www.lesechos.fr",
     "www.otz.de",
+    "www.businessinsider.com",
     "buff.ly",
     "www.delish.com",
     "www.economist.com",
@@ -191,7 +192,12 @@ def unplaginate_url(url):
 
 
 @lru_cache(maxsize=100)
-def is_valid_medium_post_id_hexadecimal(hex_string: str) -> bool:
+def is_has_valid_medium_post_id(hex_string: str) -> bool:
+    return extract_hex_string(hex_string) is not None
+
+
+@lru_cache(maxsize=100)
+def basic_hex_check(hex_string: str) -> bool:
     # Check if the string is a valid hexadecimal string
     for char in hex_string:
         if char not in VALID_ID_CHARS:
@@ -210,6 +216,16 @@ def is_valid_medium_post_id_hexadecimal(hex_string: str) -> bool:
         return False
 
     return True
+
+
+@lru_cache(maxsize=100)
+def extract_hex_string(input_string: str) -> str:
+    # First try to find a hexadecimal string preceded by a '-'
+    match = re.search(r'-(\b[a-fA-F0-9]{8,12}\b)', input_string)
+    if not match:
+        # If no match, try to find a hexadecimal string without the '-'
+        match = re.search(r'(\b[a-fA-F0-9]{8,12}\b)', input_string)
+    return match.group(1) if match else None
 
 
 async def resolve_medium_short_link(short_url_id: str, timeout: int = 5) -> str:
@@ -307,7 +323,7 @@ async def resolve_medium_url(url: str, timeout: int = 5) -> str:
         post_url = parsed_url.path.split("/")[-1]
         post_id = post_url.split("-")[-1]
 
-    if not is_valid_medium_post_id_hexadecimal(post_id):
+    if not is_has_valid_medium_post_id(post_id):
         logger.warning(f"...but hoops, that's invalid post_id: {post_id}")
         return False
 

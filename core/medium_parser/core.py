@@ -19,8 +19,8 @@ from .medium_api import query_post_by_id
 from .models.html_result import HtmlResult
 from .time import convert_datetime_to_human_readable
 from .utils import (correct_url, getting_percontage_of_match,
-                    is_valid_medium_post_id_hexadecimal, is_valid_medium_url,
-                    is_valid_url, resolve_medium_url)
+                    is_has_valid_medium_post_id, is_valid_medium_url,
+                    is_valid_url, resolve_medium_url, extract_hex_string)
 
 if typing.TYPE_CHECKING:
     from database_lib import SQLiteCacheBackend
@@ -40,12 +40,13 @@ class MediumParser:
     async def from_unknown(cls, unknown: str, cache: "SQLiteCacheBackend", timeout: int, host_address: str, auth_cookies: str = None) -> "MediumParser":
         logger.debug(f"We got some unknown data: {unknown=}, with {cache=}, {timeout=}, {host_address=}, {auth_cookies=}. Trying resolve them...///")
 
-        if is_valid_medium_post_id_hexadecimal(unknown):
+        if is_has_valid_medium_post_id(unknown):
             logger.debug("Seems like it's valid post_id")
             return cls(unknown, cache=cache, timeout=timeout, host_address=host_address, auth_cookies=auth_cookies)
 
         logger.debug("...maybe it's URL. Let's checkout...")
         return await cls.from_url(unknown, cache=cache, timeout=timeout, host_address=host_address, auth_cookies=auth_cookies)
+
 
     @classmethod
     async def from_url(cls, url: str, cache: "SQLiteCacheBackend", timeout: int, host_address: str, auth_cookies: str = None) -> "MediumParser":
@@ -65,10 +66,10 @@ class MediumParser:
 
     @post_id.setter
     def post_id(self, value):
-        if not is_valid_medium_post_id_hexadecimal(value):
+        if not is_has_valid_medium_post_id(value):
             raise InvalidMediumPostID(f"Invalid medium post ID: {value}")
 
-        self.__post_id = value
+        self.__post_id = extract_hex_string(value)
 
     @post_id.getter
     def post_id(self):
@@ -137,13 +138,13 @@ class MediumParser:
                 if not post_data:
                     reason = "No post data returned"
                 elif not isinstance(post_data, dict):
-                    reason = "Post data is not a dictionary"
+                    reason = f"Post data is not a dictionary: {post_data=}"
                 elif post_data.get("error"):
-                    reason = "Post data contains an error"
+                    reason = f"Post data contains an error: {post_data=}"
                 elif not post_data.get("data"):
-                    reason = "Post data missing 'data' key"
+                    reason = f"Post data missing 'data' key: {post_data=}"
                 elif not post_data.get("data").get("post"):
-                    reason = "Post data missing 'data.post' key"
+                    reason = f"Post data missing 'data.post' key: {post_data=}"
 
                 if reason is None:
                     logger.debug("Post data was successfully queried")
