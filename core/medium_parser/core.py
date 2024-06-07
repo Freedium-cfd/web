@@ -459,7 +459,7 @@ class MediumParser:
             return result
 
     async def generate_metadata(self, as_dict: bool = False) -> tuple:
-        title = RLStringHelper(self.post_data["data"]["post"]["title"]).get_text()  # quote_html=False
+        title = RLStringHelper(self.post_data["data"]["post"]["title"], ["minimal"]).get_text()
         subtitle = RLStringHelper(self.post_data["data"]["post"]["previewContent"]["subtitle"]).get_text()
         description = RLStringHelper(textwrap.shorten(subtitle, width=100, placeholder="...")).get_text()
         preview_image_id = self.post_data["data"]["post"]["previewImage"]["id"]
