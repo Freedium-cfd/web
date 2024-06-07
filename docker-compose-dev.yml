@@ -34,6 +34,7 @@ services:
       # - ./.env:/app/.env
       # - ./server/user_data/logs:/app/server/user_data/logs
       - .:/app
+      - ./core/medium_parser/:/app/medium_parser
     develop:
       watch:
         - action: rebuild
@@ -65,23 +66,23 @@ services:
     restart: always
     mem_limit: 2g
 
-  dragonfly:
-    image: 'docker.dragonflydb.io/dragonflydb/dragonfly'
-    ulimits:
-      memlock: -1
-    expose:
-      - 6379
-    networks:
-      - web_network
-    volumes:
-      - dragonflydata:/data
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 30s
-      start_period: 20s
-      timeout: 10s
-      retries: 3
-    restart: always
+  # dragonfly:
+  #   image: 'docker.dragonflydb.io/dragonflydb/dragonfly'
+  #   ulimits:
+  #     memlock: -1
+  #   expose:
+  #     - 6379
+  #   networks:
+  #     - web_network
+  #   volumes:
+  #     - dragonflydata:/data
+  #   healthcheck:
+  #     test: ["CMD", "redis-cli", "ping"]
+  #     interval: 30s
+  #     start_period: 20s
+  #     timeout: 10s
+  #     retries: 3
+  #   restart: always
 
   autoheal:
     restart: always

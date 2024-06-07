@@ -49,7 +49,7 @@ KNOWN_MEDIUM_DOMAINS = (
     "towardsdatascience.com",
     "thetaoist.online",
     "devopsquare.com",
-    "www.laceydearie.com",
+    "laceydearie.com",
     "bettermarketing.pub",
     "itnext.io",
     "eand.co",
@@ -72,23 +72,20 @@ NOT_MEDIUM_DOMAINS = (
     "yandex.ru",
     "yandex.kz",
     "youtube.com",
-    "www.nytimes.com",
     "nytimes.com",
     "wsj.com",
-    "www.forbes.com",
-    "www.wsj.com",
     "reddit.com",
     "elpais.com",
     "forbes.com",
     "bloomberg.com",
-    "www.lesechos.fr",
-    "www.otz.de",
-    "www.businessinsider.com",
+    "lesechos.fr",
+    "otz.de",
+    "businessinsider.com",
     "buff.ly",
-    "www.delish.com",
-    "www.economist.com",
-    "www.wired.com",
-    "www.rollingstone.com",
+    "delish.com",
+    "economist.com",
+    "wired.com",
+    "rollingstone.com",
 )
 
 
@@ -138,7 +135,7 @@ def get_unix_ms() -> int:
     return milliseconds_since_epoch
 
 
-def unquerify_url(url):
+def unquerify_url(url: str) -> str:
     """
     Sanitizes a URL by removing all query parameters.
 
@@ -155,6 +152,13 @@ def unquerify_url(url):
         parsed_url = parsed_url._replace(query="")
     sanitized_url = urllib.parse.urlunparse(parsed_url)
     return sanitized_url.removesuffix("/")
+
+
+@lru_cache(maxsize=500)
+def un_wwwify(url: str):
+    if url.startswith("www."):
+        return url.removeprefix("www.")
+    return url
 
 
 def correct_url(url: str) -> str:
@@ -247,12 +251,13 @@ async def resolve_medium_short_link(short_url_id: str, timeout: int = 5) -> str:
 async def resolve_medium_url(url: str, timeout: int = 5) -> str:
     logger.debug(f"Trying resolve {url=}, with {timeout=}")
     parsed_url = urlparse(url)
+    parsed_netloc = un_wwwify(parsed_url.netloc)
 
     if parsed_url.path.startswith("/p/"):
         logger.debug("URL is Medium 'mobile' link")
         post_id = parsed_url.path.rsplit("/p/")[1]
 
-    elif parsed_url.netloc == "l.facebook.com" and parsed_url.path.startswith("/l.php"):
+    elif parsed_netloc == "l.facebook.com" and parsed_url.path.startswith("/l.php"):
         logger.debug("URL seems like is Facebook redirect (tracking) link")
 
         parsed_query = parse_qs(parsed_url.query)
@@ -263,7 +268,7 @@ async def resolve_medium_url(url: str, timeout: int = 5) -> str:
         logger.debug("...but we get fucked up...")
         return False
 
-    elif parsed_url.netloc == "webcache.googleusercontent.com" and parsed_url.path.startswith("/search"):
+    elif parsed_netloc == "webcache.googleusercontent.com" and parsed_url.path.startswith("/search"):
         logger.debug("URL seems like is Google Web Archive page link")
 
         parsed_query = parse_qs(parsed_url.query)
@@ -274,7 +279,7 @@ async def resolve_medium_url(url: str, timeout: int = 5) -> str:
         logger.debug("...but we get fucked up...")
         return False
 
-    elif parsed_url.netloc == "www.google.com" and parsed_url.path.startswith("/url"):
+    elif parsed_netloc == "google.com" and parsed_url.path.startswith("/url"):
         logger.debug("URL seems like is Google redirect (tracking) link")
 
         parsed_query = parse_qs(parsed_url.query)
@@ -290,7 +295,7 @@ async def resolve_medium_url(url: str, timeout: int = 5) -> str:
         logger.debug("...but we get fucked up...")
         return False
 
-    elif parsed_url.netloc == "12ft.io":
+    elif parsed_netloc == "12ft.io":
         logger.debug("URL seems like is from our partner named 12ft.io")
 
         parsed_query = parse_qs(parsed_url.query)
@@ -314,7 +319,7 @@ async def resolve_medium_url(url: str, timeout: int = 5) -> str:
         logger.debug("...but we get fucked up...")
         return False
 
-    elif parsed_url.netloc == "link.medium.com":
+    elif parsed_netloc == "link.medium.com":
         logger.debug("URL seems like is Medium short (SHORT) redirect (tracking) link. Make resolve them...")
         short_url_id = parsed_url.path.removeprefix("/")
         post_url = await resolve_medium_short_link(short_url_id, timeout)
@@ -337,13 +342,16 @@ async def resolve_medium_url_old(url: str, timeout: int = 5) -> str:
         retry_client = RetryClient(client_session=session, raise_for_status=False, retry_options=retry_options)
         request = await retry_client.get(url, timeout=timeout)
         response = await request.text()
+
     soup = BeautifulSoup(response, "html.parser")
     type_meta_tag = soup.head.find("meta", property="og:type")
     if not type_meta_tag or type_meta_tag.get("content") != "article":
         return False
+
     url_meta_tag = soup.head.find("meta", property="al:android:url")
     if not url_meta_tag or not url_meta_tag.get("content"):
         return False
+
     parsed_url = urlparse(url_meta_tag["content"])
     path = parsed_url.path.strip("/")
     parsed_value = path.split("/")[-1]
@@ -394,16 +402,17 @@ async def is_valid_medium_url(url: str) -> bool:
     """
     domain = get_fld(url)
     parsed_url = urlparse(url)
+    domain_netloc = un_wwwify(parsed_url.netloc)
 
     # TODO: http://freedium.cfd/https://www.google.com.vn/url?sa=i&url=https%3A%2F%2Fmedium.com%2F%40dugguRK%2Fabout-android-hardware-abstraction-layer-hal-5d191dafeb2c&psig=AOvVaw17KP0U_haPMmhAByeMTxSg&ust=1711354113283000&source=images&cd=vfe&opi=89978449&ved=0CBQQjhxqFwoTCMCM_oG5jIUDFQAAAAAdAAAAABAa
 
     if domain in ["12ft.io", "google.com", "facebook.com", "googleusercontent.com"]:
         return True
 
-    if domain in NOT_MEDIUM_DOMAINS or parsed_url.netloc in NOT_MEDIUM_DOMAINS:
+    if domain in NOT_MEDIUM_DOMAINS or domain_netloc in NOT_MEDIUM_DOMAINS:
         raise exceptions.NotValidMediumURL("100% not valid Medium URL")
 
-    if domain in KNOWN_MEDIUM_DOMAINS or parsed_url.netloc in KNOWN_MEDIUM_CUSTOM_DOMAINS:
+    if domain in KNOWN_MEDIUM_DOMAINS or domain_netloc in KNOWN_MEDIUM_CUSTOM_DOMAINS:
         return True
 
     logger.warning(f"url '{url}' wasn't detected in known Medium domains")
@@ -411,7 +420,7 @@ async def is_valid_medium_url(url: str) -> bool:
     # XXX: Unfourtunately, for now we don't know ALL Medium's domains, so we need resolve links
     resolve_result = bool(await resolve_medium_url(url))
 
-    # send_message(f"We found that {domain=}, {parsed_url.netloc=} is not listed in out known Medium database.\nURL: {url}")
+    # send_message(f"We found that {domain=}, {domain_netloc=} is not listed in out known Medium database.\nURL: {url}")
 
     return resolve_result
 

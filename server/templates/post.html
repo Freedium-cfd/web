@@ -90,9 +90,9 @@ document.addEventListener('DOMContentLoaded', (event) => {
   hljs.highlightAll();
 
   document.querySelectorAll('pre code').forEach((el) => {
-         code = el.textContent;  
-          el = el.parentElement;
-         el.innerHTML = '<button class="hljs-copy p-1 bg-gray-300 dark:bg-black">Copy</button>' + el.innerHTML; // append copy button
+        code = el.textContent;
+        el = el.parentElement;
+        el.innerHTML = '<button class="hljs-copy p-1 bg-gray-300 dark:bg-zinc-800">Copy</button>' + el.innerHTML; // append copy button
         el.getElementsByClassName('hljs-copy')[0].contentCopy = code;
          el.getElementsByClassName('hljs-copy')[0].addEventListener("click", function () {
              this.innerText = 'Copying..';

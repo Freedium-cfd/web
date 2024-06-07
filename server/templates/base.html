@@ -8,8 +8,9 @@
         {% if creator %}<meta name="author" content="{{ creator.name }}" />{% endif %}
         <meta name="description" content="{{ description or 'Your paywall breakthrough for Medium!' }}" />
         <meta name="keywords" content="medium, paywall, medium.com, paywall breakthrough" />
+
         <script src="https://cdn.tailwindcss.com"></script>
-        <script src="https://cdn.tailwindcss.com?plugins=forms,typography,aspect-ratio"></script>
+        <!--<script src="https://cdn.tailwindcss.com?plugins=forms,typography,aspect-ratio"></script>-->
         <link href="https://glyph.medium.com/css/unbound.css" rel="stylesheet">
         <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
         <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
@@ -18,77 +19,13 @@
         <link rel="mask-icon" href="/safari-pinned-tab.svg" color="#00aba9">
         <meta name="msapplication-TileColor" content="#00aba9">
         <meta name="theme-color" content="#ffffff">
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
-        <link rel="stylesheet" href="https://unpkg.com/@highlightjs/cdn-assets@11.8.0/styles/atom-one-dark.min.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/default.min.css">
+        <script src="https://cdn.jsdelivr.net/npm/@iframe-resizer/parent"></script>
         <script src="https://cdn.jsdelivr.net/npm/vanilla-lazyload@17.8.4/dist/lazyload.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/lightense-images@1.0.17/dist/lightense.min.js"></script>
-        <script>
-            if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-  document.documentElement.classList.add('dark');
-  //document.getElementById('darkIcon').classList.remove('hidden');
-  //document.getElementById('lightIcon').classList.add('hidden')
-} else {
-  document.documentElement.classList.remove('dark')
-  //document.getElementById('lightIcon').classList.remove('hidden');
-  //document.getElementById('darkIcon').classList.add('hidden');
-}
-        </script>
-        <style>
-          .overflow-hidden {
-              overflow: hidden !important;
-          }
 
-        .shadow-lf {
-            box-shadow: inset 3px 0 0 0 rgb(209 207 239 / var(--tw-bg-opacity));
-        }
-        </style>
-        <style>
-    .notification-container {
-      display: none;
-      position: fixed;
-      top: 20px;
-      padding: 2%;
-      max-height: 95vh; /* Set a maximum height for the container */
-    overflow-y: auto; /* Enable vertical scrolling */
-    }
-
-    .notification-card {
-      background-color: #fff;
-      border: 1px solid #ccc;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-      padding: 10px 20px;
-      border-radius: 5px;
-      text-align: center;
-    }
-        </style>
-        <script>
-    window._resizeIframe = function (iframeData)
-    {
-            iframeData.iframe.height = iframeData.height
-            _resizeIframeWidth()
-    }
-
-    function _resizeIframeWidth(){ var element = document.querySelector(".main-content");
-    var width = element.offsetWidth;
-
-    iframes = document.getElementsByTagName("iframe");
-    for (var i = 0; i < iframes.length; i++) {
-            iframes[i].width = width
-    }
-
-    window.onresize = _resizeIframeWidth
- }
-        </script>
-        <!--
-        <script>
-                window.onload = function() {
-    window.parent.postMessage({
-        type: "URL_UPDATE",
-        url: window.location.href
-    }, "*");
-}
-</script>
-                -->
+        <script>iframeResize({ license: 'GPLv3' })</script>
     </head>
     <div class="fixed bottom-4 left-4" style="z-index: 999999;">
         <button id="openProblemModal"
@@ -111,8 +48,8 @@
             </svg>
         </button>
     </div>
-    <div class="notification-container" style="z-index: 999999;">
-        <div class="notification-card dark:bg-gray-800 bg-white">
+<div class="notification-container fixed top-5 p-2 max-h-[95vh] overflow-y-auto hidden" style="z-index: 999999;">
+    <div class="bg-white border border-gray-300 shadow-sm p-5 rounded-md text-center dark:bg-gray-800 bg-white">
             <p class="text-2xl pb-5 text-black dark:text-white">Bad news</p>
             <p class="pb-3 text-black dark:text-white">
                 We regret to inform you that our account on BuyMeACoffee has been suspended due to a violation of their terms of service. This was an unexpected development, and we are currently addressing the matter with utmost priority.
@@ -203,7 +140,7 @@ Warm regards, The Freedium Team
      class="modal hidden fixed inset-0 w-full h-full flex items-center justify-center overflow-y-auto bg-black bg-opacity-50"
      style="z-index: 999999">
     <div class="modal-container w-11/12 md:max-w-xl mx-auto rounded shadow-lg max-h-screen">
-        <div class="modal-content bg-white dark:bg-gray-800 dark:text-white my-8 py-4 text-left px-6">
+        <div class="modal-content bg-white dark:bg-gray-800 text-black dark:text-white my-8 py-4 text-left px-6">
             <h1 class="text-3xl font-bold">Reporting a Problem</h1>
             <div class="mt-3">
                 <p>
@@ -238,35 +175,59 @@ Warm regards, The Freedium Team
         darkMode: 'class',
     }
 
-  function navigateToOrigin() {
-    window.location.href = window.location.origin;
-  }
-if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-  // document.documentElement.classList.add('dark');
-  document.getElementById('darkIcon').classList.remove('hidden');
-  document.getElementById('lightIcon').classList.add('hidden')
-} else {
-  // document.documentElement.classList.remove('dark')
-  document.getElementById('lightIcon').classList.remove('hidden');
-  document.getElementById('darkIcon').classList.add('hidden');
+        function changeTheme(themeName) {
+            // Source: https://stackoverflow.com/questions/59257368/how-to-dynamically-change-the-theme-using-highlight-js
+            console.log(`Applying theme: ${themeName}`);
+            const existingLink = document.querySelector('link[href*="highlight.js"]');
+            if (existingLink) {
+                existingLink.remove();
+            }
+            const link = document.createElement("link");
+            link.rel = "stylesheet";
+            link.href = `https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/${themeName}.min.css`;
+            document.head.appendChild(link);
+            document.querySelector("span").textContent = themeName;
+        }
+
+        function navigateToOrigin() {
+            window.location.href = window.location.origin;
+        }
+
+    function updateThemeIcons() {
+        const isDarkMode = localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches);
+        document.getElementById('darkIcon').classList.toggle('hidden', !isDarkMode);
+        document.getElementById('lightIcon').classList.toggle('hidden', isDarkMode);
 }
 
-  document.getElementById('darkModeToggle').addEventListener('click', function() {
+        updateThemeIcons();
 
-    if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-  document.documentElement.classList.remove('dark');
-  document.getElementById('darkIcon').classList.add('hidden');
-  document.getElementById('lightIcon').classList.remove('hidden')
-  document.documentElement.style.cssText = "--lightense-backdrop: white;";
-  localStorage.setItem("theme", "light")
-} else {
-  document.documentElement.classList.add('dark')
-  document.getElementById('lightIcon').classList.add('hidden');
-  document.getElementById('darkIcon').classList.remove('hidden');
-  document.documentElement.style.cssText = "--lightense-backdrop: black;";
-  localStorage.setItem("theme", "dark")
-}
-});
+        document.getElementById('darkModeToggle').addEventListener('click', function () {
+            const isDarkMode = localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches);
+            if (isDarkMode) {
+                document.documentElement.classList.remove('dark');
+        document.documentElement.style.cssText = "--lightense-backdrop: white;";
+        localStorage.setItem("theme", "light");
+        changeTheme("a11y-light");
+    } else {
+        document.documentElement.classList.add('dark');
+        document.documentElement.style.cssText = "--lightense-backdrop: black;";
+        localStorage.setItem("theme", "dark");
+        changeTheme("androidstudio");
+    }
+        updateThemeIcons();
+    })
+
+        if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+            //document.getElementById('darkIcon').classList.remove('hidden');
+            //document.getElementById('lightIcon').classList.add('hidden')
+            changeTheme("androidstudio");
+        } else {
+            document.documentElement.classList.remove('dark')
+            //document.getElementById('lightIcon').classList.remove('hidden');
+            //document.getElementById('darkIcon').classList.add('hidden');
+            changeTheme("a11y-light");
+        }
 </script>
 <script>
                 const openModalButton = document.getElementById('openProblemModal');
@@ -277,19 +238,19 @@ if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.match
                 const body = document.querySelector('body');
 
                 openModalButton.addEventListener('click', () => {
-                    body.classList.add('overflow-hidden'); // Prevent scrolling on the body
+                    body.classList.add('!overflow-hidden'); // Prevent scrolling on the body
             modal.classList.remove('hidden');
         });
 
         closeModalButton.addEventListener('click', () => {
-            body.classList.remove('overflow-hidden'); // Re-enable scrolling on the body
+            body.classList.remove('!overflow-hidden'); // Re-enable scrolling on the body
             modal.classList.add('hidden');
         });
 
         modal.addEventListener('click', (e) => {
             if (e.target === modal) {
                 modal.classList.add('hidden');
-                body.classList.remove('overflow-hidden');
+                body.classList.remove('!overflow-hidden');
             }
         });
 
@@ -360,22 +321,41 @@ document.addEventListener('scroll', function () {
        Lightense('img:not(.no-lightense)');
   }, false);
 </script>
-</body>
-</html>
 <script>
             var lazyLoadInstance = new LazyLoad({
                     callback_loaded: function(element) {
-        Lightense(element);
-    },
-    callback_error: (img) => {
-        console.log(img);
-        if (img.hasAttribute("data-src")) {
-            if (img.attributes["data-src"].value.startsWith("https://miro.medium.com/v2/")) {
-            img.setAttribute("src", img.attributes["data-src"].value.replace("https://miro.medium.com/v2/", "{{HOST_ADDRESS}}/@miro/v2/" ));
-            }
-        }
-  }
-});
+                    console.log(element);
+                    console.log(element.tagName);
+                    switch (element.tagName) {
+                        case "IMG":
+                            console.log(`${element} is image, wrapping into lightense`);
+                            Lightense(element);
+                            break;
+                        case "IFRAME":
+                            const resizeIframe = () => {
+                                console.log(`${element} is iframe, wrapping script`);
+                                let iframeHeight = element.contentWindow.document.body.scrollHeight;
+                                if (iframeHeight == 150) {
+                                    iframeHeight = 500;
+                                }
+                                element.style.height = iframeHeight + 'px';
+                            };
+                            window.addEventListener('resize', resizeIframe);
+                            setInterval(resizeIframe, 4500);
+                            resizeIframe();
+                            break;
+                    }
+                },
+                callback_error: (element) => {
+                    console.log(element);
+                    if (element.tagName === "IMG" && element.hasAttribute("data-src")) {
+                        const srcAttribute = element.attributes["data-src"].value;
+                        if (srcAttribute.startsWith("https://miro.medium.com/v2/")) {
+                            element.setAttribute("src", srcAttribute.replace("https://miro.medium.com/v2/", "{{HOST_ADDRESS}}/@miro/v2/"));
+                        }
+                    }
+                }
+            });
 </script>
 <script>
     function navigateToOrigin() {
@@ -392,14 +372,14 @@ document.addEventListener('scroll', function () {
         function showNotification() {
           if (!localStorage.getItem(notificationFlagString)) {
                   notificationContainer.style.display = 'block';
-                  body.classList.add('overflow-hidden');
+              body.classList.add('!overflow-hidden');
           }
         }
 
         function hideNotification() {
           localStorage.setItem(notificationFlagString, 'false');
           notificationContainer.style.display = 'none';
-          body.classList.remove('overflow-hidden');
+            body.classList.remove('!overflow-hidden');
         }
 
         // Close button functionality
@@ -410,3 +390,6 @@ document.addEventListener('scroll', function () {
         showNotification();
       });
 </script>
+</body>
+
+</html>

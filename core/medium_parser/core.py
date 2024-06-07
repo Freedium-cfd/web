@@ -47,7 +47,6 @@ class MediumParser:
         logger.debug("...maybe it's URL. Let's checkout...")
         return await cls.from_url(unknown, cache=cache, timeout=timeout, host_address=host_address, auth_cookies=auth_cookies)
 
-
     @classmethod
     async def from_url(cls, url: str, cache: "SQLiteCacheBackend", timeout: int, host_address: str, auth_cookies: str = None) -> "MediumParser":
         sanitized_url = correct_url(url)
@@ -171,7 +170,7 @@ class MediumParser:
     async def _parse_and_render_content_html_post(self, content: dict, title: str, subtitle: str, preview_image_id: str, highlights: list, tags: list) -> tuple[list, str, str]:
         paragraphs = content["bodyModel"]["paragraphs"]
         tags_list = [tag["displayTitle"] for tag in tags]
-        out_paragraphs = []
+        out_paragraphs: list[str] = []
         current_pos = 0
 
         def parse_paragraph_text(text: str, markups: list, is_code: bool = False) -> str:
@@ -240,7 +239,7 @@ class MediumParser:
                             if highlight_paragraph["text"] != text_formater.get_text():
                                 logger.warning("Highlighted text and paragraph text are not the same! Skip...")
                                 break
-                            quote_markup_template = '<mark style="background-color: rgb(200 227 200);">{{ text }}</mark>'
+                            quote_markup_template = '<mark class="bg-emerald-300">{{ text }}</mark>'
                             text_formater.set_template(
                                 highlight["startOffset"],
                                 highlight["endOffset"],
@@ -271,7 +270,7 @@ class MediumParser:
                 out_paragraphs.append(header_template_rendered)
             elif paragraph["type"] == "IMG":
                 image_template = jinja_env.from_string(
-                    '<div class="mt-7"><img alt="{{ paragraph.metadata.alt }}" style="margin: auto;" class="pt-5 lazy" role="presentation" data-src="https://miro.medium.com/v2/resize:fit:700/{{ paragraph.metadata.id }}"></div>'
+                    '<div class="mt-7"><img alt="{{ paragraph.metadata.alt }}" class="pt-5 lazy m-auto" role="presentation" data-src="https://miro.medium.com/v2/resize:fit:700/{{ paragraph.metadata.id }}"></div>'
                 )
                 image_caption_template = jinja_env.from_string("<figcaption class='mt-3 text-sm text-center text-gray-500 dark:text-gray-200'>{{ text }}</figcaption>")
                 if paragraph["layout"] == "OUTSET_ROW":
@@ -355,14 +354,15 @@ class MediumParser:
 
                 current_pos = _tmp_current_pos - 1
             elif paragraph["type"] == "PRE":
-                pre_template = jinja_env.from_string('<pre class="p-4 mt-7 bg-gray-100 dark:bg-gray-900 flex flex-col justify-center">{{code_block}}</pre>')
-                code_block_template = jinja_env.from_string('<code class="overflow-x-auto mt-1 {{ code_css_class }} bg-gray-100 dark:bg-gray-900">{{ text }}</code>')
+                pre_template = jinja_env.from_string('<pre class="mt-7 flex flex-col justify-center border dark:border-gray-700">{{code_block}}</pre>')
+                code_block_template = jinja_env.from_string('<code class="p-2 bg-gray-100 dark:bg-gray-900 overflow-x-auto {{ code_css_class }}">{{ text }}</code>')
 
                 code_css_class = []
                 if paragraph["codeBlockMetadata"] and paragraph["codeBlockMetadata"]["lang"] is not None:
                     code_css_class.append(f'language-{paragraph["codeBlockMetadata"]["lang"]}')
                 else:
                     code_css_class.append("nohighlight")
+                    # code_css_class.append("auto")
 
                 code_list = []
                 _tmp_current_pos = current_pos
@@ -382,7 +382,9 @@ class MediumParser:
                 out_paragraphs.append(pre_template_rendered)
                 current_pos = _tmp_current_pos - 1
             elif paragraph["type"] == "BQ":
-                bq_template = jinja_env.from_string('<blockquote class="px-5 pt-3 pb-3 mt-5 shadow-lf"><p style="font-style: italic;">{{ text }}</p></blockquote>')
+                bq_template = jinja_env.from_string(
+                    '<blockquote style="box-shadow: inset 3px 0 0 0 rgb(209 207 239 / var(--tw-bg-opacity));" class="px-5 pt-3 pb-3 mt-5"><p class="font-italic">{{ text }}</p></blockquote>'
+                )
                 bq_template_rendered = await bq_template.render_async(text=text_formater.get_text())
                 logger.trace(bq_template_rendered)
                 out_paragraphs.append(bq_template_rendered)
@@ -394,9 +396,7 @@ class MediumParser:
             elif paragraph["type"] == "MIXTAPE_EMBED":
                 # TODO: redirect all Medium embeding articles to Fredium
                 embed_template = jinja_env.from_string(
-                    """
-<div class="border border-gray-300 p-2 mt-7 items-center overflow-hidden"><a rel="noopener follow" href="{{ url }}" target="_blank"> <div class="flex flex-row justify-between p-2 overflow-hidden"><div class="flex flex-col justify-center p-2"><h2 class="text-black dark:text-gray-100 text-base font-bold">{{ embed_title }}</h2><div class="mt-2 block"><h3 class="text-grey-darker text-sm">{{ embed_description }}</h3></div><div class="mt-5" style=""><p class="text-grey-darker text-xs">{{ embed_site }}</p></div></div><div class="relative flex flew-row h-40 w-60"><div class="lazy absolute inset-0 bg-cover bg-center" data-bg="https://miro.medium.com/v2/resize:fit:320/{{ paragraph.mixtapeMetadata.thumbnailImageId }}"></div></div></div> </a></div>
-"""
+                    '<div class="border border-gray-300 p-2 mt-7 items-center overflow-hidden"><a rel="noopener follow" href="{{ url }}" target="_blank"> <div class="flex flex-row justify-between p-2 overflow-hidden"><div class="flex flex-col justify-center p-2"><h2 class="text-black dark:text-gray-100 text-base font-bold">{{ embed_title }}</h2><div class="mt-2 block"><h3 class="text-grey-darker text-sm">{{ embed_description }}</h3></div><div class="mt-5"><p class="text-grey-darker text-xs">{{ embed_site }}</p></div></div><div class="relative flex flew-row h-40 w-60"><div class="lazy absolute inset-0 bg-cover bg-center" data-bg="https://miro.medium.com/v2/resize:fit:320/{{ paragraph.mixtapeMetadata.thumbnailImageId }}"></div></div></div> </a></div>'
                 )
                 if paragraph.get("mixtapeMetadata") is not None:
                     url = paragraph["mixtapeMetadata"]["href"]
@@ -437,7 +437,7 @@ class MediumParser:
                 out_paragraphs.append(embed_template_rendered)
             elif paragraph["type"] == "IFRAME":
                 iframe_template = jinja_env.from_string(
-                    '<div class="mt-7"><iframe class="lazy w-full h-full" data-src="{{ host_address }}/render_iframe/{{ iframe_id }}" allowfullscreen="" frameborder="0" scrolling="no"></iframe></div>'
+                    '<div class="mt-7"><iframe class="lazy w-full" data-src="{{ host_address }}/render_iframe/{{ iframe_id }}" allowfullscreen="" frameborder="0" scrolling="no"></iframe></div>'
                 )
                 iframe_template_rendered = await iframe_template.render_async(host_address=self.host_address, iframe_id=paragraph["iframe"]["mediaResource"]["id"])
                 out_paragraphs.append(iframe_template_rendered)

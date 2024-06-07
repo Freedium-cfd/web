@@ -30,10 +30,9 @@ def enable_maintenance_mode():
 
 def do_maintenance(sleep_time: int = 60 * 60 * 24):
     while True:
+        sleep(sleep_time)
         try:
             enable_maintenance_mode()
         except Exception as e:
             logger.error(f"Error enabling maintenance mode: {e}")
             send_message(f"Error enabling maintenance mode: {e}")
-        finally:
-            sleep(sleep_time)
