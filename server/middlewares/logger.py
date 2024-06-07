@@ -9,6 +9,7 @@ from starlette.responses import Response, StreamingResponse
 from starlette.types import Message
 
 from server import transponder_code_correlation, url_correlation, xkcd_passwd, xp, config, home_page_process
+from server.utils.anti_bot import filter_bots
 from server.utils.notify import send_message
 from server.utils.error import generate_error
 from server.utils.utils import string_to_number_ascii
@@ -28,6 +29,9 @@ async def get_body(request: Request) -> bytes:
 
 class LoggerMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next: Callable[[Request], Awaitable[StreamingResponse]]) -> Response:  # type: ignore
+        if filter_bots(request.headers.get("User-Agent")):
+            return Response(status_code=403)
+
         start_time = time.time()
         generated_id = xp.generate_xkcdpassword(xkcd_passwd, delimiter="-", numwords=3)
         transponder_code = string_to_number_ascii(generated_id)
