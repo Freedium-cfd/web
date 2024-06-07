@@ -9,21 +9,21 @@ from server.utils.notify import send_message
 
 # ChatGPT promt: Make this text more Humoristic in one sentenced text, 15 different with emojies as Python list: Sorry to hear that but we have some problem
 ERROR_MSG_LIST = [
-    "Sorry to hear that, but we've got a problem that's bigger than my inability to resist a donut! 🍩",
-    "Apologies for the inconvenience, but we've hit a snag - it's not as funny as my cat chasing its tail, but it's a problem nonetheless! 🐱",
-    "Sorry to hear that, but we've encountered a problem - it's not as entertaining as a clown at a circus, but it's there! 🎪",
-    "Oops! We've stumbled upon a problem, but don't worry, it's not as disastrous as my cooking! 🍳",
-    "Sorry to hear that, but we've got a problem that's more stubborn than a mule on a Monday morning! 🐴",
-    "Apologies, but we've run into a problem - it's not as amusing as my grandma's dance moves, but it's a problem! 👵💃",
-    "Sorry to hear that, but we've got a problem that's more tangled than my headphone wires! 🎧",
-    "Oops! We've hit a problem, but don't worry, it's not as catastrophic as my last blind date! 💔",
-    "Sorry to hear that, but we've got a problem that's more elusive than a sock in a washing machine! 🧦",
-    "Apologies, but we've run into a problem - it's not as hilarious as my attempt at yoga, but it's a problem! 🧘‍♂️",
-    "Sorry to hear that, but we've got a problem that's more confusing than a chameleon in a bag of Skittles! 🦎🌈",
-    "Oops! We've encountered a problem, but don't worry, it's not as disastrous as my attempt at karaoke! 🎤",
-    "Sorry to hear that, but we've got a problem that's more stubborn than a toddler refusing to eat their veggies! 👶🥦",
-    "Apologies, but we've run into a problem - it's not as amusing as my dog trying to catch its tail, but it's a problem! 🐶",
-    "Sorry to hear that, but we've got a problem that's more elusive than the end of a rainbow! 🌈",
+    "Oops! 🙈 Looks like we stumbled into a little problem!",
+    "Sorry to hear that, but our problem factory is working overtime! 😅",
+    "Oh no! 😱 We've cooked up some problems again!",
+    "Whoops! Did someone order a problem? 🍕",
+    "Yikes! 🤪 We've hit a snag bigger than my coffee addiction!",
+    "Uh oh! 🚨 We've brewed a fresh pot of problems!",
+    "Hold tight! 🎢 Our problem rollercoaster has just begun!",
+    "Alert! 📢 We've encountered a wild problem in its natural habitat!",
+    "Bummer! 😜 We've tripped over a problem cord!",
+    "Oh dear! 🐻 Looks like we've poked the problem bear!",
+    "Guess what? 🤔 We've got a problem, but we're smiling through it!",
+    "Surprise! 🎉 We found a problem you didn't even know you needed!",
+    "Heads up! 🙆‍♂️ We're dancing with a few problems today!",
+    "Sorry to hear that, but it's just another manic problem day! 🎶",
+    "Well, well, well... if it isn't another problem joining the party! 🥳"
 ]
 
 
