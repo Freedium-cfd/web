@@ -28,7 +28,7 @@ bot_signatures = {
     "okhttp/",
     "go-resty/",
     "Faraday v",
-    # "curl/"
+    "curl/",
 }
 
 

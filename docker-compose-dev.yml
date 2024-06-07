@@ -18,7 +18,7 @@ services:
     networks:
       - web_network
     healthcheck:
-      test: ["CMD-SHELL", "curl http://caddy:6752/ --max-time 80"]
+      test: ["CMD-SHELL", "curl -f http://caddy:6752/ --max-time 80 --header 'User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.3 Safari/605.1.15'"]
       interval: 30s
       start_period: 20s
       timeout: 80s
@@ -35,30 +35,31 @@ services:
       # - ./server/user_data/logs:/app/server/user_data/logs
       - .:/app
       - ./core/medium_parser/:/app/medium_parser
-    develop:
-      watch:
-        - action: rebuild
-          path: ./server
-          target: /app/server
-        - action: rebuild
-          path: ./core
-          target: /app/core
-        - action: rebuild
-          path: ./rl_string_helper
-          target: /app/rl_string_helper
-        - action: rebuild
-          path: ./database-lib
-          target: /app/database-lib
-        - action: rebuild
-          path: "**/requirements.txt"
-        - action: rebuild
-          path: "**/requirements-fast.txt"
+      - ./core/rl_string_helper/:/app/rl_string_helper
+    # develop:
+    #   watch:
+    #     - action: rebuild
+    #       path: ./server
+    #       target: /app/server
+    #     - action: rebuild
+    #       path: ./core
+    #       target: /app/core
+    #     - action: rebuild
+    #       path: ./rl_string_helper
+    #       target: /app/rl_string_helper
+    #     - action: rebuild
+    #       path: ./database-lib
+    #       target: /app/database-lib
+    #     - action: rebuild
+    #       path: "**/requirements.txt"
+    #     - action: rebuild
+    #       path: "**/requirements-fast.txt"
     expose:
       - 7080
     networks:
       - web_network
     healthcheck:
-      test: ["CMD-SHELL", "curl http://localhost:7080/ --max-time 60"]
+      test: ["CMD-SHELL", "curl -f http://localhost:7080/ --max-time 80 --header 'User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.3 Safari/605.1.15'"]
       interval: 30s
       start_period: 20s
       timeout: 80s
@@ -66,23 +67,23 @@ services:
     restart: always
     mem_limit: 2g
 
-  # dragonfly:
-  #   image: 'docker.dragonflydb.io/dragonflydb/dragonfly'
-  #   ulimits:
-  #     memlock: -1
-  #   expose:
-  #     - 6379
-  #   networks:
-  #     - web_network
-  #   volumes:
-  #     - dragonflydata:/data
-  #   healthcheck:
-  #     test: ["CMD", "redis-cli", "ping"]
-  #     interval: 30s
-  #     start_period: 20s
-  #     timeout: 10s
-  #     retries: 3
-  #   restart: always
+  dragonfly:
+    image: 'docker.dragonflydb.io/dragonflydb/dragonfly'
+    ulimits:
+      memlock: -1
+    expose:
+      - 6379
+    networks:
+      - web_network
+    volumes:
+      - dragonflydata:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      start_period: 20s
+      timeout: 10s
+      retries: 3
+    restart: always
 
   autoheal:
     restart: always
