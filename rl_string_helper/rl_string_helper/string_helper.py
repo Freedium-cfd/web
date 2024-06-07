@@ -498,10 +498,10 @@ def parse_markups(markups: list):
         logger.trace(markup)
         if markup["type"] == "A":
             if markup["anchorType"] == "LINK":
-                template = jinja_env.from_string('<a class="text-base" style="text-decoration: underline;" rel="{{rel}}" title="{{title}}" href="{{href}}" target="_blank">{{text}}</a>')
+                template = jinja_env.from_string('<a style="text-decoration: underline;" rel="{{rel}}" title="{{title}}" href="{{href}}" target="_blank">{{text}}</a>')
                 template = template.render(raw_render(rel=markup.get("rel", ""), title=markup.get("title", ""), href=markup["href"]))
             elif markup["anchorType"] == "USER":
-                template = jinja_env.from_string('<a class="text-base" style="text-decoration: underline;" href="https://medium.com/u/{{userId}}">{{text}}</a>')
+                template = jinja_env.from_string('<a style="text-decoration: underline;" href="https://medium.com/u/{{userId}}">{{text}}</a>')
                 template = template.render(userId=markup["userId"])
             else:
                 logger.error(f"Can't proccess 'anchorType': {markup['anchorType']}")
