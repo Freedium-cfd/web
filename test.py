@@ -14,7 +14,9 @@ url_for_test = {
     "https://medium.com/@aleb/how-to-generate-random-user-agents-with-an-api-22aad3d232cb",
     "https://medium.com/angular-in-depth/the-best-way-to-unsubscribe-rxjs-observable-in-the-angular-applications-d8f9aa42f6a0",
     "515dd5a43948", # full address: https://medium.com/macoclock/12-macos-apps-so-good-you-will-wonder-how-they-are-free-515dd5a43948
-    "https://anudeep-vysyaraju.medium.com/how-any-gitamite-can-get-free-linkedin-premium-membership-d4222bd1a0b3"  # <--- Check for non properly aligned emojies
+    "https://anudeep-vysyaraju.medium.com/how-any-gitamite-can-get-free-linkedin-premium-membership-d4222bd1a0b3",  # <--- Check for non properly aligned emojies
+    "http://freedium.cfd/https://johndanielraines.medium.com/be-an-engineer-not-a-frameworker-c58fe28d0c88",
+    "https://medium.com/coding-beauty/parseint-strange-behavior-cdff5e1f9ff7" # <---- Title renderer some weird characters
 }
 
 blacklist_url = {"51e23c5a2aac"}

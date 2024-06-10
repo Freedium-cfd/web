@@ -15,15 +15,8 @@ from server.utils.error import generate_error
 from server.utils.utils import string_to_number_ascii
 
 
-async def set_body(request: Request, body: bytes):
-     async def receive() -> Message:
-         return {"type": "http.request", "body": body}
-     request._receive = receive
-
-
 async def get_body(request: Request) -> bytes:
      body = await request.body()
-     await set_body(request, body)
      return body
 
 

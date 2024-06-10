@@ -3,8 +3,8 @@ import sentry_sdk
 from fastapi.exceptions import HTTPException
 from fastapi import FastAPI, Depends, APIRouter
 from loguru import logger
-from fastapi_limiter import FastAPILimiter
-from fastapi_limiter.depends import RateLimiter
+# from fastapi_limiter import FastAPILimiter
+# from fastapi_limiter.depends import RateLimiter
 from server import config, redis_storage
 from server.exceptions.main import register_main_error_handler
 from server.handlers.main import register_main_router

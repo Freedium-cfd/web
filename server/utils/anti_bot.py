@@ -33,6 +33,9 @@ bot_signatures = {
 
 
 def filter_bots(details: str) -> bool:
+    if not details:
+        return True
+
     is_bot = any(bot_signature in details for bot_signature in bot_signatures)
     logger.debug(f"{details} is a bot: {is_bot}")
     return is_bot

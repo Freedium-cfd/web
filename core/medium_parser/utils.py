@@ -227,11 +227,11 @@ def basic_hex_check(hex_string: str) -> bool:
 @lru_cache(maxsize=100)
 def extract_hex_string(input_string: str) -> str:
     # First try to find a hexadecimal string preceded by a '-'
-    match = re.search(r'-(\b[a-fA-F0-9]{8,12}\b)', input_string)
+    match = re.findall(r'-(\b[a-fA-F0-9]{8,12}\b)', input_string)
     if not match:
         # If no match, try to find a hexadecimal string without the '-'
-        match = re.search(r'(\b[a-fA-F0-9]{8,12}\b)', input_string)
-    return match.group(1) if match else None
+        match = re.findall(r'(\b[a-fA-F0-9]{8,12}\b)', input_string)
+    return match[-1] if match else None
 
 
 async def resolve_medium_short_link(short_url_id: str, timeout: int = 5) -> str:
