@@ -34,7 +34,7 @@ async def render_postleter(limit: int = 30, as_html: bool = False):
                 post_metadata = await post.generate_metadata(as_dict=True)
                 outlet_posts_list.append(post_metadata)
             except Exception as ex:
-                await handle_exception(ex, message=f"Couldn't render post_id for postleter: {post_id}")
+                await handle_exception(ex, message=f"Couldn't render post_id for postleter: {post_id}. Just ignore that")
 
         task = fetch_post_metadata(post_id)
         tasks.append(task)
@@ -87,7 +87,7 @@ async def render_medium_post_link(path: str, use_cache: bool = True, use_redis: 
     except medium_parser_exceptions.InvalidMediumPostID as ex:
         return await handle_exception(ex, "Unable to identify the Medium article ID.", status_code=500)
     except medium_parser_exceptions.NotValidMediumURL as ex:
-        return await handle_exception("You sure that this is a valid Medium.com URL?", status_code=404, quiet=True)
+        return await handle_exception(ex, "You sure that this is a valid Medium.com URL?", status_code=404, quiet=True)
     except Exception as ex:
         return await handle_exception(ex, status_code=500)
     else:

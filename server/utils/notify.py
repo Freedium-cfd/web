@@ -17,6 +17,7 @@ def send_message(text: str, silent: bool = False, status: MessageStatus = "ERROR
         return
 
     if status == MessageStatus.GOOD.value:
+        logger.warning(f"Ignoring sending GOOD message")
         return True
 
     if len(text) > 4000:
