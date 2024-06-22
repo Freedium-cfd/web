@@ -24,10 +24,11 @@ def server_cmd(cmd, opts):
     if is_port_in_use(opts.port):
         cmd.error(f"Port {opts.port} is in use or permission denied")
 
-    # from server.services.worker import execute_server_worker
-    from server.services.server import execute_server
-    from server.utils.maintenance_scheduler import do_maintenance
+    from server.services.worker import execute_server_worker
 
-    threading.Thread(target=do_maintenance, daemon=True).start()
-    # execute_server_worker(host="0.0.0.0", port=opts.port)
-    execute_server(host="0.0.0.0", port=opts.port)
+    # from server.services.server import execute_server
+    # from server.utils.maintenance_scheduler import do_maintenance
+
+    # threading.Thread(target=do_maintenance, daemon=True).start()
+    execute_server_worker(host="0.0.0.0", port=opts.port)
+    # execute_server(host="0.0.0.0", port=opts.port)
