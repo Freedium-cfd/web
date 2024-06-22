@@ -52,8 +52,8 @@ async def route_processing(path: str, request: Request):
 @trace
 async def main_page():
     postleter_template = await render_postleter(as_html=True)
-    main_template_rendered = await main_template.render_async(postleter=postleter_template)
-    base_template_rendered = await base_template.render_async(body_template=main_template_rendered, HOST_ADDRESS=config.HOST_ADDRESS)
+    main_template_rendered = main_template.render(postleter=postleter_template)
+    base_template_rendered = base_template.render(body_template=main_template_rendered, HOST_ADDRESS=config.HOST_ADDRESS)
     parsed_template = parse(base_template_rendered)
     serialized_template = serialize(parsed_template, encoding='utf-8')
     return HTMLResponse(serialized_template)

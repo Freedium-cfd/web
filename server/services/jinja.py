@@ -1,8 +1,8 @@
 from jinja2 import Environment, DebugUndefined, FileSystemLoader
 
-jinja_env = Environment(enable_async=True)
+jinja_env = Environment()
 jinja_safe_env = Environment(undefined=DebugUndefined)
-template_env = Environment(loader=FileSystemLoader("./server/templates"), enable_async=True)
+template_env = Environment(loader=FileSystemLoader("./server/templates"))
 template_safe_env = Environment(loader=FileSystemLoader("./server/templates"), undefined=DebugUndefined)
 
 base_template = template_env.get_template("base.html")

@@ -35,11 +35,11 @@ async def generate_error(error_msg: str = None, title: str = "Error", status_cod
     if not quiet:
         send_message(f"📛 Error while processing url: <code>{url_correlation.get()}</code>, transponder_code: <code>{transponder_code_correlation.get()}</code>, error: <code>{error_msg}</code>")
 
-    error_template_rendered = await error_template.render_async(error_msg=error_msg, transponder_code=transponder_code_correlation.get())
+    error_template_rendered = error_template.render(error_msg=error_msg, transponder_code=transponder_code_correlation.get())
     base_context = {
         "enable_ads_header": config.ENABLE_ADS_BANNER,
         "body_template": error_template_rendered,
         "title": title,
     }
-    base_template_rendered = await base_template.render_async(base_context, HOST_ADDRESS=config.HOST_ADDRESS)
+    base_template_rendered = base_template.render(base_context, HOST_ADDRESS=config.HOST_ADDRESS)
     return HTMLResponse(base_template_rendered, status_code=status_code)

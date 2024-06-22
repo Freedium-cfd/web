@@ -252,21 +252,21 @@ class MediumParser:
                 if out_paragraphs:
                     css_class.append("pt-12")
                 header_template = jinja_env.from_string('<h2 class="font-bold font-sans break-normal text-gray-900 dark:text-gray-100 text-1xl md:text-2xl {{ css_class }}">{{ text }}</h2>')
-                header_template_rendered = await header_template.render_async(text=text_formater.get_text(), css_class="".join(css_class))
+                header_template_rendered = header_template.render(text=text_formater.get_text(), css_class="".join(css_class))
                 out_paragraphs.append(header_template_rendered)
             elif paragraph["type"] == "H3":
                 css_class = []
                 if out_paragraphs:
                     css_class.append("pt-12")
                 header_template = jinja_env.from_string('<h3 class="font-bold font-sans break-normal text-gray-900 dark:text-gray-100 text-1xl md:text-2xl {{ css_class }}">{{ text }}</h3>')
-                header_template_rendered = await header_template.render_async(text=text_formater.get_text(), css_class="".join(css_class))
+                header_template_rendered = header_template.render(text=text_formater.get_text(), css_class="".join(css_class))
                 out_paragraphs.append(header_template_rendered)
             elif paragraph["type"] == "H4":
                 css_class = []
                 if out_paragraphs:
                     css_class.append("pt-8")
                 header_template = jinja_env.from_string('<h4 class="font-bold font-sans break-normal text-gray-900 dark:text-gray-100 text-l md:text-xl {{ css_class }}">{{ text }}</h4>')
-                header_template_rendered = await header_template.render_async(text=text_formater.get_text(), css_class="".join(css_class))
+                header_template_rendered = header_template.render(text=text_formater.get_text(), css_class="".join(css_class))
                 out_paragraphs.append(header_template_rendered)
             elif paragraph["type"] == "IMG":
                 image_template = jinja_env.from_string(
@@ -276,20 +276,20 @@ class MediumParser:
                 if paragraph["layout"] == "OUTSET_ROW":
                     image_templates_row = []
                     img_row_template = jinja_env.from_string('<div class="mx-5"><div class="flex flex-row justify-center">{{ images }}</div></div>')
-                    image_template_rendered = await image_template.render_async(paragraph=paragraph)
+                    image_template_rendered = image_template.render(paragraph=paragraph)
                     image_templates_row.append(image_template_rendered)
                     _tmp_current_pos = current_pos + 1
                     while len(paragraphs) > _tmp_current_pos:
                         _paragraph = paragraphs[_tmp_current_pos]
                         if _paragraph["layout"] == "OUTSET_ROW_CONTINUE":
-                            image_template_rendered = await image_template.render_async(paragraph=_paragraph)
+                            image_template_rendered = image_template.render(paragraph=_paragraph)
                             image_templates_row.append(image_template_rendered)
                         else:
                             break
 
                         _tmp_current_pos += 1
 
-                    img_row_template_rendered = await img_row_template.render_async(images="".join(image_templates_row))
+                    img_row_template_rendered = img_row_template.render(images="".join(image_templates_row))
                     out_paragraphs.append(img_row_template_rendered)
 
                     current_pos = _tmp_current_pos - 1
@@ -298,10 +298,10 @@ class MediumParser:
                     current_pos += 1
                     continue
                 else:
-                    image_template_rendered = await image_template.render_async(paragraph=paragraph)
+                    image_template_rendered = image_template.render(paragraph=paragraph)
                     out_paragraphs.append(image_template_rendered)
                     if paragraph["text"]:
-                        out_paragraphs.append(await image_caption_template.render_async(text=text_formater.get_text()))
+                        out_paragraphs.append(image_caption_template.render(text=text_formater.get_text()))
             elif paragraph["type"] == "P":
                 css_class = ["leading-8"]
                 paragraph_template = jinja_env.from_string('<p class="{{ css_class }}">{{ text }}</p>')
@@ -309,7 +309,7 @@ class MediumParser:
                     css_class.append("mt-3")
                 else:
                     css_class.append("mt-7")
-                paragraph_template_rendered = await paragraph_template.render_async(text=text_formater.get_text(), css_class=" ".join(css_class))
+                paragraph_template_rendered = paragraph_template.render(text=text_formater.get_text(), css_class=" ".join(css_class))
                 out_paragraphs.append(paragraph_template_rendered)
             elif paragraph["type"] == "ULI":
                 uli_template = jinja_env.from_string('<ul class="list-disc pl-8 mt-2">{{ li }}</ul>')
@@ -321,14 +321,14 @@ class MediumParser:
                     _paragraph = paragraphs[_tmp_current_pos]
                     if _paragraph["type"] == "ULI":
                         text_formater = parse_paragraph_text(_paragraph["text"], _paragraph["markups"])
-                        li_template_rendered = await li_template.render_async(text=text_formater.get_text())
+                        li_template_rendered = li_template.render(text=text_formater.get_text())
                         li_templates.append(li_template_rendered)
                     else:
                         break
 
                     _tmp_current_pos += 1
 
-                uli_template_rendered = await uli_template.render_async(li="".join(li_templates))
+                uli_template_rendered = uli_template.render(li="".join(li_templates))
                 out_paragraphs.append(uli_template_rendered)
 
                 current_pos = _tmp_current_pos - 1
@@ -342,14 +342,14 @@ class MediumParser:
                     _paragraph = paragraphs[_tmp_current_pos]
                     if _paragraph["type"] == "OLI":
                         text_formater = parse_paragraph_text(_paragraph["text"], _paragraph["markups"])
-                        li_template_rendered = await li_template.render_async(text=text_formater.get_text())
+                        li_template_rendered = li_template.render(text=text_formater.get_text())
                         li_templates.append(li_template_rendered)
                     else:
                         break
 
                     _tmp_current_pos += 1
 
-                ol_template_rendered = await ol_template.render_async(li="".join(li_templates))
+                ol_template_rendered = ol_template.render(li="".join(li_templates))
                 out_paragraphs.append(ol_template_rendered)
 
                 current_pos = _tmp_current_pos - 1
@@ -376,8 +376,8 @@ class MediumParser:
 
                     _tmp_current_pos += 1
 
-                code_block_template_rendered = await code_block_template.render_async(text="\n".join(code_list), code_css_class=" ".join(code_css_class))
-                pre_template_rendered = await pre_template.render_async(code_block=code_block_template_rendered)
+                code_block_template_rendered = code_block_template.render(text="\n".join(code_list), code_css_class=" ".join(code_css_class))
+                pre_template_rendered = pre_template.render(code_block=code_block_template_rendered)
 
                 out_paragraphs.append(pre_template_rendered)
                 current_pos = _tmp_current_pos - 1
@@ -385,12 +385,12 @@ class MediumParser:
                 bq_template = jinja_env.from_string(
                     '<blockquote style="box-shadow: inset 3px 0 0 0 rgb(209 207 239 / var(--tw-bg-opacity));" class="px-5 pt-3 pb-3 mt-5"><p class="font-italic">{{ text }}</p></blockquote>'
                 )
-                bq_template_rendered = await bq_template.render_async(text=text_formater.get_text())
+                bq_template_rendered = bq_template.render(text=text_formater.get_text())
                 logger.trace(bq_template_rendered)
                 out_paragraphs.append(bq_template_rendered)
             elif paragraph["type"] == "PQ":
                 pq_template = jinja_env.from_string('<blockquote class="mt-7 text-2xl ml-5 text-gray-600 dark:text-gray-300"><p>{{ text }}</p></blockquote>')
-                pq_template_rendered = await pq_template.render_async(text=text_formater.get_text())
+                pq_template_rendered = pq_template.render(text=text_formater.get_text())
                 logger.trace(pq_template_rendered)
                 out_paragraphs.append(pq_template_rendered)
             elif paragraph["type"] == "MIXTAPE_EMBED":
@@ -433,13 +433,13 @@ class MediumParser:
 
                 logger.trace(f"{embed_site=}")
 
-                embed_template_rendered = await embed_template.render_async(paragraph=paragraph, url=url, embed_title=embed_title, embed_description=embed_description, embed_site=embed_site)
+                embed_template_rendered = embed_template.render(paragraph=paragraph, url=url, embed_title=embed_title, embed_description=embed_description, embed_site=embed_site)
                 out_paragraphs.append(embed_template_rendered)
             elif paragraph["type"] == "IFRAME":
                 iframe_template = jinja_env.from_string(
                     '<div class="mt-7"><iframe class="lazy w-full" data-src="{{ host_address }}/render_iframe/{{ iframe_id }}" allowfullscreen="" frameborder="0" scrolling="no"></iframe></div>'
                 )
-                iframe_template_rendered = await iframe_template.render_async(host_address=self.host_address, iframe_id=paragraph["iframe"]["mediaResource"]["id"])
+                iframe_template_rendered = iframe_template.render(host_address=self.host_address, iframe_id=paragraph["iframe"]["mediaResource"]["id"])
                 out_paragraphs.append(iframe_template_rendered)
 
             else:
@@ -508,7 +508,7 @@ class MediumParser:
         if collection:
             post_page_title_raw += " | in {{ collection.name }}"
         post_page_title = jinja_env.from_string(post_page_title_raw)
-        post_page_title_rendered = await post_page_title.render_async(title=title, creator=creator, collection=collection)
+        post_page_title_rendered = post_page_title.render(title=title, creator=creator, collection=collection)
 
         post_context = {
             "subtitle": subtitle,
@@ -524,7 +524,7 @@ class MediumParser:
             "content": content,
             "tags": tags,
         }
-        post_template_rendered = await post_template.render_async(post_context)
+        post_template_rendered = post_template.render(post_context)
 
         return HtmlResult(post_page_title_rendered, description, url, post_template_rendered)
 

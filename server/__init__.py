@@ -1,11 +1,6 @@
-import nest_asyncio
-
-nest_asyncio.apply()
-
 from loguru import logger
 import pickledb
 from multiprocessing import Value
-import logging
 from contextvars import ContextVar
 from typing import Optional
 

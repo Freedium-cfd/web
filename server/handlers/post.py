@@ -41,7 +41,7 @@ async def render_postleter(limit: int = 30, as_html: bool = False):
 
     await asyncio.gather(*tasks)
 
-    postleter_template_rendered = await postleter_template.render_async(post_list=outlet_posts_list)
+    postleter_template_rendered = postleter_template.render(post_list=outlet_posts_list)
     if as_html:
         return postleter_template_rendered
     return HTMLResponse(postleter_template_rendered)
@@ -97,7 +97,7 @@ async def render_medium_post_link(path: str, use_cache: bool = True, use_redis: 
             "title": rendered_medium_post.title,
             "description": rendered_medium_post.description,
         }
-        rendered_post = await base_template.render_async(base_context, HOST_ADDRESS=config.HOST_ADDRESS)
+        rendered_post = base_template.render(base_context, HOST_ADDRESS=config.HOST_ADDRESS)
         parsed_rendered_post = parse(rendered_post)
         serialized_rendered_post = serialize(parsed_rendered_post, encoding="utf-8")
 

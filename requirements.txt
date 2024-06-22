@@ -10,4 +10,3 @@ gunicorn==21.2.0
 redis[hiredis]==4.6.0
 xkcdpass==1.19.3
 apscheduler==3.10.4
-nest-asyncio==1.6.0
