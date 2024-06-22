@@ -497,7 +497,7 @@ class MediumParser:
             logger.warning(f"No post data found for post ID: {self.post_id}. Querying...")
             await self.query()
 
-        jinja_template = jinja2.Environment(loader=jinja2.FileSystemLoader(template_folder), enable_async=True)
+        jinja_template = jinja2.Environment(loader=jinja2.FileSystemLoader(template_folder))
         post_template = jinja_template.get_template("post.html")
 
         title, subtitle, description, url, creator, collection, reading_time, free_access, updated_at, first_published_at, preview_image_id, tags = await self.generate_metadata()
