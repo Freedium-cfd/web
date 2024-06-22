@@ -1,6 +1,7 @@
 # Source: https://pawamoy.github.io/posts/unify-logging-for-a-gunicorn-uvicorn-app/
 # This code taken from comment by GroverChouT
 
+import datetime as dt
 import logging
 import os
 import sys
@@ -10,15 +11,16 @@ from gunicorn.glogging import Logger
 from loguru import logger
 from loguru._datetime import datetime as loguru_datetime
 
-from server import START_TIME, config
+from server import config
 
-ENQUEUE = True
+START_TIME = dt.datetime.now().strftime("%H-%M-%S")
 
 # Python's logging module is not supporting TRACE level
 # https://bugs.python.org/issue31732
 # https://betterstack.com/community/guides/logging/how-to-start-logging-with-python/
 logging.addLevelName("TRACE", 5)
 
+ENQUEUE = True
 BACKTRACE = True
 DIAGNOSE = True
 LOG_LEVEL = logging.getLevelName(config.LOG_LEVEL_NAME)
@@ -26,7 +28,6 @@ LOG_LEVEL = logging.getLevelName(config.LOG_LEVEL_NAME)
 LOG_FORMAT = "[{process.id}] | <green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green> | <level>{level}</level> | <cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> - <level>[{extra[id]}] - {message}</level>"
 LOG_FOLDER_PATH = f"server/user_data/logs/{{time:YYYY-MM-DD}}/{START_TIME}"
 LOG_FOLDER_PATH_FORMATED = LOG_FOLDER_PATH.format(time=loguru_datetime.now())
-
 
 def logger_register():
     pid = os.getpid()

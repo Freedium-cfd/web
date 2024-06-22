@@ -2,7 +2,6 @@ import nest_asyncio
 
 nest_asyncio.apply()
 
-import datetime as dt
 from loguru import logger
 import pickledb
 from multiprocessing import Value
@@ -35,7 +34,6 @@ home_page_process = {}
 
 ban_db = pickledb.load('ban_post_list.db', True)
 
-START_TIME = dt.datetime.now().strftime("%H-%M-%S")
 WORDS_LIST_FILE = "xkcdpass/static/legac"
 
 xkcd_passwd = xp.generate_wordlist(wordfile=WORDS_LIST_FILE, min_length=5, max_length=8)
