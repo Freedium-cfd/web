@@ -2,7 +2,9 @@
 
 <h1 align="center">Freedium: Your paywall breakthrough for Medium!</h1>
 
-[!["Buy Me A Coffee"](https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png)](https://www.buymeacoffee.com/zhymabekroman)
+<a href="https://www.patreon.com/Freedium">
+    <img width="200px" height="50px" alt="Become a Patron" src="https://github.com/elsiehupp/patron-buttons/blob/master/svg/become_a_patron_4x1_black_logo_white_text_on_coral.svg?raw=True">
+</a>
 
 ## FAQ
 
