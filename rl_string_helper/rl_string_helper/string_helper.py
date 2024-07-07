@@ -74,17 +74,17 @@ Python uses UTF-8 encoding, which each character is encoded as one byte. So here
 # TODO: doc! Who will read this noodles lol?
 # TODO: check cases when UTF-16 character can be more that 2 bytes
 class RLStringHelper:
-    __slots__ = ("string", "templates", "replaces", "quote_html_type", "quote_replaces")
+    __slots__ = ("string", "templates", "replaces", "quote_html_type", "quote_replaces", "_default_bang_char")
 
-    def __init__(self, string: str, quote_html_type: list[str] = ["full"]):
+    def __init__(self, string: str, quote_html_type: list[str] = ["full"], _default_bang_char: str = "R"):
         self.string = StringAsignmentMix(quote_symbol(string))
         self.templates = []
         self.quote_replaces = []
         self.replaces = []
         self.quote_html_type = quote_html_type
-
+        self._default_bang_char = _default_bang_char
     @trace
-    def pre_utf_16_bang(self, string: str, string_pos_matrix: list, _default_bang_char: str = "R"):
+    def pre_utf_16_bang(self, string: str, string_pos_matrix: list):
         utf_16_bang_list = []
         string_len_utf_16 = len(string.encode("utf-16-le")) // 2
         if string_len_utf_16 == len(string):
@@ -100,19 +100,19 @@ class RLStringHelper:
                 char_len_dif = char_len - 1
                 logger.trace(char_len_dif)
                 logger.trace(f"'{char}' char is two bytes")
-                # logger.trace(f"'{char}' char is multibyte")
-                char_present = _default_bang_char * char_len_dif
+                char_present = self._default_bang_char * char_len_dif
                 logger.trace(f"{char_present=}")
                 string, string_pos_matrix = self._paste_char(string, string_pos_matrix, new_i + 1, char_present)
                 i += 1
                 utf_16_bang_list.append((i, char_len_dif, i))
             elif char_len == 1:
                 logger.trace(f"'{char}' char is single byte")
-                pass
             else:
-                ValueError(f"Invalid char: {char}")
+                logger.warning(f"{char=} looks like is multibyte: {char_len}")
+                ValueError(f"Invalid char length: {char}")
 
             i += 1
+
         logger.trace(utf_16_bang_list)
         logger.trace(string_pos_matrix)
         logger.trace(len(string))
@@ -137,7 +137,7 @@ class RLStringHelper:
         return string, string_pos_matrix
 
     @trace
-    def post_utf_16_bang(self, string: str, string_pos_matrix: list, utf_16_bang_list: list, _default_bang_char: str = "R"):
+    def post_utf_16_bang(self, string: str, string_pos_matrix: list, utf_16_bang_list: list):
         string = StringAsignmentMix(string)
 
         post_transbang = 0
@@ -441,6 +441,8 @@ def split_overlapping_range_position(positions):
 
     logger.debug(f"Final result: {result}")
     return result
+
+
 def raw_render(**kwargs):
     for key, value in kwargs.items():
         if isinstance(value, str):
