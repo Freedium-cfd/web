@@ -225,7 +225,7 @@ class RLStringHelper:
             logger.trace(older_text == updated_text)
             logger.trace(f"{updated_text}")
 
-            logger.trace(f"{start=}, {end=}, {template=}")
+            logger.trace(f"{start=}, {end=}, template={str(template)}")
 
             if start >= len(string_pos_matrix):
                 logger.warning("Start position is out of range. Ignore...")
@@ -375,9 +375,9 @@ class RLStringHelper:
         return self.__str__()
 
 
-def split_overlapping_ranges(markups):
+def split_overlapping_ranges(markups, _retry_count: int = 7):
     last_fixed_markup = markups
-    for _ in range(len(markups) * 7):
+    for _ in range(len(markups) * _retry_count):
         markups = split_overlapping_range_position(markups)
         if last_fixed_markup and len(last_fixed_markup) == len(markups):
             break
@@ -389,101 +389,58 @@ def split_overlapping_range_position(positions):
     if not positions:
         return []
 
-    # Sort the positions by start
     positions.sort(key=lambda x: x["start"])
-    logger.trace(positions)
+    logger.debug(f"Sorted positions: {positions}")
 
-    # Initialize the result list with the first position
     result = [positions[0]]
-    logger.trace(result)
+    logger.debug(f"Initial result: {result}")
 
     for pos in positions[1:]:
-        logger.trace(pos)
+        logger.debug(f"Processing position: {pos}")
         last = result[-1]
 
-        # If the current position overlaps with the last one in the result
         if pos["start"] < last["end"]:
-            logger.trace(0)
-            # If the current position has a different markup and ends before the last one
-            if pos["type"] != last["type"] and pos["end"] < last["end"]:
-                logger.trace(1)
-                # Split the last position into three
-                result[-1] = {
-                    "start": last["start"],
-                    "end": pos["start"],
-                    "type": last["type"],
-                    "template": last["template"],
-                }
-                logger.trace(result)
-                result.append(
-                    {
-                        "start": pos["start"],
-                        "end": pos["end"],
-                        "type": pos["type"],
-                        "template": pos["template"],
-                    }
-                )
-                logger.trace(result)
-                result.append(
-                    {
-                        "start": pos["start"],
-                        "end": pos["end"],
+            logger.debug("Overlap detected")
+            if pos["type"] != last["type"]:
+                logger.debug("Different type")
+                if pos["end"] <= last["end"]:
+                    logger.debug("Case 1: Different type, ends before or at last")
+                    result[-1] = {
+                        "start": last["start"],
+                        "end": pos["start"],
                         "type": last["type"],
                         "template": last["template"],
                     }
-                )
-                logger.trace(result)
-                result.append(
-                    {
-                        "start": pos["end"],
-                        "end": last["end"],
+                    result.append(pos.copy())
+                    if pos["end"] < last["end"]:
+                        result.append(
+                            {
+                                "start": pos["end"],
+                                "end": last["end"],
+                                "type": last["type"],
+                                "template": last["template"],
+                            }
+                        )
+                else:
+                    logger.debug("Case 2: Different type, ends after last")
+                    result[-1] = {
+                        "start": last["start"],
+                        "end": pos["start"],
                         "type": last["type"],
                         "template": last["template"],
                     }
-                )
-                logger.trace(result)
-            elif pos["type"] != last["type"]:
-                logger.trace(2)
-                # Split the last position into two, updating end of the last position
-                result[-1] = {
-                    "start": last["start"],
-                    "end": pos["start"],
-                    "type": last["type"],
-                    "template": last["template"],
-                }
-                logger.trace(result)
-                result.append(
-                    {
-                        "start": pos["start"],
-                        "end": pos["end"],
-                        "type": pos["type"],
-                        "template": pos["template"],
-                    }
-                )
-                logger.trace(result)
-                result.append(
-                    {
-                        "start": pos["start"],
-                        "end": last["end"],
-                        "type": last["type"],
-                        "template": last["template"],
-                    }
-                )
-                logger.trace(result)
+                    result.append(pos.copy())
             else:
-                logger.trace(3)
-                # Update the end of the last position in the result
+                logger.debug("Case 3: Same type, update end")
                 result[-1]["end"] = max(last["end"], pos["end"])
-                logger.trace(result)
         else:
-            logger.trace(4)
-            # Add the current position to the result
-            result.append(pos)
-            logger.trace(result)
+            logger.debug("Case 4: No overlap, add new position")
+            result.append(pos.copy())
 
+        logger.debug(f"Updated result: {result}")
+
+    logger.debug(f"Final result: {result}")
     return result
-
-
 def raw_render(**kwargs):
     for key, value in kwargs.items():
         if isinstance(value, str):
@@ -491,10 +448,12 @@ def raw_render(**kwargs):
     return kwargs
 
 
-def parse_markups(markups: list):
+def parse_markups(markups: list[str]):
+    logger.trace(f"Given {markups=}")
     markups_out = []
 
     for markup in markups:
+        logger.trace(f"Processing {markups=}")
         logger.trace(markup)
         if markup["type"] == "A":
             if markup["anchorType"] == "LINK":

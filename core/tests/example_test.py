@@ -5,6 +5,7 @@ import sys
 import jinja2
 from loguru import logger
 from medium_parser.core import MediumParser
+from database_lib import SQLiteCacheBackend
 
 jinja2_env = jinja2.Environment(
     loader=jinja2.FileSystemLoader("./"),
@@ -19,11 +20,14 @@ async def safe_main():
 
 async def main():
     logger.remove()
-    # logger.add(sys.stderr, level="INFO")
-    logger.add(sys.stderr, level="TRACE")
+    logger.add(sys.stderr, level="INFO")
+    # logger.add(sys.stderr, level="TRACE")
+    logger.add("trace.log", level="TRACE")
 
     # dl = await MediumParser.from_url("")
-    dl = MediumParser("1059aeab90d", 8, "localhost")
+    sqlite = SQLiteCacheBackend("test_db.sqlite")
+    sqlite.init_db()
+    dl = MediumParser("ef85d8e72883", sqlite, 8, "localhost")
     query_result = await dl.query(use_cache=False)
 
     with open("query_result.json", "w") as f:
