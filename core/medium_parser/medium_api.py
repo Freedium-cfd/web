@@ -1,4 +1,7 @@
+from typing import Optional
+
 import aiohttp
+import orjson
 from aiohttp_retry import RetryClient
 from loguru import logger
 
@@ -8,8 +11,9 @@ from .utils import generate_random_sha256_hash
 
 
 # https://gist.github.com/vladar/a4e3afd608cfe8b13e5844d75447f0a4
-async def query_post_by_id(post_id: str, timeout: int = 3, auth_cookies: str = ""):
-    auth_cookies = "" if not auth_cookies else auth_cookies
+async def query_post_by_id(post_id: str, timeout: int = 3, auth_cookies: Optional[str] = None):
+    logger.debug(f"Starting request contructing for post {post_id}")
+    auth_cookies = "" if auth_cookies is None else auth_cookies
 
     headers = {
         "X-APOLLO-OPERATION-ID": generate_random_sha256_hash(),
@@ -19,14 +23,14 @@ async def query_post_by_id(post_id: str, timeout: int = 3, auth_cookies: str = "
         "X-Obvious-CID": "android",
         "X-Xsrf-Token": "1",
         "X-Client-Date": str(get_unix_ms()),
-        "User-Agent": "AdsBot-Google-Mobile", # "donkey/4.5.1187420",  # <---- There is Medium version
+        "User-Agent": "AdsBot-Google-Mobile",  # "donkey/4.5.1187420",  # <---- There is Medium version
         "Cache-Control": "public, max-age=-1",
         "Content-Type": "application/json",
         "Connection": "Keep-Alive",
         "Cookie": auth_cookies,
     }
 
-    json_data = {
+    graphql_data = {
         "operationName": "FullPostQuery",
         "variables": {
             "postId": post_id,
@@ -36,25 +40,33 @@ async def query_post_by_id(post_id: str, timeout: int = 3, auth_cookies: str = "
     }
 
     response_data = None
+    exception = None
+
+    logger.debug(f"Request started...")
+
     async with aiohttp.ClientSession() as session:
-        retry_client = RetryClient(client_session=session, raise_for_status=False, retry_options=retry_options)
-        request = await retry_client.post(
+        async with RetryClient(client_session=session, raise_for_status=False, retry_options=retry_options) as retry_client:
+            async with retry_client.post(
                 "https://medium.com/_/graphql",
                 headers=headers,
-                json=json_data,
+                json=graphql_data,
                 timeout=timeout,
-        )
-        if request.status == 200:
-            try:
-                response_data = await request.json()
-            except Exception as ex:
-                logger.debug("Failed to parse response data as JSON")
-                logger.exception(ex)
-                raise ex
-        else:
-            logger.error(f"Failed to fetch post by ID {post_id} with status code: {request.status}")
-            return None
+            ) as request:
+                if request.status != 200:
+                    logger.error(f"Failed to fetch post by ID {post_id} with status code: {request.status}")
+                    return None
 
-    logger.trace(request.headers)
+                try:
+                    response_data = await request.json(loads=orjson.loads)
+                except Exception as ex:
+                    logger.debug("Failed to parse response data as JSON")
+                    logger.exception(ex)
+                    exception = ex
+
+    logger.debug(f"Request finished...")
+
+    if exception:
+        logger.error(f"Exception occured while fetching post {post_id}, so let's just fuck it up")
+        raise exception
 
     return response_data

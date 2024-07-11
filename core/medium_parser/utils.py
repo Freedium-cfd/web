@@ -244,6 +244,7 @@ async def resolve_medium_short_link(short_url_id: str, timeout: int = 5) -> str:
             allow_redirects=False,
         )
         post_url = request.headers["Location"]
+
     return post_url
 
 
