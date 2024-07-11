@@ -67,16 +67,10 @@ services:
     restart: always
     mem_limit: 2g
 
-  dragonfly:
-    image: 'docker.dragonflydb.io/dragonflydb/dragonfly'
-    ulimits:
-      memlock: -1
-    expose:
-      - 6379
+  redis_service:
+    image: redis:latest
     networks:
       - web_network
-    volumes:
-      - dragonflydata:/data
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 30s
