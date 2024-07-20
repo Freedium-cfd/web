@@ -1,5 +1,5 @@
 import re
-
+from typing import Literal
 
 MINIMAL_QUOTE_PATTERN = re.compile(r"""([&<>])(?!(amp|lt|gt|quot|#39);)""")
 MINIMAL_QUOTE_REPLACE_WITH = {
@@ -28,7 +28,7 @@ def quote_symbol(text: str) -> str:
 
 # https://stackoverflow.com/questions/1061697/whats-the-easiest-way-to-escape-html-in-python
 # XXX: disabling extra quoting as workaround
-def quote_html(html: str, quote_types: list[str]) -> list[tuple[int, str]]:
+def quote_html(html: str, quote_types: Literal["minimal", "normal", "extra", "full"]) -> list[tuple[int, str]]:
     if 'minimal' in quote_types or 'full' in quote_types or 'extra' in quote_types:
         for m in MINIMAL_QUOTE_PATTERN.finditer(html):
             yield m.span(), MINIMAL_QUOTE_REPLACE_WITH[m.group(1)]

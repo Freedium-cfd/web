@@ -9,21 +9,18 @@ import jinja2
 import tld
 from loguru import logger
 
-from rl_string_helper import (RLStringHelper, parse_markups,
-                              split_overlapping_ranges)
+from rl_string_helper import RLStringHelper, parse_markups, split_overlapping_ranges
 
 from . import jinja_env
-from .exceptions import (InvalidMediumPostID, InvalidMediumPostURL, InvalidURL,
-                         MediumParserException, MediumPostQueryError)
+from .exceptions import InvalidMediumPostID, InvalidMediumPostURL, InvalidURL, MediumParserException, MediumPostQueryError
 from .medium_api import query_post_by_id
 from .models.html_result import HtmlResult
 from .time import convert_datetime_to_human_readable
-from .utils import (correct_url, getting_percontage_of_match,
-                    is_has_valid_medium_post_id, is_valid_medium_url,
-                    is_valid_url, resolve_medium_url, extract_hex_string)
+from .utils import correct_url, getting_percontage_of_match, is_has_valid_medium_post_id, is_valid_medium_url, is_valid_url, resolve_medium_url, extract_hex_string
 
 if typing.TYPE_CHECKING:
     from database_lib import SQLiteCacheBackend
+
 
 class MediumParser:
     __slots__ = ("__post_id", "auth_cookies", "cache", "host_address", "jinja", "post_data", "timeout")
@@ -123,7 +120,7 @@ class MediumParser:
 
         return post_data, cache_used
 
-    async def query(self, use_cache: bool = True, retry: int = 3, force_cache: bool = False):
+    async def query(self, use_cache: bool = True, retry: int = 2, force_cache: bool = False):
         logger.debug(f"Medium QUERY: {use_cache=}, {retry=}, {force_cache=}")
 
         post_data, is_cache_used = None, False
@@ -167,7 +164,7 @@ class MediumParser:
         logger.trace(f"Query: done")
         return post_data
 
-    async def _parse_and_render_content_html_post(self, content: dict, title: str, subtitle: str, preview_image_id: str, highlights: list, tags: list) -> tuple[list, str, str]:
+    def _parse_and_render_content_html_post(self, content: dict, title: str, subtitle: str, preview_image_id: str, highlights: list, tags: list) -> tuple[list, str, str]:
         paragraphs = content["bodyModel"]["paragraphs"]
         tags_list = [tag["displayTitle"] for tag in tags]
         out_paragraphs: list[str] = []
@@ -497,12 +494,26 @@ class MediumParser:
             logger.warning(f"No post data found for post ID: {self.post_id}. Querying...")
             await self.query()
 
+        # Load templates once at the start
         jinja_template = jinja2.Environment(loader=jinja2.FileSystemLoader(template_folder))
         post_template = jinja_template.get_template("post.html")
 
-        title, subtitle, description, url, creator, collection, reading_time, free_access, updated_at, first_published_at, preview_image_id, tags = await self.generate_metadata()
+        # Generate metadata in parallel
+        metadata_task = asyncio.create_task(self.generate_metadata())
 
-        content, title, subtitle = await self._parse_and_render_content_html_post(self.post_data["data"]["post"]["content"], title, subtitle, preview_image_id, self.post_data["data"]["post"]["highlights"], tags)
+        # Parse and render content in parallel
+        content, title, subtitle = await asyncio.to_thread(
+            self._parse_and_render_content_html_post,
+            self.post_data["data"]["post"]["content"],
+            self.post_data["data"]["post"]["title"],
+            self.post_data["data"]["post"]["previewContent"]["subtitle"],
+            self.post_data["data"]["post"]["previewImage"]["id"],
+            self.post_data["data"]["post"]["highlights"],
+            self.post_data["data"]["post"]["tags"],
+        )
+
+        # Await metadata
+        title, subtitle, description, url, creator, collection, reading_time, free_access, updated_at, first_published_at, preview_image_id, tags = await metadata_task
 
         post_page_title_raw = "{{ title }} | by {{ creator.name }}"
         if collection:

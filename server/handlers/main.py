@@ -6,7 +6,7 @@ from loguru import logger
 
 from server import config
 from server.handlers.misc import delete_from_cache, report_problem
-from server.handlers.post import render_medium_post_link, render_postleter
+from server.handlers.post import render_medium_post_link, render_homepage
 from server.handlers.reverse_proxy import iframe_proxy, miro_proxy
 from server.services.jinja import base_template, main_template
 from server.utils.logger_trace import trace
@@ -51,8 +51,8 @@ async def route_processing(path: str, request: Request):
 
 @trace
 async def main_page():
-    postleter_template = await render_postleter(as_html=True)
-    main_template_rendered = main_template.render(postleter=postleter_template)
+    homepage_template = await render_homepage(as_html=True)
+    main_template_rendered = main_template.render(postleter=homepage_template)
     base_template_rendered = base_template.render(body_template=main_template_rendered, HOST_ADDRESS=config.HOST_ADDRESS)
     parsed_template = parse(base_template_rendered)
     serialized_template = serialize(parsed_template, encoding='utf-8')

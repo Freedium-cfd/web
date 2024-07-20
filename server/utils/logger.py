@@ -20,7 +20,7 @@ START_TIME = dt.datetime.now().strftime("%H-%M-%S")
 # https://betterstack.com/community/guides/logging/how-to-start-logging-with-python/
 logging.addLevelName("TRACE", 5)
 
-ENQUEUE = True
+ENQUEUE = False  # True # https://github.com/Delgan/loguru/issues/1118
 BACKTRACE = True
 DIAGNOSE = True
 LOG_LEVEL = logging.getLevelName(config.LOG_LEVEL_NAME)
@@ -40,24 +40,26 @@ def logger_register():
             "backtrace": BACKTRACE,
             "diagnose": DIAGNOSE,
         },
-        {
-            "sink": f"{LOG_FOLDER_PATH}/standart_{pid}_log_server",
-            "level": LOG_LEVEL,
-            "format": LOG_FORMAT,
-            "enqueue": ENQUEUE,
-        },
     ]
 
-    handlers.append(
-        {
-            "sink": f"{LOG_FOLDER_PATH}/debug_{pid}_log_server",
-            "level": "DEBUG",
-            "format": LOG_FORMAT,
-            "enqueue": ENQUEUE,
-        }
-    )
+    # handlers.append(
+    #     {
+    #         "sink": f"{LOG_FOLDER_PATH}/standart_{pid}_log_server",
+    #         "level": LOG_LEVEL,
+    #         "format": LOG_FORMAT,
+    #         "enqueue": ENQUEUE,
+    #     }
+    # )
 
     if config.MORE_LOGS:
+        handlers.append(
+            {
+                "sink": f"{LOG_FOLDER_PATH}/debug_{pid}_log_server",
+                "level": "DEBUG",
+                "format": LOG_FORMAT,
+                "enqueue": ENQUEUE,
+            }
+        )
         handlers.append(
             {
                 "sink": f"{LOG_FOLDER_PATH}/trace_{pid}_log_server",
@@ -66,6 +68,7 @@ def logger_register():
                 "enqueue": ENQUEUE,
             }
         )
+
     logger.configure(
         handlers=handlers,
         extra={"id": None},

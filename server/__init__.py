@@ -4,7 +4,9 @@ from typing import Optional
 
 import pickledb
 import redis.asyncio as redis
-from database_lib import SQLiteCacheBackend
+import time
+from psycopg2 import OperationalError, connect
+from database_lib import PostgreSQLCacheBackend, migrate_to_postgres, execute_migrate_to_postgres_in_thread
 from loguru import logger
 from xkcdpass import xkcd_password as xp
 
@@ -12,12 +14,32 @@ from server import config
 from server.utils.logger import configure_logger
 from server.utils.loguru_handler import InterceptHandler
 
+
+def wait_for_postgres(max_retries=5, retry_interval=5):
+    retries = 0
+    while retries < max_retries:
+        try:
+            conn = connect("postgresql://postgres:postgres@postgres:5432/postgres")
+            conn.close()
+            logger.info("Successfully connected to PostgreSQL")
+            return
+        except OperationalError as e:
+            logger.warning(f"PostgreSQL is not ready. Retrying in {retry_interval} seconds... (Attempt {retries + 1}/{max_retries})")
+            time.sleep(retry_interval)
+            retries += 1
+
+    raise Exception("Failed to connect to PostgreSQL after multiple attempts")
+
+
+wait_for_postgres()
+
 # logging.basicConfig(handlers=[InterceptHandler()], level=0, force=True)
 configure_logger()
 
-medium_cache = SQLiteCacheBackend('medium_db_cache.sqlite')
+medium_cache = PostgreSQLCacheBackend("postgresql://postgres:postgres@postgres:5432/postgres")
 medium_cache.init_db()
-medium_cache.enable_zstd()
+
+# migrate_to_postgres_thread = execute_migrate_to_postgres_in_thread("medium_db_cache.sqlite", "postgresql://postgres:postgres@postgres:5432/postgres")
 
 logger.debug(f"Database length: {medium_cache.all_length()}")
 

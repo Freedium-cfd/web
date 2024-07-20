@@ -1,2 +1,29 @@
 [tool.black]
 line-length = 220
+
+[tool.poetry]
+name = "freedium web"
+version = "0.1.0"
+description = ""
+authors = ["ZhymabekRoman <robanokssamit@yandex.ru>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+pickledb = "0.9.2"
+html5lib = "1.1"
+sentry-sdk = {version = "1.29.2", extras = ["fastapi"]}
+uvicorn = "0.27.1"
+jinja2 = "3.1.2"
+fastapi = "0.108.0"
+gunicorn = "21.2.0"
+redis = {version = "4.6.0", extras = ["hiredis"]}
+xkcdpass = "1.19.3"
+apscheduler = "3.10.4"
+loguru = "0.6.0"
+anyio = "<=4.0.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

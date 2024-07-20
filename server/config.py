@@ -17,6 +17,7 @@ WORKER_TIMEOUT = config("WORKER_TIMEOUT", cast=int, default=120)
 SENTRY_SDK_DSN = config("SENTRY_SDK_DSN", default=None)
 ENABLE_ADS_BANNER = config("ENABLE_ADS_BANNER", cast=bool, default=False)
 CACHE_LIFE_TIME = config("CACHE_LIFE_TIME", cast=int, default=60 * 60 * 5)
+HOME_PAGE_MAX_POSTS = config("HOME_PAGE_MAX_POSTS", cast=int, default=30)
 
 REDIS_HOST = config("REDIS_HOST", default="redis_service")
 REDIS_PORT = config("REDIS_PORT", cast=int, default=6379)

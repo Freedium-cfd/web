@@ -26,8 +26,8 @@ def server_cmd(cmd, opts):
 
     # from server.services.worker import execute_server_worker
     from server.services.server import execute_server
-    from server.utils.maintenance_scheduler import do_maintenance
+    # from server.utils.maintenance_scheduler import do_maintenance
 
-    threading.Thread(target=do_maintenance, daemon=True).start()
+    # threading.Thread(target=do_maintenance, daemon=True).start()
     # execute_server_worker(host="0.0.0.0", port=opts.port)
     execute_server(host="0.0.0.0", port=opts.port)

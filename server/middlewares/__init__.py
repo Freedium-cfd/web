@@ -5,7 +5,7 @@ from server.middlewares.maintenance_mode import MaintenanceModeMiddleware
 origins = ["*"]
 
 def register_middlewares(app):
-    app.add_middleware(MaintenanceModeMiddleware)
+    # app.add_middleware(MaintenanceModeMiddleware)
     app.add_middleware(LoggerMiddleware)
     app.add_middleware(
         CORSMiddleware,

@@ -15,11 +15,6 @@ from server.utils.error import generate_error
 from server.utils.utils import string_to_number_ascii
 
 
-async def get_body(request: Request) -> bytes:
-     body = await request.body()
-     return body
-
-
 class LoggerMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next: Callable[[Request], Awaitable[StreamingResponse]]) -> Response:  # type: ignore
         if filter_bots(request.headers.get("User-Agent")):
@@ -33,8 +28,6 @@ class LoggerMiddleware(BaseHTTPMiddleware):
         with logger.contextualize(id=generated_id):
             logger.debug(f"Current ID '{generated_id}' transponder code is '{transponder_code}'")
             logger.trace(request.__dict__)
-
-            await request.body()
 
             logger.debug(f"< HTTP/{request['http_version']} {request.method} {request.url}")
             logger.debug(f"< IP host origin: {request.client.host}")
@@ -52,9 +45,6 @@ class LoggerMiddleware(BaseHTTPMiddleware):
                 logger.debug("< Coockies:")
                 for name, value in request.cookies.items():
                     logger.debug(f"\t< {name}: {value}")
-
-            # Workaround for stupid Starlette bug: https://github.com/tiangolo/fastapi/issues/394
-            await get_body(request)
 
             try:
                 response = await asyncio.wait_for(call_next(request), timeout=config.REQUEST_TIMEOUT)

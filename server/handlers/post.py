@@ -10,7 +10,7 @@ from medium_parser import medium_parser_exceptions
 from medium_parser.core import MediumParser
 
 from server import config, home_page_process, medium_cache, redis_storage, transponder_code_correlation
-from server.services.jinja import base_template, postleter_template
+from server.services.jinja import base_template, homepage_template
 from server.utils.cache import aio_redis_cache
 from server.utils.exceptions import handle_exception
 from server.utils.logger_trace import trace
@@ -20,7 +20,7 @@ from server.utils.utils import safe_check_redis_connection
 
 @trace
 @aio_redis_cache(10 * 60)
-async def render_postleter(limit: int = 30, as_html: bool = False):
+async def render_homepage(limit: int = config.HOME_PAGE_MAX_POSTS, as_html: bool = False):
     random_post_id_list = [i[0] for i in medium_cache.random(limit)]
     home_page_process[transponder_code_correlation.get()] = random_post_id_list
 
@@ -41,13 +41,12 @@ async def render_postleter(limit: int = 30, as_html: bool = False):
 
     await asyncio.gather(*tasks)
 
-    postleter_template_rendered = postleter_template.render(post_list=outlet_posts_list)
+    homepage_template_rendered = homepage_template.render(post_list=outlet_posts_list)
     if as_html:
-        return postleter_template_rendered
-    return HTMLResponse(postleter_template_rendered)
+        return homepage_template_rendered
+    return HTMLResponse(homepage_template_rendered)
 
 
-@alru_cache(maxsize=20)
 async def render_medium_post_link(path: str, use_cache: bool = True, use_redis: bool = True):
     redis_available = await safe_check_redis_connection(redis_storage)
     logger.debug("Redis available: {}", redis_available)
