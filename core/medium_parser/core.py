@@ -3,10 +3,11 @@ import math
 import textwrap
 import typing
 import urllib.parse
-from contextlib import suppress
+from typing import Optional
 
 import jinja2
 import tld
+from asyncer import asyncify
 from loguru import logger
 
 from rl_string_helper import RLStringHelper, parse_markups, split_overlapping_ranges
@@ -16,111 +17,99 @@ from .exceptions import InvalidMediumPostID, InvalidMediumPostURL, InvalidURL, M
 from .medium_api import query_post_by_id
 from .models.html_result import HtmlResult
 from .time import convert_datetime_to_human_readable
-from .utils import correct_url, getting_percontage_of_match, is_has_valid_medium_post_id, is_valid_medium_url, is_valid_url, resolve_medium_url, extract_hex_string
+from .utils import correct_url, extract_hex_string, getting_percontage_of_match, is_has_valid_medium_post_id, is_valid_medium_url, is_valid_url, resolve_medium_url
 
 if typing.TYPE_CHECKING:
     from database_lib import SQLiteCacheBackend
 
 
 class MediumParser:
-    __slots__ = ("__post_id", "auth_cookies", "cache", "host_address", "jinja", "post_data", "timeout")
+    __slots__ = ("cache", "host_address", "jinja_template", "post_template", "timeout", "auth_cookies")
 
-    def __init__(self, post_id: str, cache: "SQLiteCacheBackend", timeout: int, host_address: str, auth_cookies: str = None):
+    def __init__(self, cache: "SQLiteCacheBackend", timeout: int, host_address: str, auth_cookies: Optional[str] = None, template_folder: str = "./templates"):
         self.timeout = timeout
         self.cache = cache
         self.host_address = host_address
-        self.post_id = post_id
-        self.post_data = None
         self.auth_cookies = auth_cookies
+        self.jinja_template = jinja2.Environment(loader=jinja2.FileSystemLoader(template_folder))
+        self.post_template = self.jinja_template.get_template("post.html")
 
-    @classmethod
-    async def from_unknown(cls, unknown: str, cache: "SQLiteCacheBackend", timeout: int, host_address: str, auth_cookies: str = None) -> "MediumParser":
-        logger.debug(f"We got some unknown data: {unknown=}, with {cache=}, {timeout=}, {host_address=}, {auth_cookies=}. Trying resolve them...///")
+    async def resolve(self, unknown: str) -> str:
+        logger.debug(f"We got some unknown data: {unknown=}. Trying resolve them...///")
 
         if is_has_valid_medium_post_id(unknown):
             logger.debug("Seems like it's valid post_id")
-            return cls(unknown, cache=cache, timeout=timeout, host_address=host_address, auth_cookies=auth_cookies)
+            return extract_hex_string(unknown)
 
         logger.debug("...maybe it's URL. Let's checkout...")
-        return await cls.from_url(unknown, cache=cache, timeout=timeout, host_address=host_address, auth_cookies=auth_cookies)
+        post_id = await self.resolve_url(unknown)
+        return post_id
 
-    @classmethod
-    async def from_url(cls, url: str, cache: "SQLiteCacheBackend", timeout: int, host_address: str, auth_cookies: str = None) -> "MediumParser":
+    async def resolve_url(self, url: str) -> str:
         sanitized_url = correct_url(url)
         if not is_valid_url(url) or not await is_valid_medium_url(sanitized_url):
             raise InvalidURL(f"Invalid Medium URL: {sanitized_url}")
 
-        post_id = await resolve_medium_url(sanitized_url, timeout)
+        post_id = await resolve_medium_url(sanitized_url, self.timeout)
         if not post_id:
             raise InvalidMediumPostURL(f"Could not find Medium post ID for URL: {sanitized_url}")
 
-        return cls(post_id, cache=cache, timeout=timeout, host_address=host_address, auth_cookies=auth_cookies)
+        return post_id
 
-    @property
-    def post_id(self):
-        return self.__post_id
-
-    @post_id.setter
-    def post_id(self, value):
-        if not is_has_valid_medium_post_id(value):
-            raise InvalidMediumPostID(f"Invalid medium post ID: {value}")
-
-        self.__post_id = extract_hex_string(value)
-
-    @post_id.getter
-    def post_id(self):
-        return self.__post_id
-
-    async def delete_from_cache(self, post_id: str = None):
-        if not post_id:
-            post_id = self.post_id
-
+    async def delete_from_cache(self, post_id: str):
         self.cache.delete(post_id)
-
         return True
 
-    async def get_post_data_from_cache(self):
+    async def get_post_data_from_cache(self, post_id: str):
         async def _get_from_cache():
             logger.debug("Using cache backend")
-            post_data = self.cache.pull(self.post_id)
+            post_data = self.cache.pull(post_id)
             if post_data:
                 logger.debug("post query was found on cache")
                 return post_data.json()
-            logger.debug(f"No data found in cache by {self.post_id}")
+            logger.debug(f"No data found in cache by {post_id}")
             return None
 
-        with suppress(Exception):
-            return await asyncio.wait_for(_get_from_cache(), timeout=3)
+        try:
+            return await asyncio.wait_for(_get_from_cache(), timeout=self.timeout)
+        except asyncio.TimeoutError:
+            logger.debug("Timeout while waiting for cache")
+            return None
+        except Exception as e:
+            logger.error(f"Error while waiting for cache: {e}")
+            return None
 
-        return None
-
-    async def get_post_data_from_api(self):
+    async def get_post_data_from_api(self, post_id: str):
         async def _get_from_api():
             logger.debug("Using API to gather post data")
             try:
-                return await query_post_by_id(self.post_id, self.timeout, self.auth_cookies)
+                return await query_post_by_id(post_id, self.timeout, self.auth_cookies)
             except Exception as ex:
                 logger.debug("Error while querying post data from Medium API")
                 logger.exception(ex)
                 return None
 
-        with suppress(Exception):
-            return await asyncio.wait_for(_get_from_api(), timeout=self.timeout + 1)
+        try:
+            return await asyncio.wait_for(_get_from_api(), timeout=self.timeout)
+        except asyncio.TimeoutError:
+            logger.debug("Timeout while waiting for cache")
+            return None
+        except Exception as e:
+            logger.error(f"Error while waiting for cache: {e}")
+            return None
 
-        return None
-
-    async def query_get(self, use_cache: bool, force_cache: bool = False):
+    async def query_get(self, post_id: str, use_cache: bool, force_cache: bool = False):
         cache_used = True
-        post_data = await self.get_post_data_from_cache() if use_cache else None
+        post_data = await self.get_post_data_from_cache(post_id) if use_cache else None
 
         if not post_data and not force_cache:
             logger.debug("Getting value from cache failed, using API")
             cache_used = False
-            post_data = await self.get_post_data_from_api()
+            post_data = await self.get_post_data_from_api(post_id)
 
         return post_data, cache_used
 
-    async def query(self, use_cache: bool = True, retry: int = 2, force_cache: bool = False):
+    async def query(self, post_id: str, use_cache: bool = True, retry: int = 2, force_cache: bool = False):
         logger.debug(f"Medium QUERY: {use_cache=}, {retry=}, {force_cache=}")
 
         post_data, is_cache_used = None, False
@@ -129,7 +118,7 @@ class MediumParser:
         reason = None
         while not post_data and attempt < retry:
             try:
-                post_data, is_cache_used = await self.query_get(use_cache, force_cache)
+                post_data, is_cache_used = await self.query_get(post_id, use_cache, force_cache)
 
                 if not post_data:
                     reason = "No post data returned"
@@ -139,7 +128,7 @@ class MediumParser:
                     reason = f"Post data contains an error: {post_data=}"
                 elif not post_data.get("data"):
                     reason = f"Post data missing 'data' key: {post_data=}"
-                elif not post_data.get("data").get("post"):
+                elif not post_data.get("data", {}).get("post"):
                     reason = f"Post data missing 'data.post' key: {post_data=}"
 
                 if reason is None:
@@ -149,18 +138,18 @@ class MediumParser:
                 logger.error(f"Attempt {attempt + 1} failed with exception: {e}")
                 logger.debug(f"Retrying in {2 ** attempt} seconds...")
                 await asyncio.sleep(2**attempt)
+            finally:
                 attempt += 1
         else:
             if not reason:
                 reason = "Unknown"
 
-            raise MediumPostQueryError(f"Could not query post by ID from API: {self.post_id}. Reason: {reason}")
+            raise MediumPostQueryError(f"Could not query post by ID from API: {post_id}. Reason: {reason}")
 
         if not is_cache_used:
             logger.debug("Pushing post data to cache")
-            self.cache.push(self.post_id, post_data)
+            self.cache.push(post_id, post_data)
 
-        self.post_data = post_data
         logger.trace(f"Query: done")
         return post_data
 
@@ -217,7 +206,7 @@ class MediumParser:
                         current_pos += 1
                         continue
                     elif subtitle and subtitle.endswith("…") and len(paragraph["text"]) > 100:
-                        subtitle = None
+                        subtitle = ""
                 elif paragraph["type"] == "IMG":
                     if paragraph["metadata"] and paragraph["metadata"]["id"] == preview_image_id:
                         logger.trace("Preview image was detected, ignore...")
@@ -446,33 +435,33 @@ class MediumParser:
 
         return out_paragraphs, title, subtitle
 
-    async def render_as_html(self, template_folder: str = "./templates"):
+    async def render_as_html(self, post_id: str):
+        post_data = await self.query(post_id)
         try:
-            result = await self._render_as_html(template_folder)
+            result = await self._render_as_html(post_data, post_id)
         except Exception as ex:
             raise ex
-            # raise MediumParserException(ex) from ex
         else:
             return result
 
-    async def generate_metadata(self, as_dict: bool = False) -> tuple:
-        title = RLStringHelper(self.post_data["data"]["post"]["title"], ["minimal"]).get_text()
-        subtitle = RLStringHelper(self.post_data["data"]["post"]["previewContent"]["subtitle"]).get_text()
+    async def generate_metadata(self, post_data: dict, post_id: str, as_dict: bool = False) -> tuple:
+        title = RLStringHelper(post_data["data"]["post"]["title"], ["minimal"]).get_text()
+        subtitle = RLStringHelper(post_data["data"]["post"]["previewContent"]["subtitle"]).get_text()
         description = RLStringHelper(textwrap.shorten(subtitle, width=100, placeholder="...")).get_text()
-        preview_image_id = self.post_data["data"]["post"]["previewImage"]["id"]
-        creator = self.post_data["data"]["post"]["creator"]
-        collection = self.post_data["data"]["post"]["collection"]
-        url = self.post_data["data"]["post"]["mediumUrl"]
+        preview_image_id = post_data["data"]["post"]["previewImage"]["id"]
+        creator = post_data["data"]["post"]["creator"]
+        collection = post_data["data"]["post"]["collection"]
+        url = post_data["data"]["post"]["mediumUrl"]
 
-        reading_time = math.ceil(self.post_data["data"]["post"]["readingTime"])
-        free_access = "No" if self.post_data["data"]["post"]["isLocked"] else "Yes"
-        updated_at = convert_datetime_to_human_readable(self.post_data["data"]["post"]["updatedAt"])
-        first_published_at = convert_datetime_to_human_readable(self.post_data["data"]["post"]["firstPublishedAt"])
-        tags = self.post_data["data"]["post"]["tags"]
+        reading_time = math.ceil(post_data["data"]["post"]["readingTime"])
+        free_access = "No" if post_data["data"]["post"]["isLocked"] else "Yes"
+        updated_at = convert_datetime_to_human_readable(post_data["data"]["post"]["updatedAt"])
+        first_published_at = convert_datetime_to_human_readable(post_data["data"]["post"]["firstPublishedAt"])
+        tags = post_data["data"]["post"]["tags"]
 
         if as_dict:
             return {
-                "post_id": self.post_id,
+                "post_id": post_id,
                 "title": title,
                 "subtitle": subtitle,
                 "description": description,
@@ -489,27 +478,18 @@ class MediumParser:
 
         return title, subtitle, description, url, creator, collection, reading_time, free_access, updated_at, first_published_at, preview_image_id, tags
 
-    async def _render_as_html(self, template_folder: str = "./templates") -> "HtmlResult":
-        if not self.post_data:
-            logger.warning(f"No post data found for post ID: {self.post_id}. Querying...")
-            await self.query()
-
-        # Load templates once at the start
-        jinja_template = jinja2.Environment(loader=jinja2.FileSystemLoader(template_folder))
-        post_template = jinja_template.get_template("post.html")
-
+    async def _render_as_html(self, post_data: dict, post_id: str) -> "HtmlResult":
         # Generate metadata in parallel
-        metadata_task = asyncio.create_task(self.generate_metadata())
+        metadata_task = asyncio.create_task(self.generate_metadata(post_data, post_id))
 
         # Parse and render content in parallel
-        content, title, subtitle = await asyncio.to_thread(
-            self._parse_and_render_content_html_post,
-            self.post_data["data"]["post"]["content"],
-            self.post_data["data"]["post"]["title"],
-            self.post_data["data"]["post"]["previewContent"]["subtitle"],
-            self.post_data["data"]["post"]["previewImage"]["id"],
-            self.post_data["data"]["post"]["highlights"],
-            self.post_data["data"]["post"]["tags"],
+        content, title, subtitle = await asyncify(self._parse_and_render_content_html_post)(
+            post_data["data"]["post"]["content"],
+            post_data["data"]["post"]["title"],
+            post_data["data"]["post"]["previewContent"]["subtitle"],
+            post_data["data"]["post"]["previewImage"]["id"],
+            post_data["data"]["post"]["highlights"],
+            post_data["data"]["post"]["tags"],
         )
 
         # Await metadata
@@ -535,7 +515,7 @@ class MediumParser:
             "content": content,
             "tags": tags,
         }
-        post_template_rendered = post_template.render(post_context)
+        post_template_rendered = self.post_template.render(post_context)
 
         return HtmlResult(post_page_title_rendered, description, url, post_template_rendered)
 

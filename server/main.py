@@ -22,9 +22,6 @@ FASTAPI_APPLICATION_CONFIG = {"title": APP_TITLE, "version": APP_VERSION}
 if config.DISABLE_EXTERNAL_DOCS:
     FASTAPI_APPLICATION_CONFIG.update({"openapi_url": None, "docs_url": None, "redoc_url": None})
 
-if config.SENTRY_SDK_DSN:
-    sentry_sdk.init(dsn=config.SENTRY_SDK_DSN, traces_sample_rate=1.0)
-
 
 async def limiter_callback(request, response, pexpire: int):
     expire = ceil(pexpire / 1000)

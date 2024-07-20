@@ -55,8 +55,8 @@ services:
     #       path: "**/requirements.txt"
     #     - action: rebuild
     #       path: "**/requirements-fast.txt"
-    expose:
-      - 7080
+    ports:
+      - "7080:7080"
     networks:
       - freedium_net
     # healthcheck:
@@ -69,29 +69,10 @@ services:
     mem_limit: 4g
     stop_grace_period: 2m
 
-  redis_service:
-    image: redis:latest
-    networks:
-      - freedium_net
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 30s
-      start_period: 20s
-      timeout: 10s
-      retries: 3
-    restart: always
-    stop_grace_period: 2m
-
   # redis_service:
-  #   image: 'docker.dragonflydb.io/dragonflydb/dragonfly'
-  #   ulimits:
-  #     memlock: -1
-  #   expose:
-  #     - 6379
+  #   image: redis:latest
   #   networks:
-  #     - web_network
-  #   volumes:
-  #     - dragonflydata:/data
+  #     - freedium_net
   #   healthcheck:
   #     test: ["CMD", "redis-cli", "ping"]
   #     interval: 30s
@@ -101,6 +82,26 @@ services:
   #   restart: always
   #   stop_grace_period: 2m
 
+  redis_service:
+    image: 'docker.dragonflydb.io/dragonflydb/dragonfly'
+    ulimits:
+      memlock: -1
+    # expose:
+    #   - 6379
+    networks:
+      - freedium_net
+    volumes:
+      - dragonflydata:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      start_period: 20s
+      timeout: 10s
+      retries: 3
+    restart: always
+    stop_grace_period: 2m
+    # mem_limit: 1g
+
   postgres:
     image: postgres:16.3-alpine3.20
     networks:
@@ -108,7 +109,8 @@ services:
     ports:
       - 5432:5432
     volumes:
-      - ./postgres:/var/lib/postgresql/data
+      - ~/apps/postgres:/var/lib/postgresql/data
+    #   - ./postgres:/var/lib/postgresql/data
     environment:
       - POSTGRES_PASSWORD=postgres
       - POSTGRES_USER=postgres

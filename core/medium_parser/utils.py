@@ -107,9 +107,10 @@ def is_valid_url(url):
     return bool(parsed_url.scheme and parsed_url.netloc)
 
 
-def getting_percontage_of_match(string: str, matched_string: str) -> int:
+def getting_percontage_of_match(string: str, matched_string: str) -> float:
     if string is None or matched_string is None:
-        return 0
+        return 0.0
+
     return difflib.SequenceMatcher(None, string, matched_string).ratio() * 100
 
 

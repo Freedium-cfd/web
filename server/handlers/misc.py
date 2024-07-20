@@ -2,9 +2,7 @@ from loguru import logger
 from pydantic import BaseModel
 from fastapi.responses import JSONResponse
 
-from medium_parser.core import MediumParser
-
-from server import config, ban_db
+from server import config, ban_db, medium_parser
 from server.utils.notify import send_message
 from server.utils.logger_trace import trace
 
@@ -30,8 +28,7 @@ async def delete_from_cache(key_data: DeleteFromCache):
         return JSONResponse({"message": f"Wrong secret key: {key_data.ADMIN_SECRET_KEY}"}, status_code=403)
 
     try:
-        post = MediumParser(key_data.key, timeout=config.TIMEOUT, host_address=config.HOST_ADDRESS, auth_cookies=config.MEDIUM_AUTH_COOKIES)
-        await post.delete_from_cache()
+        await medium_parser.delete_from_cache(key_data.key)
     except Exception as ex:
         logger.exception(ex)
         return JSONResponse({"message": f"Couldn't delete from cache: {ex}"}, status_code=500)

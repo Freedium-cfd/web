@@ -8,7 +8,7 @@ from starlette.requests import Request
 from starlette.responses import Response, StreamingResponse
 from starlette.types import Message
 
-from server import transponder_code_correlation, url_correlation, xkcd_passwd, xp, config, home_page_process
+from server import transponder_code_correlation, url_correlation, xkcd_passwd, xp, config
 from server.utils.anti_bot import filter_bots
 from server.utils.notify import send_message
 from server.utils.error import generate_error
@@ -51,7 +51,9 @@ class LoggerMiddleware(BaseHTTPMiddleware):
             except Exception as ex:
                 exception_class = type(ex)
                 logger.exception(ex)
-                send_message(f"Error while processing url: <code>{url_correlation.get()}</code>, transponder_id: <code>{generated_id}</code>, transponder_code: <code>{transponder_code_correlation.get()}</code>, error: <code>{ex}</code>. exception: <code>{exception_class.__name__}</code>. {home_page_process.get(transponder_code_correlation.get(), '')}")
+                send_message(
+                    f"Error while processing url: <code>{url_correlation.get()}</code>, transponder_id: <code>{generated_id}</code>, transponder_code: <code>{transponder_code_correlation.get()}</code>, error: <code>{ex}</code>. exception: <code>{exception_class.__name__}</code>."
+                )
                 response = await generate_error()
 
             logger.trace(response.__dict__)

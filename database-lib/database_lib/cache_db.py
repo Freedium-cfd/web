@@ -1,4 +1,4 @@
-import json
+import orjson as json
 import time
 import sqlite3
 import threading
