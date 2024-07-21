@@ -28,7 +28,7 @@ ENABLE_ADS_BANNER = config("ENABLE_ADS_BANNER", cast=bool, default=False)
 
 REDIS_HOST = config("REDIS_HOST", default="redis_service")
 REDIS_PORT = config("REDIS_PORT", cast=int, default=6379)
-REDIS_TIMEOUT = config("REDIS_TIMEOUT", cast=int, default=0.75)
+REDIS_TIMEOUT = config("REDIS_TIMEOUT", cast=int, default=1.75)
 
 SENTRY_SDK_DSN = config("SENTRY_SDK_DSN", default=None)
 SENTRY_TRACES_SAMPLE_RATE = config("SENTRY_TRACES_SAMPLE_RATE", cast=float, default=0.2)
