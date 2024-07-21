@@ -26,6 +26,40 @@ services:
     restart: always
     stop_grace_period: 2m
 
+  wgcf1:
+    image: neilpang/wgcf-docker:latest
+    volumes:
+    #   - ./wgcf:/wgcf
+      - /lib/modules:/lib/modules
+      - ./scripts/entryWGCF.sh:/entry.sh
+      - /etc/localtime:/etc/localtime:ro
+    privileged: true
+    sysctls:
+      net.ipv6.conf.all.disable_ipv6: 0
+    cap_add:
+      - NET_ADMIN
+    # ports:
+    #   - "9681:1080"
+    restart: always
+    healthcheck:
+      test: curl -fs https://www.cloudflare.com/cdn-cgi/trace | grep -q -E 'warp=(on|plus)' && exit 0 || exit 1
+      interval: 5s
+      timeout: 2s
+      retries: 10
+
+  dante_1:
+    image: shturman/dante:1.4.2
+    volumes:
+      - ./scripts/dante.config:/etc/sockd.conf
+      - /etc/localtime:/etc/localtime:ro
+    restart: always
+    environment:
+      - CFGFILE=/etc/sockd.conf
+    network_mode: "service:wgcf1"
+    depends_on:
+      wgcf1:
+        condition: service_healthy
+
   web:
     build:
       context: ./

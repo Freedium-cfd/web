@@ -3,17 +3,21 @@ from typing import Optional
 import aiohttp
 import orjson
 from aiohttp_retry import RetryClient
+from aiohttp_socks import ProxyConnector
 from loguru import logger
 
 from . import retry_options
 from .time import get_unix_ms
 from .utils import generate_random_sha256_hash
 
+socks_proxy = "socks5h://wgcf1:1080"
 
-# https://gist.github.com/vladar/a4e3afd608cfe8b13e5844d75447f0a4
-async def query_post_by_id(post_id: str, timeout: int = 3, auth_cookies: Optional[str] = None):
-    logger.debug(f"Starting request contructing for post {post_id}")
+
+async def query_post_by_id(post_id: str, timeout: int = 3, auth_cookies: Optional[str] = None, use_proxy: bool = True):
+    logger.debug(f"Starting request construction for post {post_id}")
     auth_cookies = "" if auth_cookies is None else auth_cookies
+
+    connector = ProxyConnector.from_url(socks_proxy) if use_proxy else None
 
     headers = {
         "X-APOLLO-OPERATION-ID": generate_random_sha256_hash(),
@@ -44,7 +48,7 @@ async def query_post_by_id(post_id: str, timeout: int = 3, auth_cookies: Optiona
 
     logger.debug(f"Request started...")
 
-    async with aiohttp.ClientSession() as session:
+    async with aiohttp.ClientSession(connector=connector) as session:
         async with RetryClient(client_session=session, raise_for_status=False, retry_options=retry_options) as retry_client:
             async with retry_client.post(
                 "https://medium.com/_/graphql",

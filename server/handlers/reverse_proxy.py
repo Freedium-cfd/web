@@ -29,7 +29,6 @@ async def iframe_proxy(iframe_id):
     return Response(content=request_content_soup.prettify(), media_type="text/html", headers=IFRAME_HEADERS)
 
 
-@trace
 async def miro_proxy(miro_data: str):
     async with aiohttp.ClientSession() as client:
         request = await client.get(
