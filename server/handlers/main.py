@@ -39,10 +39,10 @@ async def route_processing(path: str, request: Request):
         if key_data != config.ADMIN_SECRET_KEY:
             return JSONResponse({"message": f"Wrong secret key: {key_data}"}, status_code=403)
 
-    if path.startswith("@miro/"):
-        miro_data = path.removeprefix("@miro/")
-        return await miro_proxy(miro_data)
-    elif path.startswith("render_iframe/"):
+    # if path.startswith("@miro/"):
+    #     miro_data = path.removeprefix("@miro/")
+    #     return await miro_proxy(miro_data)
+    if path.startswith("render_iframe/"):
         iframe_id = path.removeprefix("render_iframe/")
         return await iframe_proxy(iframe_id)
 

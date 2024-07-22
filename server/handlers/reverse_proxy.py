@@ -8,8 +8,9 @@ from bs4 import BeautifulSoup, Comment
 
 IFRAME_HEADERS = {"Access-Control-Allow-Origin": "*", "X-Frame-Options": "SAMEORIGIN"}
 
+
 @trace
-async def iframe_proxy(iframe_id):
+async def iframe_proxy(iframe_id: str):
     # How Medium embeds works: https://stackoverflow.com/questions/56594766/medium-embed-ly-notifyresize-does-not-work-on-safari
     async with aiohttp.ClientSession() as client:
         request = await client.get(
