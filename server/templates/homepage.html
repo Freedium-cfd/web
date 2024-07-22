@@ -1,7 +1,7 @@
 <div class="p-2 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 w-full">
     {% for post in post_list %}
         <div class="p-6 bg-white dark:bg-gray-600 rounded-xl">
-            <a class="group post_view" post_id="{{ post.post_id }}">
+            <a class="group" href="/{{ post.post_id }}">
                 <div class="max-h-60 min-h-60 m-auto overflow-hidden flex items-center justify-center">
                     {% if post.preview_image_id %}
                         <img data-src="https://miro.medium.com/v2/resize:fit:700/{{ post.preview_image_id }}"
@@ -37,12 +37,7 @@
             </div>
             <p class="mt-6 leading-normal line-clamp-3 text-gray-600 dark:text-gray-200">{{ post.description }}</p>
         </div>
-        <a post_id="{{ post.post_id }}" class="inline-block mt-6 text-purple-500 hover:text-purple-400 post_view">Read More</a>
+        <a href="/{{ post.post_id }}" class="inline-block mt-6 text-purple-500 hover:text-purple-400">Read More</a>
     </div>
 {% endfor %}
 </div>
-<script>
-        for (let post_a_el of document.getElementsByClassName("post_view")) {
-    post_a_el.href = `${window.location.origin}/${post_a_el.attributes["post_id"].value}`
-}
-</script>
