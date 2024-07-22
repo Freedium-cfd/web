@@ -347,7 +347,7 @@ document.addEventListener('scroll', function () {
                     if (element.tagName === "IMG" && element.hasAttribute("data-src")) {
                         const srcAttribute = element.attributes["data-src"].value;
                         if (srcAttribute.startsWith("https://miro.medium.com/v2/")) {
-                            element.setAttribute("src", srcAttribute.replace("https://miro.medium.com/v2/", "{{HOST_ADDRESS}}/@miro/v2/"));
+                            element.setAttribute("src", srcAttribute.replace("https://miro.medium.com/v2/", "{{host_address}}/@miro/v2/"));
                         }
                     }
                 }

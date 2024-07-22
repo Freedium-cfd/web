@@ -53,7 +53,7 @@ async def route_processing(path: str, request: Request):
 async def main_page():
     homepage_template = await render_homepage(as_html=True)
     main_template_rendered = main_template.render(postleter=homepage_template)
-    base_template_rendered = base_template.render(body_template=main_template_rendered, HOST_ADDRESS=config.HOST_ADDRESS)
+    base_template_rendered = base_template.render(body_template=main_template_rendered, host_address=config.HOST_ADDRESS)
     parsed_template = parse(base_template_rendered)
     serialized_template = serialize(parsed_template, encoding='utf-8')
     return HTMLResponse(serialized_template)

@@ -30,13 +30,14 @@ async def iframe_proxy(iframe_id: str):
     return Response(content=request_content_soup.prettify(), media_type="text/html", headers=IFRAME_HEADERS)
 
 
-async def miro_proxy(miro_data: str):
-    async with aiohttp.ClientSession() as client:
-        request = await client.get(
-           f"https://miro.medium.com/{miro_data}",
-            timeout=config.TIMEOUT,
-            headers={"User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.116 Safari/537.36"},
-        )
-        request_content = await request.read()
-        content_type = request.headers["Content-Type"]
-    return Response(content=request_content, media_type=content_type)
+# async def miro_proxy(miro_data: str):
+#     async with aiohttp.ClientSession() as client:
+#         request = await client.get(
+#            f"https://miro.medium.com/{miro_data}",
+#             timeout=config.TIMEOUT,
+#             headers={"User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.116 Safari/537.36"},
+#         )
+#         request_content = await request.read()
+#         content_type = request.headers["Content-Type"]
+#     return Response(content=request_content, media_type=content_type)
+#

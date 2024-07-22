@@ -88,12 +88,13 @@ async def render_medium_post_link(path: str, use_cache: bool = True, use_redis: 
         return await handle_exception(ex, status_code=500)
     else:
         base_context = {
+            "host_address": config.HOST_ADDRESS,
             "enable_ads_header": config.ENABLE_ADS_BANNER,
             "body_template": rendered_medium_post.data,
             "title": rendered_medium_post.title,
             "description": rendered_medium_post.description,
         }
-        rendered_post = base_template.render(base_context, HOST_ADDRESS=config.HOST_ADDRESS)
+        rendered_post = base_template.render(base_context)
         parsed_rendered_post = parse(rendered_post)
         serialized_rendered_post = serialize(parsed_rendered_post, encoding="utf-8")
 

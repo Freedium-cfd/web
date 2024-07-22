@@ -24,3 +24,15 @@ class InvalidMediumPostID(MediumParserException):
 
 class MediumPostQueryError(MediumParserException):
     pass
+
+
+class MediumPostNotFound(MediumPostQueryError):
+    pass
+
+
+class MediumPostUnavailable(MediumPostQueryError):
+    pass
+
+
+class MediumPostDeleted(MediumPostQueryError):
+    pass

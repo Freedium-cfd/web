@@ -14,25 +14,25 @@ from rl_string_helper import RLStringHelper, parse_markups, split_overlapping_ra
 
 from . import jinja_env
 from .exceptions import InvalidMediumPostID, InvalidMediumPostURL, InvalidURL, MediumParserException, MediumPostQueryError
-from .medium_api import query_post_by_id
+from .medium_api import MediumApi
 from .models.html_result import HtmlResult
 from .time import convert_datetime_to_human_readable
 from .utils import correct_url, extract_hex_string, getting_percontage_of_match, is_has_valid_medium_post_id, is_valid_medium_url, is_valid_url, resolve_medium_url
 
 if typing.TYPE_CHECKING:
-    from database_lib import SQLiteCacheBackend
+    from database_lib import AbstractCacheBackend
 
 
 class MediumParser:
-    __slots__ = ("cache", "host_address", "jinja_template", "post_template", "timeout", "auth_cookies")
+    __slots__ = ("cache", "host_address", "jinja_template", "post_template", "timeout")
 
-    def __init__(self, cache: "SQLiteCacheBackend", timeout: int, host_address: str, auth_cookies: Optional[str] = None, template_folder: str = "./templates"):
-        self.timeout = timeout
-        self.cache = cache
-        self.host_address = host_address
-        self.auth_cookies = auth_cookies
-        self.jinja_template = jinja2.Environment(loader=jinja2.FileSystemLoader(template_folder))
-        self.post_template = self.jinja_template.get_template("post.html")
+    def __init__(self, cache: "AbstractCacheBackend", medium_api: MediumApi, timeout: int, host_address: str, template_folder: str = "./templates"):
+        self.timeout: int = timeout
+        self.cache: AbstractCacheBackend = cache
+        self.host_address: str = host_address
+        self.jinja_template: jinja2.Environment = jinja2.Environment(loader=jinja2.FileSystemLoader(template_folder))
+        self.post_template: jinja2.Template = self.jinja_template.get_template("post.html")
+        self.medium_api: MediumApi = medium_api
 
     async def resolve(self, unknown: str) -> str:
         logger.debug(f"We got some unknown data: {unknown=}. Trying resolve them...///")
@@ -83,7 +83,7 @@ class MediumParser:
         async def _get_from_api():
             logger.debug("Using API to gather post data")
             try:
-                return await query_post_by_id(post_id, self.timeout, self.auth_cookies)
+                return await self.medium_api.query_post_by_id(post_id)
             except Exception as ex:
                 logger.debug("Error while querying post data from Medium API")
                 logger.exception(ex)
@@ -218,20 +218,20 @@ class MediumParser:
             else:
                 text_formater = None
 
-                for highlight in highlights:
-                    for highlight_paragraph in highlight["paragraphs"]:
-                        if highlight_paragraph["name"] == paragraph["name"]:
-                            logger.trace("Apply highlight to this paragraph")
-                            if highlight_paragraph["text"] != text_formater.get_text():
-                                logger.warning("Highlighted text and paragraph text are not the same! Skip...")
-                                break
-                            quote_markup_template = '<mark class="bg-emerald-300">{{ text }}</mark>'
-                            text_formater.set_template(
-                                highlight["startOffset"],
-                                highlight["endOffset"],
-                                quote_markup_template,
-                            )
+            for highlight in highlights:
+                for highlight_paragraph in highlight["paragraphs"]:
+                    if highlight_paragraph["name"] == paragraph["name"]:
+                        logger.trace("Apply highlight to this paragraph")
+                        if highlight_paragraph["text"] != text_formater.get_text():
+                            logger.warning("Highlighted text and paragraph text are not the same! Skip...")
                             break
+                        quote_markup_template = '<mark class="bg-emerald-300">{{ text }}</mark>'
+                        text_formater.set_template(
+                            highlight["startOffset"],
+                            highlight["endOffset"],
+                            quote_markup_template,
+                        )
+                        break
 
             if paragraph["type"] == "H2":
                 css_class = []

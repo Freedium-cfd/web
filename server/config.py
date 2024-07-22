@@ -17,7 +17,7 @@ MORE_LOGS = config("MORE_LOGS", cast=bool, default=False)
 DISABLE_EXTERNAL_DOCS = config("DISABLE_EXTERNAL_DOCS", cast=bool, default=True)
 DISABLE_RATE_LIMITER = config("DISABLE_RATE_LIMITER", cast=bool, default=True)
 
-TIMEOUT = config("TIMEOUT", cast=int, default=25)
+TIMEOUT = config("TIMEOUT", cast=int, default=8)
 REQUEST_TIMEOUT = config("REQUEST_TIMEOUT", cast=int, default=40)
 WORKER_TIMEOUT = config("WORKER_TIMEOUT", cast=int, default=120)
 

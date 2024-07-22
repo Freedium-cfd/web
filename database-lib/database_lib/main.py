@@ -4,6 +4,7 @@ import sqlite3
 import threading
 from itertools import islice
 from typing import Union, Optional
+from abc import ABC, abstractmethod
 
 import psycopg2
 import sqlite_zstd
@@ -12,7 +13,7 @@ from loguru import logger
 from psycopg2.extras import execute_batch
 
 
-class CacheResponse:
+class CacheData:
     __slots__ = ("data",)
 
     def __init__(self, data: str):
@@ -28,7 +29,52 @@ class CacheResponse:
         return self.data
 
 
-class SQLiteCacheBackend:
+class CacheResponse:
+    __slots__ = ("key", "data")
+
+    def __init__(self, key: str, data: Union[CacheData, str]):
+        self.key: str = key
+        self.data: CacheData = CacheData(data) if isinstance(data, str) else data
+
+    def json(self):
+        return self.data.json()
+
+
+class AbstractCacheBackend(ABC):
+    @abstractmethod
+    def init_db(self):
+        pass
+
+    @abstractmethod
+    def all(self):
+        pass
+
+    @abstractmethod
+    def all_length(self) -> int:
+        pass
+
+    @abstractmethod
+    def random(self, size: int) -> list[CacheResponse]:
+        pass
+
+    @abstractmethod
+    def pull(self, key: str) -> Union[CacheResponse, None]:
+        pass
+
+    @abstractmethod
+    def push(self, key: str, value: Union[str, dict]) -> None:
+        pass
+
+    @abstractmethod
+    def delete(self, key: str) -> None:
+        pass
+
+    @abstractmethod
+    def close(self):
+        pass
+
+
+class SQLiteCacheBackend(AbstractCacheBackend):
     __slots__ = ("connection", "cursor", "database", "lock")
 
     def __init__(self, database: str, zstd_enabled: bool = False):
@@ -53,9 +99,10 @@ class SQLiteCacheBackend:
         with self.connection:
             return self.cursor.execute("SELECT COUNT(*) FROM cache").fetchone()[0]
 
-    def random(self, size: int):
+    def random(self, size: int) -> list[CacheResponse]:
         with self.connection:
-            return self.cursor.execute("SELECT * FROM cache ORDER BY RANDOM() LIMIT ?", (size,)).fetchall()
+            self.cursor.execute("SELECT key, value FROM cache ORDER BY RANDOM() LIMIT ?", (size,))
+            return [CacheResponse(key, value) for key, value in self.cursor]
 
     def enable_zstd(self):
         if not self.zstd_enabled:
@@ -65,7 +112,9 @@ class SQLiteCacheBackend:
             try:
                 self.cursor.execute('SELECT zstd_enable_transparent(\'{"table": "cache", "column": "value", "compression_level": 9, "dict_chooser": "\'\'a\'\'"}\')')
             except Exception as error:
-                print(error)
+                logger.error(f"Error enabling ZSTD compression: {error}")
+                logger.exception(error)
+
             self.connection.execute("PRAGMA auto_vacuum=full")
 
     def init_db(self):
@@ -78,7 +127,7 @@ class SQLiteCacheBackend:
             cache = self.cursor.execute("SELECT value FROM cache WHERE key = :0", {"0": key}).fetchone()
             if cache:
                 logger.debug("Value found in DB, returning it")
-                return CacheResponse(cache[0])
+                return CacheResponse(key, cache[0])
             else:
                 logger.debug(f"No value found for key: {key}")
                 return None
@@ -161,7 +210,7 @@ class SQLiteCacheBackend:
         self.connection.close()
 
 
-class PostgreSQLCacheBackend:
+class PostgreSQLCacheBackend(AbstractCacheBackend):
     def __init__(self, connection_string: str):
         self.connection = psycopg2.connect(connection_string)
         self.cursor = self.connection.cursor()
@@ -187,10 +236,10 @@ class PostgreSQLCacheBackend:
             self.cursor.execute("SELECT COUNT(*) FROM cache")
             return self.cursor.fetchone()[0]
 
-    def random(self, size: int):
+    def random(self, size: int) -> list[CacheResponse]:
         with self.connection:
-            self.cursor.execute("SELECT * FROM cache ORDER BY RANDOM() LIMIT %s", (size,))
-            return self.cursor.fetchall()
+            self.cursor.execute("SELECT key, value FROM cache ORDER BY RANDOM() LIMIT %s", (size,))
+            return [CacheResponse(key, value) for key, value in self.cursor]
 
     def pull(self, key: str) -> Union[CacheResponse, None]:
         with self.connection:
@@ -198,7 +247,7 @@ class PostgreSQLCacheBackend:
             cache = self.cursor.fetchone()
             if cache:
                 logger.debug("Value found in DB, returning it")
-                return CacheResponse(cache[0])
+                return CacheResponse(key, cache[0])
             else:
                 logger.debug(f"No value found for key: {key}")
                 return None
@@ -258,7 +307,6 @@ def migrate_to_postgres(sqlite_db_path: str, pg_conn_string: str, chunk_size: in
             elapsed_time = time.time() - start_time
             rows_per_second = processed_rows / elapsed_time
             logger.info(f"Processed {processed_rows}/{total_rows} rows. Speed: {rows_per_second:.2f} rows/second")
-
     except Exception as e:
         logger.error(f"An error occurred during migration: {e}")
         pg_db.connection.rollback()

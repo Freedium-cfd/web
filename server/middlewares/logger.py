@@ -25,6 +25,7 @@ class LoggerMiddleware(BaseHTTPMiddleware):
         transponder_code = string_to_number_ascii(generated_id)
         transponder_code_correlation.set(transponder_code)
         url_correlation.set(request.url)
+
         with logger.contextualize(id=generated_id):
             logger.debug(f"Current ID '{generated_id}' transponder code is '{transponder_code}'")
             logger.trace(request.__dict__)

@@ -15,7 +15,7 @@ from async_lru import alru_cache
 from bs4 import BeautifulSoup
 from loguru import logger
 
-from . import exceptions, retry_options
+from medium_parser import exceptions, retry_options
 
 DEFAULT_URL_PROTOCOL = "https://"
 
@@ -157,6 +157,7 @@ def unquerify_url(url: str) -> str:
 
 @lru_cache(maxsize=500)
 def un_wwwify(url: str):
+    # TODO: enhanced type checks
     if url.startswith("www."):
         return url.removeprefix("www.")
     return url
