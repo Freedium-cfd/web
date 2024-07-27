@@ -74,7 +74,7 @@ class RLStringHelper:
 
     @trace
     def post_utf_16_bang(self, string: StringAssignmentMixin, string_pos_matrix: list, utf_16_bang_list: list):
-        # string = StringAssignmentMixin(str(string))
+        string = StringAssignmentMixin(str(string))
         post_transbang = 0
         for bang_pos, char_len, old_pos in utf_16_bang_list:
             string, string_pos_matrix = self._delete_char(string, string_pos_matrix, bang_pos - post_transbang, char_len, old_pos - post_transbang)
@@ -147,7 +147,7 @@ class RLStringHelper:
         if not self.replaces and not self.quote_replaces:
             return string, string_pos_matrix, utf_16_bang_list
 
-        # string = StringAssignmentMixin(str(string))
+        string = StringAssignmentMixin(str(string))
         replaces = self.replaces + self.quote_replaces
 
         @trace
