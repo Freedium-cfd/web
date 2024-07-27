@@ -39,9 +39,9 @@ async def route_processing(path: str, request: Request):
         if key_data != config.ADMIN_SECRET_KEY:
             return JSONResponse({"message": f"Wrong secret key: {key_data}"}, status_code=403)
 
-    # if path.startswith("@miro/"):
-    #     miro_data = path.removeprefix("@miro/")
-    #     return await miro_proxy(miro_data)
+    if path.startswith("@miro/"):
+        miro_data = path.removeprefix("@miro/")
+        return await miro_proxy(miro_data)
     if path.startswith("render_iframe/"):
         iframe_id = path.removeprefix("render_iframe/")
         return await iframe_proxy(iframe_id)
@@ -55,7 +55,7 @@ async def main_page():
     main_template_rendered = main_template.render(postleter=homepage_template)
     base_template_rendered = base_template.render(body_template=main_template_rendered, host_address=config.HOST_ADDRESS)
     parsed_template = parse(base_template_rendered)
-    serialized_template = serialize(parsed_template, encoding='utf-8')
+    serialized_template = serialize(parsed_template, encoding="utf-8")
     return HTMLResponse(serialized_template)
 
 

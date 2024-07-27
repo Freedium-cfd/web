@@ -11,8 +11,6 @@ from medium_parser import retry_options
 from medium_parser.time import get_unix_ms
 from medium_parser.utils import generate_random_sha256_hash
 
-socks_proxy = "socks5://wgcf1:1080"
-
 
 class MediumApi:
     __slots__ = ("auth_cookies", "proxy_list", "timeout")
@@ -23,15 +21,20 @@ class MediumApi:
         self.timeout = timeout
 
     async def query_post_by_id(self, post_id: str):
-        return await self.query_post_graphql(post_id, self.timeout)
+        logger.debug("Using graphql implementation")
+        return await self.query_post_graphql(post_id)
 
     async def query_post_graphql(self, post_id: str):
         logger.debug(f"Starting request construction for post {post_id}")
 
         if self.proxy_list:
-            connector = ProxyConnector.from_url(random.choice(self.proxy_list))
+            proxy = random.choice(self.proxy_list)
+            connector = ProxyConnector.from_url(proxy)
+            logger.debug(f"Using proxy: {proxy}")
         else:
             connector = None
+
+        logger.debug(f"Using connector: {connector}")
 
         headers = {
             "X-APOLLO-OPERATION-ID": generate_random_sha256_hash(),

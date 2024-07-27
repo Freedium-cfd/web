@@ -19,7 +19,7 @@ from xkcdpass import xkcd_password as xp
 
 from server.utils.logger import configure_logger
 from medium_parser.core import MediumParser
-from server.utils.loguru_handler import InterceptHandler
+from medium_parser.api import MediumApi
 
 
 def wait_for_postgres(max_retries=5, retry_interval=5):
@@ -48,7 +48,8 @@ medium_cache.init_db()
 # migrate_to_postgres_thread = execute_migrate_to_postgres_in_thread("medium_db_cache.sqlite", "postgresql://postgres:postgres@postgres:5432/postgres")
 logger.debug(f"Database length: {medium_cache.all_length()}")
 
-medium_parser = MediumParser(cache=medium_cache, timeout=3, host_address=config.HOST_ADDRESS, auth_cookies=config.MEDIUM_AUTH_COOKIES, template_folder="server/templates")
+medium_api = MediumApi(auth_cookies=config.MEDIUM_AUTH_COOKIES, timeout=3, proxy_list=config.PROXY_LIST)
+medium_parser = MediumParser(cache=medium_cache, medium_api=medium_api, timeout=3, host_address=config.HOST_ADDRESS, template_folder="server/templates")
 
 redis_storage = redis.Redis(
     host=config.REDIS_HOST,

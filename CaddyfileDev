@@ -162,10 +162,6 @@
         respond "Access denied" 403
     }
 
-    route @miro/* {
-        uri replace @miro/ /
-        reverse_proxy https://miro.medium.com
-    }
 
     route /* {
 		reverse_proxy web:7080

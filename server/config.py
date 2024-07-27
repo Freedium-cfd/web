@@ -23,7 +23,7 @@ WORKER_TIMEOUT = config("WORKER_TIMEOUT", cast=int, default=120)
 
 CACHE_LIFE_TIME = config("CACHE_LIFE_TIME", cast=int, default=60 * 60 * 5)
 
-HOME_PAGE_MAX_POSTS = config("HOME_PAGE_MAX_POSTS", cast=int, default=15)
+HOME_PAGE_MAX_POSTS = config("HOME_PAGE_MAX_POSTS", cast=int, default=25)
 ENABLE_ADS_BANNER = config("ENABLE_ADS_BANNER", cast=bool, default=False)
 
 REDIS_HOST = config("REDIS_HOST", default="redis_service")
@@ -33,3 +33,6 @@ REDIS_TIMEOUT = config("REDIS_TIMEOUT", cast=int, default=1.75)
 SENTRY_SDK_DSN = config("SENTRY_SDK_DSN", default=None)
 SENTRY_TRACES_SAMPLE_RATE = config("SENTRY_TRACES_SAMPLE_RATE", cast=float, default=0.2)
 SENTRY_PROFILES_SAMPLE_RATE = config("SENTRY_PROFILES_SAMPLE_RATE", cast=float, default=0.2)
+
+_PROXY_LIST = config("PROXY_LIST", cast=str, default="")
+PROXY_LIST = _PROXY_LIST.split(",") if _PROXY_LIST else []

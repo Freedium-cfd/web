@@ -14,7 +14,7 @@ from rl_string_helper import RLStringHelper, parse_markups, split_overlapping_ra
 
 from . import jinja_env
 from .exceptions import InvalidMediumPostID, InvalidMediumPostURL, InvalidURL, MediumParserException, MediumPostQueryError
-from .medium_api import MediumApi
+from .api import MediumApi
 from .models.html_result import HtmlResult
 from .time import convert_datetime_to_human_readable
 from .utils import correct_url, extract_hex_string, getting_percontage_of_match, is_has_valid_medium_post_id, is_valid_medium_url, is_valid_url, resolve_medium_url
@@ -24,7 +24,7 @@ if typing.TYPE_CHECKING:
 
 
 class MediumParser:
-    __slots__ = ("cache", "host_address", "jinja_template", "post_template", "timeout")
+    __slots__ = ("cache", "host_address", "jinja_template", "post_template", "timeout", "medium_api")
 
     def __init__(self, cache: "AbstractCacheBackend", medium_api: MediumApi, timeout: int, host_address: str, template_folder: str = "./templates"):
         self.timeout: int = timeout

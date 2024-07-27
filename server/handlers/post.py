@@ -20,11 +20,12 @@ from server.utils.utils import safe_check_redis_connection
 @trace
 @aio_redis_cache(10 * 60)
 async def render_homepage(limit: int = config.HOME_PAGE_MAX_POSTS, as_html: bool = False):
-    random_post_id_list = list(set([i[0] for i in medium_cache.random(limit)]))
+    random_post_id_list = list(set([i.key for i in medium_cache.random(limit)]))
 
     outlet_posts_list = []
     tasks = []
     for post_id in random_post_id_list:
+
         async def fetch_post_metadata(post_id):
             try:
                 logger.debug(f"Fetching post_id: {post_id}")

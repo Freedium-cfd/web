@@ -18,7 +18,11 @@ services:
     networks:
       - caddy_net
     healthcheck:
-      test: ["CMD-SHELL", "curl -f http://caddy_freedium:6752/ --max-time 80 --header 'User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.3 Safari/605.1.15'"]
+      test:
+        [
+          "CMD-SHELL",
+          "curl -f http://caddy_freedium:6752/ --max-time 80 --header 'User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.3 Safari/605.1.15'"
+        ]
       interval: 30s
       start_period: 20s
       timeout: 80s
@@ -29,7 +33,7 @@ services:
   wgcf1:
     image: neilpang/wgcf-docker:latest
     volumes:
-    #   - ./wgcf:/wgcf
+      #   - ./wgcf:/wgcf
       - /lib/modules:/lib/modules
       - ./scripts/entryWGCF.sh:/entry.sh
       - /etc/localtime:/etc/localtime:ro
@@ -51,6 +55,9 @@ services:
 
   dante_1:
     image: shturman/dante:1.4.2
+    # build:
+    #   context: ./
+    #   dockerfile: ./DockerfileDante
     volumes:
       - ./scripts/dante.config:/etc/sockd.conf
       - /etc/localtime:/etc/localtime:ro
@@ -61,12 +68,19 @@ services:
     depends_on:
       wgcf1:
         condition: service_healthy
+    # healthcheck:
+    #   test: curl --proxy socks5://localhost:1080 https://google.com
+    #   interval: 5s
+    #   timeout: 2s
+    #   retries: 5
 
   web:
     build:
       context: ./
       dockerfile: ./Dockerfile
     command: python3 -m server server
+    environment:
+      - "PROXY_LIST=socks5://wgcf1:1080"
     volumes:
       # - ./.env:/app/.env
       # - ./server/user_data/logs:/app/server/user_data/logs
@@ -129,7 +143,7 @@ services:
     volumes:
       - dragonflydata:/data
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
+      test: [ "CMD", "redis-cli", "ping" ]
       interval: 30s
       start_period: 20s
       timeout: 10s
@@ -141,7 +155,7 @@ services:
   postgres:
     image: postgres:16.3-alpine3.20
     networks:
-     - caddy_net
+      - caddy_net
         # ports:
         # - 5432:5432
     volumes:
@@ -166,6 +180,7 @@ volumes:
   caddy_data:
   caddy_config:
   dragonflydata:
+
 
 networks:
   caddy_net:

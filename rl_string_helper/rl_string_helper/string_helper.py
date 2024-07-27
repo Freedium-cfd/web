@@ -3,45 +3,9 @@ from .logger_trace import trace
 from .utils import quote_html, quote_symbol
 from jinja2 import Environment, DebugUndefined, Template
 
+from rl_string_helper.mixins.string_assignment import StringAssignmentMixin_py as StringAssignmentMixin
+
 jinja_env = Environment(undefined=DebugUndefined)
-
-class StringAssignmentMix:
-    __slots__ = ("string", "string_list")
-
-    def __init__(self, string: str):
-        self.string = str(string) if isinstance(string, StringAssignmentMix) else string
-        self.string_list = list(self.string)
-
-    def __render_string(self):
-        self.string = "".join(self.string_list)
-
-    def __len__(self):
-        return len(self.string_list)
-
-    def pop(self, key):
-        self.string_list.pop(key)
-        return self
-
-    def encode(self, encoding: str):
-        self.__render_string()
-        return self.string.encode(encoding, "surrogatepass")
-
-    def insert(self, key: int, value):
-        self.string_list.insert(key, value)
-        return self
-
-    def __setitem__(self, key, value):
-        self.string_list[key] = value
-        return self
-
-    def __getitem__(self, key):
-        return "".join(self.string_list[key])
-
-    def __str__(self):
-        self.__render_string()
-        return self.string
-
-    __repr__ = __str__
 
 
 # TODO: more clarified description
@@ -53,13 +17,14 @@ the value returned by length might not match the actual number of Unicode charac
 Python uses UTF-8 encoding, which each character is encoded as one byte. So here is a workaround to get the actual number of characters and manipulate them in string as in UTF-16 encoding. See pre_utf_16_bang and post_utf_16_bang function. 
 """
 
+
 # TODO: doc! Who will read this noodles lol?
 # TODO: check cases when UTF-16 character can be more that 2 bytes
 class RLStringHelper:
     __slots__ = ("string", "templates", "replaces", "quote_html_type", "quote_replaces", "_default_bang_char")
 
     def __init__(self, string: str, quote_html_type: list[str] = ["full"], _default_bang_char: str = "R"):
-        self.string = StringAssignmentMix(quote_symbol(string))
+        self.string: str = quote_symbol(string)
         self.templates = []
         self.quote_replaces = []
         self.replaces = []
@@ -108,8 +73,8 @@ class RLStringHelper:
         return string, string_pos_matrix
 
     @trace
-    def post_utf_16_bang(self, string: str, string_pos_matrix: list, utf_16_bang_list: list):
-        string = StringAssignmentMix(string)
+    def post_utf_16_bang(self, string: StringAssignmentMixin, string_pos_matrix: list, utf_16_bang_list: list):
+        # string = StringAssignmentMixin(str(string))
         post_transbang = 0
         for bang_pos, char_len, old_pos in utf_16_bang_list:
             string, string_pos_matrix = self._delete_char(string, string_pos_matrix, bang_pos - post_transbang, char_len, old_pos - post_transbang)
@@ -178,11 +143,11 @@ class RLStringHelper:
         return updated_text, string_pos_matrix, utf_16_bang_list
 
     @trace
-    def _render_replaces(self, string: str, string_pos_matrix: list, utf_16_bang_list: list):
+    def _render_replaces(self, string: StringAssignmentMixin, string_pos_matrix: list, utf_16_bang_list: list):
         if not self.replaces and not self.quote_replaces:
             return string, string_pos_matrix, utf_16_bang_list
 
-        string = StringAssignmentMix(string)
+        # string = StringAssignmentMixin(str(string))
         replaces = self.replaces + self.quote_replaces
 
         @trace
@@ -229,7 +194,8 @@ class RLStringHelper:
 
     @trace
     def __str__(self):
-        string = StringAssignmentMix(self.string)
+        string = StringAssignmentMixin(self.string)
+
         string_pos_matrix = list(range(len(string)))
         updated_text, string_pos_matrix, utf_16_bang_list = self.pre_utf_16_bang(string, string_pos_matrix)
 
@@ -237,7 +203,7 @@ class RLStringHelper:
             self.quote_replaces = list(quote_html(str(updated_text), self.quote_html_type))
 
         if not self.templates and not self.replaces and not self.quote_replaces:
-            return str(self.string)
+            return self.string
 
         updated_text, string_pos_matrix, utf_16_bang_list = self._render_templates(updated_text, string_pos_matrix, utf_16_bang_list)
         updated_text, string_pos_matrix, utf_16_bang_list = self._render_replaces(updated_text, string_pos_matrix, utf_16_bang_list)
@@ -247,6 +213,7 @@ class RLStringHelper:
     def get_text(self):
         return self.__str__()
 
+
 def split_overlapping_ranges(markups, _retry_count: int = 7):
     for _ in range(len(markups) * _retry_count):
         new_markups = split_overlapping_range_position(markups)
@@ -254,6 +221,7 @@ def split_overlapping_ranges(markups, _retry_count: int = 7):
             break
         markups = new_markups
     return markups
+
 
 def split_overlapping_range_position(positions):
     if not positions:
@@ -264,45 +232,47 @@ def split_overlapping_range_position(positions):
 
     for pos in positions[1:]:
         last = result[-1]
-        if pos["start"] < last["end"]:
-            if pos["type"] != last["type"]:
-                if pos["end"] <= last["end"]:
-                    result[-1] = {
-                        "start": last["start"],
-                        "end": pos["start"],
-                        "type": last["type"],
-                        "template": last["template"],
-                    }
-                    result.append(pos.copy())
-                    if pos["end"] < last["end"]:
-                        result.append(
-                            {
-                                "start": pos["end"],
-                                "end": last["end"],
-                                "type": last["type"],
-                                "template": last["template"],
-                            }
-                        )
-                else:
-                    result[-1] = {
-                        "start": last["start"],
-                        "end": pos["start"],
-                        "type": last["type"],
-                        "template": last["template"],
-                    }
-                    result.append(pos.copy())
-            else:
-                result[-1]["end"] = max(last["end"], pos["end"])
-        else:
+        if not pos["start"] < last["end"]:
             result.append(pos.copy())
+            continue
+    if pos["type"] != last["type"]:
+        if pos["end"] <= last["end"]:
+            result[-1] = {
+                "start": last["start"],
+                "end": pos["start"],
+                "type": last["type"],
+                "template": last["template"],
+            }
+            result.append(pos.copy())
+            if pos["end"] < last["end"]:
+                result.append(
+                    {
+                        "start": pos["end"],
+                        "end": last["end"],
+                        "type": last["type"],
+                        "template": last["template"],
+                    }
+                )
+        else:
+            result[-1] = {
+                "start": last["start"],
+                "end": pos["start"],
+                "type": last["type"],
+                "template": last["template"],
+            }
+            result.append(pos.copy())
+    else:
+        result[-1]["end"] = max(last["end"], pos["end"])
 
     return result
+
 
 def raw_render(**kwargs):
     for key, value in kwargs.items():
         if isinstance(value, str):
             kwargs[key] = f"{{% raw %}}{value}{{% endraw %}}"
     return kwargs
+
 
 def parse_markups(markups: list[str]):
     markups_out = []
