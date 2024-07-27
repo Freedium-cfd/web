@@ -235,34 +235,35 @@ def split_overlapping_range_position(positions):
         if not pos["start"] < last["end"]:
             result.append(pos.copy())
             continue
-    if pos["type"] != last["type"]:
-        if pos["end"] <= last["end"]:
-            result[-1] = {
-                "start": last["start"],
-                "end": pos["start"],
-                "type": last["type"],
-                "template": last["template"],
-            }
-            result.append(pos.copy())
-            if pos["end"] < last["end"]:
-                result.append(
-                    {
-                        "start": pos["end"],
-                        "end": last["end"],
-                        "type": last["type"],
-                        "template": last["template"],
-                    }
-                )
+
+        if pos["type"] != last["type"]:
+            if pos["end"] <= last["end"]:
+                result[-1] = {
+                    "start": last["start"],
+                    "end": pos["start"],
+                    "type": last["type"],
+                    "template": last["template"],
+                }
+                result.append(pos.copy())
+                if pos["end"] < last["end"]:
+                    result.append(
+                        {
+                            "start": pos["end"],
+                            "end": last["end"],
+                            "type": last["type"],
+                            "template": last["template"],
+                        }
+                    )
+            else:
+                result[-1] = {
+                    "start": last["start"],
+                    "end": pos["start"],
+                    "type": last["type"],
+                    "template": last["template"],
+                }
+                result.append(pos.copy())
         else:
-            result[-1] = {
-                "start": last["start"],
-                "end": pos["start"],
-                "type": last["type"],
-                "template": last["template"],
-            }
-            result.append(pos.copy())
-    else:
-        result[-1]["end"] = max(last["end"], pos["end"])
+            result[-1]["end"] = max(last["end"], pos["end"])
 
     return result
 
