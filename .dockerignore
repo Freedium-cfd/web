@@ -166,3 +166,4 @@ cython_debug/
 ban_post_list.db
 core.*
 postgres/
+database.tar

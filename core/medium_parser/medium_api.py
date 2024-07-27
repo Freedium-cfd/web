@@ -11,7 +11,7 @@ from medium_parser import retry_options
 from medium_parser.time import get_unix_ms
 from medium_parser.utils import generate_random_sha256_hash
 
-socks_proxy = "socks5h://wgcf1:1080"
+socks_proxy = "socks5://wgcf1:1080"
 
 
 class MediumApi:

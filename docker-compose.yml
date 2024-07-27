@@ -3,7 +3,7 @@
 version: '3.7'
 
 services:
-  caddy:
+  caddy_freedium:
     build:
       context: ./
       dockerfile: ./DockerfileCaddy
@@ -16,9 +16,9 @@ services:
       - caddy_data:/data
       - caddy_config:/config
     networks:
-      - freedium_net
+      - caddy_net
     healthcheck:
-      test: ["CMD-SHELL", "curl -f http://caddy:6752/ --max-time 80 --header 'User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.3 Safari/605.1.15'"]
+      test: ["CMD-SHELL", "curl -f http://caddy_freedium:6752/ --max-time 80 --header 'User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.3 Safari/605.1.15'"]
       interval: 30s
       start_period: 20s
       timeout: 80s
@@ -41,6 +41,8 @@ services:
     # ports:
     #   - "9681:1080"
     restart: always
+    networks:
+      - caddy_net
     healthcheck:
       test: curl -fs https://www.cloudflare.com/cdn-cgi/trace | grep -q -E 'warp=(on|plus)' && exit 0 || exit 1
       interval: 5s
@@ -92,7 +94,7 @@ services:
     ports:
       - "7080:7080"
     networks:
-      - freedium_net
+      - caddy_net
     # healthcheck:
     #   test: ["CMD-SHELL", "curl -f http://web:7080/ --max-time 80 --header 'User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.3 Safari/605.1.15'"]
     #   interval: 30s
@@ -106,7 +108,7 @@ services:
   # redis_service:
   #   image: redis:latest
   #   networks:
-  #     - freedium_net
+  #     - caddy_net
   #   healthcheck:
   #     test: ["CMD", "redis-cli", "ping"]
   #     interval: 30s
@@ -123,7 +125,7 @@ services:
     # expose:
     #   - 6379
     networks:
-      - freedium_net
+      - caddy_net
     volumes:
       - dragonflydata:/data
     healthcheck:
@@ -139,9 +141,9 @@ services:
   postgres:
     image: postgres:16.3-alpine3.20
     networks:
-      - freedium_net
-    ports:
-      - 5432:5432
+     - caddy_net
+        # ports:
+        # - 5432:5432
     volumes:
       #   - ~/apps/postgres:/var/lib/postgresql/data
       - ./postgres:/var/lib/postgresql/data
@@ -166,5 +168,5 @@ volumes:
   dragonflydata:
 
 networks:
-  freedium_net:
-    driver: bridge
+  caddy_net:
+    external: true
