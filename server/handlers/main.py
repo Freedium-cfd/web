@@ -7,7 +7,8 @@ from loguru import logger
 from server import config
 from server.handlers.misc import delete_from_cache, report_problem
 from server.handlers.post import render_medium_post_link, render_homepage
-from server.handlers.reverse_proxy import iframe_proxy, miro_proxy
+from server.handlers.miro import miro_proxy
+from server.handlers.iframe import iframe_proxy
 from server.services.jinja import base_template, main_template
 from server.utils.logger_trace import trace
 
