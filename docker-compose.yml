@@ -32,6 +32,7 @@ services:
 
   wgcf1:
     image: neilpang/wgcf-docker:latest
+    container_name: wgcf1
     volumes:
       #   - ./wgcf:/wgcf
       - /lib/modules:/lib/modules
@@ -55,6 +56,7 @@ services:
 
   dante_1:
     image: shturman/dante:1.4.2
+    container_name: dante_1
     # build:
     #   context: ./
     #   dockerfile: ./DockerfileDante
@@ -73,6 +75,25 @@ services:
     #   interval: 5s
     #   timeout: 2s
     #   retries: 5
+
+  wgcf1_healthcare_service:
+    build:
+      context: .
+      dockerfile: DockerfileHealthcare
+    environment:
+      - TG_TOKEN=${TG_TOKEN}
+      - TG_CHAT_ID=${TG_CHAT_ID}
+      - PROXY_HOST=wgcf1
+      - PROXY_PORT=1080
+    depends_on:
+      - dante_1
+    networks:
+      - caddy_net
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /etc/localtime:/etc/localtime:ro
+      - ./scripts/service_up.py:/scripts/service_up.py
+    # network_mode: "host"
 
   web:
     build:

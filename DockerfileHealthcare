@@ -1,0 +1,9 @@
+FROM python:3.12.3
+
+RUN pip install docker requests[socks] loguru --no-cache-dir
+
+COPY scripts/ /scripts/
+
+# RUN chmod +x /scripts/service_up.py
+
+CMD [ "python3", "/scripts/service_up.py" ]
