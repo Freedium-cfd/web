@@ -12,6 +12,7 @@ class MessageStatus(Enum):
 
 
 def send_message(text: str, silent: bool = False, status: MessageStatus = "ERROR") -> None:
+    return True
     if not config.TELEGRAM_BOT_TOKEN or not config.TELEGRAM_ADMIN_ID:
         logger.warning("Can't send log messages, because of lack of some informations. Ignore....")
         return
