@@ -61,3 +61,6 @@ sudo docker-compose -f docker-compose-dev.yml up
 ```
 
 And now you can access local instance of Freedium by opening browser and type `http://localhost:6752`.
+
+## TODO:
+- Integrate library notifiers - https://github.com/liiight/notifiers

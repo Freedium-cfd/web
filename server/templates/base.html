@@ -1,108 +1,126 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <meta http-equiv="X-UA-Compatible" content="ie=edge" />
-        <title>{{ title or "Breaking Medium paywall!" }} - Freedium</title>
-        {% if creator %}<meta name="author" content="{{ creator.name }}" />{% endif %}
-        <meta name="description" content="{{ description or 'Your paywall breakthrough for Medium!' }}" />
-        <meta name="keywords" content="medium, paywall, medium.com, paywall breakthrough" />
 
-        <script src="https://cdn.tailwindcss.com"></script>
-        <!--<script src="https://cdn.tailwindcss.com?plugins=forms,typography,aspect-ratio"></script>-->
-        <link href="https://glyph.medium.com/css/unbound.css" rel="stylesheet">
-        <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
-        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
-        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
-        <link rel="manifest" href="/site.webmanifest">
-        <link rel="mask-icon" href="/safari-pinned-tab.svg" color="#00aba9">
-        <meta name="msapplication-TileColor" content="#00aba9">
-        <meta name="theme-color" content="#ffffff">
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/default.min.css">
-        <script src="https://cdn.jsdelivr.net/npm/@iframe-resizer/parent"></script>
-        <script src="https://cdn.jsdelivr.net/npm/vanilla-lazyload@17.8.4/dist/lazyload.min.js"></script>
-        <script src="https://cdn.jsdelivr.net/npm/lightense-images@1.0.17/dist/lightense.min.js"></script>
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>{{ title or "Breaking Medium paywall!" }} - Freedium</title>
+    {% if creator %}
+    <meta name="author" content="{{ creator.name }}" />{% endif %}
+    <meta name="description" content="{{ description or 'Your paywall breakthrough for Medium!' }}" />
+    <meta name="keywords" content="medium, paywall, medium.com, paywall breakthrough" />
 
-        <script>iframeResize({ license: 'GPLv3' })</script>
-    </head>
-    <div class="fixed bottom-4 left-4" style="z-index: 999999;">
-        <button id="openProblemModal"
-                class="m-1.5 flex items-center bg-red-500 text-white py-2 px-4 rounded-full shadow-lg hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-blue-500">
-            <svg xmlns="http://www.w3.org/2000/svg" height="1em" viewBox="0 0 512 512">
-                <!--! Font Awesome Free 6.4.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2023 Fonticons, Inc. --><style>svg{fill:#ffffff}</style>
-                <path d="M256 32c14.2 0 27.3 7.5 34.5 19.8l216 368c7.3 12.4 7.3 27.7 .2 40.1S486.3 480 472 480H40c-14.3 0-27.6-7.7-34.7-20.1s-7-27.8 .2-40.1l216-368C228.7 39.5 241.8 32 256 32zm0 128c-13.3 0-24 10.7-24 24V296c0 13.3 10.7 24 24 24s24-10.7 24-24V184c0-13.3-10.7-24-24-24zm32 224a32 32 0 1 0 -64 0 32 32 0 1 0 64 0z" />
-            </svg>
-        </button>
-        <button id="darkModeToggle"
-                class="m-1.5 flex items-center bg-blue-500 text-white py-2 px-4 rounded-full shadow-lg hover:bg-blue-600 focus:outline-none">
-            <svg id="darkIcon" xmlns="http://www.w3.org/2000/svg" height="1em" viewBox="0 0 384 512">
-                <!--! Font Awesome Free 6.4.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2023 Fonticons, Inc. -->
-                <path d="M223.5 32C100 32 0 132.3 0 256S100 480 223.5 480c60.6 0 115.5-24.2 155.8-63.4c5-4.9 6.3-12.5 3.1-18.7s-10.1-9.7-17-8.5c-9.8 1.7-19.8 2.6-30.1 2.6c-96.9 0-175.5-78.8-175.5-176c0-65.8 36-123.1 89.3-153.3c6.1-3.5 9.2-10.5 7.7-17.3s-7.3-11.9-14.3-12.5c-6.3-.5-12.6-.8-19-.8z" />
-            </svg>
-            <!-- SVG icon for light mode (e.g., a sun) -->
-            <svg class="hidden" id="lightIcon" xmlns="http://www.w3.org/2000/svg" height="1em" viewBox="0 0 512 512">
-                <!--! Font Awesome Free 6.4.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2023 Fonticons, Inc. -->
-                <path d="M361.5 1.2c5 2.1 8.6 6.6 9.6 11.9L391 121l107.9 19.8c5.3 1 9.8 4.6 11.9 9.6s1.5 10.7-1.6 15.2L446.9 256l62.3 90.3c3.1 4.5 3.7 10.2 1.6 15.2s-6.6 8.6-11.9 9.6L391 391 371.1 498.9c-1 5.3-4.6 9.8-9.6 11.9s-10.7 1.5-15.2-1.6L256 446.9l-90.3 62.3c-4.5 3.1-10.2 3.7-15.2 1.6s-8.6-6.6-9.6-11.9L121 391 13.1 371.1c-5.3-1-9.8-4.6-11.9-9.6s-1.5-10.7 1.6-15.2L65.1 256 2.8 165.7c-3.1-4.5-3.7-10.2-1.6-15.2s6.6-8.6 11.9-9.6L121 121 140.9 13.1c1-5.3 4.6-9.8 9.6-11.9s10.7-1.5 15.2 1.6L256 65.1 346.3 2.8c4.5-3.1 10.2-3.7 15.2-1.6zM160 256a96 96 0 1 1 192 0 96 96 0 1 1 -192 0zm224 0a128 128 0 1 0 -256 0 128 128 0 1 0 256 0z" />
-            </svg>
-        </button>
-    </div>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!--<script src="https://cdn.tailwindcss.com?plugins=forms,typography,aspect-ratio"></script>-->
+    <link href="https://glyph.medium.com/css/unbound.css" rel="stylesheet">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    <link rel="manifest" href="/site.webmanifest">
+    <link rel="mask-icon" href="/safari-pinned-tab.svg" color="#00aba9">
+    <meta name="msapplication-TileColor" content="#00aba9">
+    <meta name="theme-color" content="#ffffff">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/default.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@iframe-resizer/parent"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vanilla-lazyload@17.8.4/dist/lazyload.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/lightense-images@1.0.17/dist/lightense.min.js"></script>
+
+    <script>iframeResize({ license: 'GPLv3' })</script>
+</head>
+<div class="fixed bottom-4 left-4" style="z-index: 999999;">
+    <button id="openProblemModal"
+        class="m-1.5 flex items-center bg-red-500 text-white py-2 px-4 rounded-full shadow-lg hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-blue-500">
+        <svg xmlns="http://www.w3.org/2000/svg" height="1em" viewBox="0 0 512 512">
+            <!--! Font Awesome Free 6.4.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2023 Fonticons, Inc. -->
+            <style>
+                svg {
+                    fill: #ffffff
+                }
+            </style>
+            <path
+                d="M256 32c14.2 0 27.3 7.5 34.5 19.8l216 368c7.3 12.4 7.3 27.7 .2 40.1S486.3 480 472 480H40c-14.3 0-27.6-7.7-34.7-20.1s-7-27.8 .2-40.1l216-368C228.7 39.5 241.8 32 256 32zm0 128c-13.3 0-24 10.7-24 24V296c0 13.3 10.7 24 24 24s24-10.7 24-24V184c0-13.3-10.7-24-24-24zm32 224a32 32 0 1 0 -64 0 32 32 0 1 0 64 0z" />
+        </svg>
+    </button>
+    <button id="darkModeToggle"
+        class="m-1.5 flex items-center bg-blue-500 text-white py-2 px-4 rounded-full shadow-lg hover:bg-blue-600 focus:outline-none">
+        <svg id="darkIcon" xmlns="http://www.w3.org/2000/svg" height="1em" viewBox="0 0 384 512">
+            <!--! Font Awesome Free 6.4.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2023 Fonticons, Inc. -->
+            <path
+                d="M223.5 32C100 32 0 132.3 0 256S100 480 223.5 480c60.6 0 115.5-24.2 155.8-63.4c5-4.9 6.3-12.5 3.1-18.7s-10.1-9.7-17-8.5c-9.8 1.7-19.8 2.6-30.1 2.6c-96.9 0-175.5-78.8-175.5-176c0-65.8 36-123.1 89.3-153.3c6.1-3.5 9.2-10.5 7.7-17.3s-7.3-11.9-14.3-12.5c-6.3-.5-12.6-.8-19-.8z" />
+        </svg>
+        <!-- SVG icon for light mode (e.g., a sun) -->
+        <svg class="hidden" id="lightIcon" xmlns="http://www.w3.org/2000/svg" height="1em" viewBox="0 0 512 512">
+            <!--! Font Awesome Free 6.4.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2023 Fonticons, Inc. -->
+            <path
+                d="M361.5 1.2c5 2.1 8.6 6.6 9.6 11.9L391 121l107.9 19.8c5.3 1 9.8 4.6 11.9 9.6s1.5 10.7-1.6 15.2L446.9 256l62.3 90.3c3.1 4.5 3.7 10.2 1.6 15.2s-6.6 8.6-11.9 9.6L391 391 371.1 498.9c-1 5.3-4.6 9.8-9.6 11.9s-10.7 1.5-15.2-1.6L256 446.9l-90.3 62.3c-4.5 3.1-10.2 3.7-15.2 1.6s-8.6-6.6-9.6-11.9L121 391 13.1 371.1c-5.3-1-9.8-4.6-11.9-9.6s-1.5-10.7 1.6-15.2L65.1 256 2.8 165.7c-3.1-4.5-3.7-10.2-1.6-15.2s6.6-8.6 11.9-9.6L121 121 140.9 13.1c1-5.3 4.6-9.8 9.6-11.9s10.7-1.5 15.2 1.6L256 65.1 346.3 2.8c4.5-3.1 10.2-3.7 15.2-1.6zM160 256a96 96 0 1 1 192 0 96 96 0 1 1 -192 0zm224 0a128 128 0 1 0 -256 0 128 128 0 1 0 256 0z" />
+        </svg>
+    </button>
+</div>
 <div class="notification-container fixed top-5 p-2 max-h-[95vh] overflow-y-auto hidden" style="z-index: 999999;">
     <div class="bg-white border border-gray-300 shadow-sm p-5 rounded-md text-center dark:bg-gray-800 bg-white">
-            <p class="text-2xl pb-5 text-black dark:text-white">Bad news</p>
-            <p class="pb-3 text-black dark:text-white">
-                We regret to inform you that our account on BuyMeACoffee has been suspended due to a violation of their terms of service. This was an unexpected development, and we are currently addressing the matter with utmost priority.
+        <p class="text-2xl pb-5 text-black dark:text-white">Bad news</p>
+        <p class="pb-3 text-black dark:text-white">
+            We regret to inform you that our account on BuyMeACoffee has been suspended due to a violation of their
+            terms of service. This was an unexpected development, and we are currently addressing the matter with utmost
+            priority.
             </br>
-        </br>
-        However, our mission at Freedium remains unchanged, and your support is more crucial than ever. We are transitioning to Patreon, a platform that aligns with our values and offers us the freedom to share our work with you.
-    </br>
-</br>
-Please join us on Patreon and continue to support our endeavors. Your contributions are invaluable to us, and we are committed to delivering the quality content you’ve come to expect from Freedium.
-</br>
-</br>
-Thank you for your understanding and unwavering support.
-</br>
-</br>
-Support Us on Patreon
-</br>
-</br>
-Warm regards, The Freedium Team
-</p>
-<a href="https://patreon.com/Freedium" rel="noreferrer" target="_blank" title="Patreon">
-    <button class="bg-red-400 mx-1 text-white hover:bg-red-500 font-semibold py-1 px-2 rounded mt-2">Patreon</button>
-</a>
-<button class="bg-gray-300 mx-1 hover:bg-gray-400 text-gray-800 font-semibold py-1 px-2 rounded mt-2 close-button">Close</button>
-<a href="https://codeberg.org/Freedium-cfd/web" rel="noreferrer" target="_blank" title="Codeberg">
-    <button class="bg-blue-800 hover:bg-blue-900 mx-1 text-white font-semibold py-1 px-2 rounded mt-2">
-        Source
-        code - Codeberg
-    </button>
-</a>
-<a href="https://github.com/Freedium-cfd/web" rel="noreferrer" target="_blank" title="GitHub"></a>
-<button class="bg-gray-700 hover:bg-gray-600 mx-1 text-white font-semibold py-1 px-2 rounded mt-2">
-    Source code -
-    GitHub
-</button>
-</a>
+            </br>
+            However, our mission at Freedium remains unchanged, and your support is more crucial than ever. We are
+            transitioning to Patreon, a platform that aligns with our values and offers us the freedom to share our work
+            with you.
+            </br>
+            </br>
+            Please join us on Patreon and continue to support our endeavors. Your contributions are invaluable to us,
+            and we are committed to delivering the quality content you’ve come to expect from Freedium.
+            </br>
+            </br>
+            Thank you for your understanding and unwavering support.
+            </br>
+            </br>
+            Support Us on Patreon
+            </br>
+            </br>
+            Warm regards, The Freedium Team
+        </p>
+        <a href="https://patreon.com/Freedium" rel="noreferrer" target="_blank" title="Patreon">
+            <button
+                class="bg-red-400 mx-1 text-white hover:bg-red-500 font-semibold py-1 px-2 rounded mt-2">Patreon</button>
+        </a>
+        <button
+            class="bg-gray-300 mx-1 hover:bg-gray-400 text-gray-800 font-semibold py-1 px-2 rounded mt-2 close-button">Close</button>
+        <a href="https://codeberg.org/Freedium-cfd/web" rel="noreferrer" target="_blank" title="Codeberg">
+            <button class="bg-blue-800 hover:bg-blue-900 mx-1 text-white font-semibold py-1 px-2 rounded mt-2">
+                Source
+                code - Codeberg
+            </button>
+        </a>
+        <a href="https://github.com/Freedium-cfd/web" rel="noreferrer" target="_blank" title="GitHub"></a>
+        <button class="bg-gray-700 hover:bg-gray-600 mx-1 text-white font-semibold py-1 px-2 rounded mt-2">
+            Source code -
+            GitHub
+        </button>
+        </a>
+    </div>
 </div>
-</div>
-<nav id="header" class="fixed w-full z-9 top-0 dark:bg-gray-800 dark:text-white bg-white shadow" style="z-index: 999990;">
+<nav id="header" class="fixed w-full z-9 top-0 dark:bg-gray-800 dark:text-white bg-white shadow"
+    style="z-index: 999990;">
     {% if enable_ads_header %}
-        <div class="w-full bg-yellow-400 text-center py-1 px-4">
-            <p class="text-yellow-900">Advertise here and support our project! Reach out to us at admin@freedium.cfd</p>
-        </div>
+    <div class="w-full bg-yellow-400 text-center py-1 px-4">
+        <p class="text-yellow-900">Advertise here and support our project! Reach out to us at admin@freedium.cfd</p>
+    </div>
     {% endif %}
-    <div id="progress" class="h-1 z-20 top-0" style="background:linear-gradient(to right, #4dc0b5 var(--scroll), transparent 0)"></div>
+    <div id="progress" class="h-1 z-20 top-0"
+        style="background:linear-gradient(to right, #4dc0b5 var(--scroll), transparent 0)"></div>
     <div class="w-full md:max-w-4xl mx-auto flex flex-wrap items-center justify-between mt-0 py-3">
         <div class="pl-4">
-            <a class="text-green-500 text-base no-underline hover:no-underline font-extrabold text-xl"
-               href="/"
-               onclick="navigateToOrigin()">Freedium</a>
+            <a class="text-green-500 text-base no-underline hover:no-underline font-extrabold text-xl" href="/"
+                onclick="navigateToOrigin()">Freedium</a>
         </div>
         <div class="block lg:hidden pr-4">
             <button id="nav-toggle"
-                    class="flex items-center px-3 py-2 border rounded text-gray-500 dark:text-white border-gray-600 hover:text-gray-900 dark:hover:text-white hover:border-green-500 appearance-none focus:outline-none">
+                class="flex items-center px-3 py-2 border rounded text-gray-500 dark:text-white border-gray-600 hover:text-gray-900 dark:hover:text-white hover:border-green-500 appearance-none focus:outline-none">
                 <svg class="fill-current h-3 w-3" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
                     <title>Menu</title>
                     <path d="M0 3h20v2H0V3zm0 6h20v2H0V9zm0 6h20v2H0v-2z" />
@@ -110,281 +128,283 @@ Warm regards, The Freedium Team
             </button>
         </div>
         <div class="w-full flex-grow lg:flex lg:items-center lg:w-auto hidden lg:block mt-2 lg:mt-0 dark:bg-gray-800 bg-white"
-             id="nav-content">
+            id="nav-content">
             <ul class="list-reset lg:flex justify-end flex-1 items-center">
-                <li class="mr-3">
-                    <a class="inline-block text-gray-600 dark:text-white no-underline hover:text-gray-900 dark:hover:text-white hover:text-underline py-2 px-4"
-                       href="https://codeberg.org/Freedium-cfd/web"
-                       target="_blank">Source code</a>
+                <li class="justify-center align-center mr-3">
+                    <a class="inline-block text-gray-600 dark:text-white no-underline hover:text-gray-900 dark:hover:text-white hover:text-underline h-full"
+                        href="https://codeberg.org/Freedium-cfd/web" target="_blank"><svg
+                            xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24">
+                            <path fill="currentColor"
+                                d="M12 2A10 10 0 0 0 2 12c0 4.42 2.87 8.17 6.84 9.5c.5.08.66-.23.66-.5v-1.69c-2.77.6-3.36-1.34-3.36-1.34c-.46-1.16-1.11-1.47-1.11-1.47c-.91-.62.07-.6.07-.6c1 .07 1.53 1.03 1.53 1.03c.87 1.52 2.34 1.07 2.91.83c.09-.65.35-1.09.63-1.34c-2.22-.25-4.55-1.11-4.55-4.92c0-1.11.38-2 1.03-2.71c-.1-.25-.45-1.29.1-2.64c0 0 .84-.27 2.75 1.02c.79-.22 1.65-.33 2.5-.33s1.71.11 2.5.33c1.91-1.29 2.75-1.02 2.75-1.02c.55 1.35.2 2.39.1 2.64c.65.71 1.03 1.6 1.03 2.71c0 3.82-2.34 4.66-4.57 4.91c.36.31.69.92.69 1.85V21c0 .27.16.59.67.5C19.14 20.16 22 16.42 22 12A10 10 0 0 0 12 2" />
+                        </svg></a>
                 </li>
                 <li class="mr-3">
-                    <a class="inline-block text-gray-600 dark:text-white no-underline hover:text-gray-900 dark:hover:text-white hover:text-underline py-2 px-4"
-                       href="https://romans-status-page.vercel.app/status/freedium"
-                       target="_blank">Status page</a>
+                    <a class="inline-block text-gray-600 dark:text-white no-underline hover:text-gray-900 dark:hover:text-white hover:text-underline"
+                        href="https://romans-status-page.vercel.app/status/freedium" target="_blank">Status page</a>
                 </li>
                 <li class="mr-3">
-                    <a class="inline-block text-gray-600 dark:text-white no-underline hover:text-gray-900 dark:hover:text-white hover:text-underline py-2 px-4"
-                       href="https://noref.io/#https://patreon.com/Freedium"
-                       target="_blank">Patreon - Support us</a>
+                    <a class="inline-block text-gray-600 dark:text-white no-underline hover:text-gray-900 dark:hover:text-white hover:text-underline"
+                        href="https://noref.io/#https://patreon.com/Freedium" target="_blank">Patreon - Support us</a>
                 </li>
             </ul>
         </div>
     </div>
 </nav>
+
 <body class="dark:bg-gray-800 bg-white">{{ body_template }}</body>
 <div id="problemModal"
-     class="modal hidden fixed inset-0 w-full h-full flex items-center justify-center overflow-y-auto bg-black bg-opacity-50"
-     style="z-index: 999999">
+    class="modal hidden fixed inset-0 w-full h-full flex items-center justify-center overflow-y-auto bg-black bg-opacity-50"
+    style="z-index: 999999">
     <div class="modal-container w-11/12 md:max-w-xl mx-auto rounded shadow-lg max-h-screen">
         <div class="modal-content bg-white dark:bg-gray-800 text-black dark:text-white my-8 py-4 text-left px-6">
             <h1 class="text-3xl font-bold">Reporting a Problem</h1>
             <div class="mt-3">
                 <p>
                     Sometimes we have problems displaying some Medium posts.
-                </br>
-            </br>
-        </p>
-        <p>If you have a problem that some images aren't loading - try using VPN. Probably you have problem with access to Medium CDN (or fucking Cloudflare's bot detection algorithms are blocking you).</p>
+                    </br>
+                    </br>
+                </p>
+                <p>If you have a problem that some images aren't loading - try using VPN. Probably you have problem with
+                    access to Medium CDN (or fucking Cloudflare's bot detection algorithms are blocking you).</p>
+            </div>
+            <form action="#" method="POST" class="mt-4" id="problem-form">
+                <div class="mb-4">
+                    <label for="problem-description" class="block text-gray-700 dark:text-white font-bold mb-2">Problem
+                        Description</label>
+                    <textarea id="problem-description" name="problem-description"
+                        placeholder="Describe your problem here..."
+                        class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                        rows="4" required></textarea>
+                </div>
+                <div>
+                    <button type="submit"
+                        class="m-2 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">Submit</button>
+                    <button type="button"
+                        class="m-2 modal-close bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">Cancel</button>
+                </div>
+            </form>
+        </div>
     </div>
-    <form action="#" method="POST" class="mt-4" id="problem-form">
-        <div class="mb-4">
-            <label for="problem-description" class="block text-gray-700 dark:text-white font-bold mb-2">Problem Description</label>
-            <textarea id="problem-description"
-                      name="problem-description"
-                      placeholder="Describe your problem here..."
-                      class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                      rows="4"
-                      required></textarea>
-        </div>
-        <div>
-            <button type="submit"
-                    class="m-2 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">Submit</button>
-            <button type="button"
-                    class="m-2 modal-close bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">Cancel</button>
-        </div>
-    </form>
-</div>
-</div>
 </div>
 <script>
     tailwind.config = {
         darkMode: 'class',
     }
 
-        function changeTheme(themeName) {
-            // Source: https://stackoverflow.com/questions/59257368/how-to-dynamically-change-the-theme-using-highlight-js
-            console.log(`Applying theme: ${themeName}`);
-            const existingLink = document.querySelector('link[href*="highlight.js"]');
-            if (existingLink) {
-                existingLink.remove();
-            }
-            const link = document.createElement("link");
-            link.rel = "stylesheet";
-            link.href = `https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/${themeName}.min.css`;
-            document.head.appendChild(link);
-            document.querySelector("span").textContent = themeName;
+    function changeTheme(themeName) {
+        // Source: https://stackoverflow.com/questions/59257368/how-to-dynamically-change-the-theme-using-highlight-js
+        console.log(`Applying theme: ${themeName}`);
+        const existingLink = document.querySelector('link[href*="highlight.js"]');
+        if (existingLink) {
+            existingLink.remove();
         }
+        const link = document.createElement("link");
+        link.rel = "stylesheet";
+        link.href = `https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/${themeName}.min.css`;
+        document.head.appendChild(link);
+        document.querySelector("span").textContent = themeName;
+    }
 
-        function navigateToOrigin() {
-            window.location.href = window.location.origin;
-        }
+    function navigateToOrigin() {
+        window.location.href = window.location.origin;
+    }
 
     function updateThemeIcons() {
         const isDarkMode = localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches);
         document.getElementById('darkIcon').classList.toggle('hidden', !isDarkMode);
         document.getElementById('lightIcon').classList.toggle('hidden', isDarkMode);
-}
-
-        updateThemeIcons();
-
-        document.getElementById('darkModeToggle').addEventListener('click', function () {
-            const isDarkMode = localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches);
-            if (isDarkMode) {
-                document.documentElement.classList.remove('dark');
-        document.documentElement.style.cssText = "--lightense-backdrop: white;";
-        localStorage.setItem("theme", "light");
-        changeTheme("a11y-light");
-    } else {
-        document.documentElement.classList.add('dark');
-        document.documentElement.style.cssText = "--lightense-backdrop: black;";
-        localStorage.setItem("theme", "dark");
-        changeTheme("androidstudio");
     }
+
+    updateThemeIcons();
+
+    document.getElementById('darkModeToggle').addEventListener('click', function () {
+        const isDarkMode = localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches);
+        if (isDarkMode) {
+            document.documentElement.classList.remove('dark');
+            document.documentElement.style.cssText = "--lightense-backdrop: white;";
+            localStorage.setItem("theme", "light");
+            changeTheme("a11y-light");
+        } else {
+            document.documentElement.classList.add('dark');
+            document.documentElement.style.cssText = "--lightense-backdrop: black;";
+            localStorage.setItem("theme", "dark");
+            changeTheme("androidstudio");
+        }
         updateThemeIcons();
     })
 
-        if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-            document.documentElement.classList.add('dark');
-            //document.getElementById('darkIcon').classList.remove('hidden');
-            //document.getElementById('lightIcon').classList.add('hidden')
-            changeTheme("androidstudio");
-        } else {
-            document.documentElement.classList.remove('dark')
-            //document.getElementById('lightIcon').classList.remove('hidden');
-            //document.getElementById('darkIcon').classList.add('hidden');
-            changeTheme("a11y-light");
-        }
-</script>
-<script>
-                const openModalButton = document.getElementById('openProblemModal');
-                const closeModalButton = document.querySelector('.modal-close');
-                const modal = document.getElementById('problemModal');
-                const problemDescriptionInput = document.getElementById('problem-description');
-                const submitButton = document.querySelector('form button');
-                const body = document.querySelector('body');
-
-                openModalButton.addEventListener('click', () => {
-                    body.classList.add('!overflow-hidden'); // Prevent scrolling on the body
-            modal.classList.remove('hidden');
-        });
-
-        closeModalButton.addEventListener('click', () => {
-            body.classList.remove('!overflow-hidden'); // Re-enable scrolling on the body
-            modal.classList.add('hidden');
-        });
-
-        modal.addEventListener('click', (e) => {
-            if (e.target === modal) {
-                modal.classList.add('hidden');
-                body.classList.remove('!overflow-hidden');
-            }
-        });
-
-        function navigateNoCache() {
-                window.location.href = `/render-no-cache${window.location.pathname}`;
-        }
-
-        const submitForm = async (event) => {
-            event.preventDefault();
-
-            console.log('Form submiting is started!');
-            submitButton.disabled = true;
-
-            // Get the problem description from the input field
-            const problemDescription = problemDescriptionInput.value;
-            const currentPage = window.location.href;
-
-            try {
-                // Send a POST request to the "report-problem" API endpoint
-                const response = await fetch('/report-problem', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ description: problemDescription, page: currentPage }),
-                });
-
-                if (response.ok) {
-                    // Report submitted successfully, you can add a success message or further actions here
-                    console.log('Problem report submitted successfully.');
-                    modal.classList.add('hidden'); // Close the modal
-                } else {
-                    // Handle errors, such as non-200 responses
-                    console.error('Failed to submit problem report.');
-                    submitButton.disabled = false;
-                }
-            } catch (error) {
-                // Handle network errors or other exceptions
-                console.error('An error occurred:', error);
-                submitButton.disabled = false;
-            }
-        };
-
-        document.getElementById('problem-form').onsubmit = submitForm;
-</script>
-<script>
-const h = document.documentElement, b = document.body;
-const st = 'scrollTop';
-const sh = 'scrollHeight';
-const progress = document.getElementById('progress');
-const header = document.getElementById('header');
-const navcontent = document.getElementById('nav-content');
-
-document.addEventListener('scroll', function () {
-  /* Refresh scroll % width */
-  const scroll = (h[st] || b[st]) / ((h[sh] || b[sh]) - h.clientHeight) * 100;
-  progress.style.setProperty('--scroll', scroll + '%');
-
-  /* Apply classes for slide in bar */
-  const shouldAddClass = window.scrollY > 10;
-});
-
-		document.getElementById('nav-toggle').onclick = function() {
-			document.getElementById("nav-content").classList.toggle("hidden");
-		}
-
-  window.addEventListener('load', function () {
-       Lightense('img:not(.no-lightense)');
-  }, false);
-</script>
-<script>
-            var lazyLoadInstance = new LazyLoad({
-                    callback_loaded: function(element) {
-                    console.log(element);
-                    console.log(element.tagName);
-                    switch (element.tagName) {
-                        case "IMG":
-                            console.log(`${element} is image, wrapping into lightense`);
-                            Lightense(element);
-                            break;
-                        case "IFRAME":
-                            const resizeIframe = () => {
-                                console.log(`${element} is iframe, wrapping script`);
-                                let iframeHeight = element.contentWindow.document.body.scrollHeight;
-                                if (iframeHeight == 150) {
-                                    iframeHeight = 500;
-                                }
-                                element.style.height = iframeHeight + 'px';
-                            };
-                            window.addEventListener('resize', resizeIframe);
-                            setInterval(resizeIframe, 4500);
-                            resizeIframe();
-                            break;
-                    }
-                },
-                callback_error: (element) => {
-                    console.log(element);
-                    if (element.tagName === "IMG" && element.hasAttribute("data-src")) {
-                        const srcAttribute = element.attributes["data-src"].value;
-                        if (srcAttribute.startsWith("https://miro.medium.com/v2/")) {
-                            element.setAttribute("src", srcAttribute.replace("https://miro.medium.com/v2/", "{{host_address}}/@miro/v2/"));
-                        }
-                    }
-                }
-            });
-</script>
-<script>
-    function navigateToOrigin() {
-      window.location.href = window.location.origin;
+    if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        document.documentElement.classList.add('dark');
+        //document.getElementById('darkIcon').classList.remove('hidden');
+        //document.getElementById('lightIcon').classList.add('hidden')
+        changeTheme("androidstudio");
+    } else {
+        document.documentElement.classList.remove('dark')
+        //document.getElementById('lightIcon').classList.remove('hidden');
+        //document.getElementById('darkIcon').classList.add('hidden');
+        changeTheme("a11y-light");
     }
 </script>
 <script>
-      document.addEventListener('DOMContentLoaded', () => {
+    const openModalButton = document.getElementById('openProblemModal');
+    const closeModalButton = document.querySelector('.modal-close');
+    const modal = document.getElementById('problemModal');
+    const problemDescriptionInput = document.getElementById('problem-description');
+    const submitButton = document.querySelector('form button');
+    const body = document.querySelector('body');
+
+    openModalButton.addEventListener('click', () => {
+        body.classList.add('!overflow-hidden'); // Prevent scrolling on the body
+        modal.classList.remove('hidden');
+    });
+
+    closeModalButton.addEventListener('click', () => {
+        body.classList.remove('!overflow-hidden'); // Re-enable scrolling on the body
+        modal.classList.add('hidden');
+    });
+
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+            modal.classList.add('hidden');
+            body.classList.remove('!overflow-hidden');
+        }
+    });
+
+    function navigateNoCache() {
+        window.location.href = `/render-no-cache${window.location.pathname}`;
+    }
+
+    const submitForm = async (event) => {
+        event.preventDefault();
+
+        console.log('Form submiting is started!');
+        submitButton.disabled = true;
+
+        // Get the problem description from the input field
+        const problemDescription = problemDescriptionInput.value;
+        const currentPage = window.location.href;
+
+        try {
+            // Send a POST request to the "report-problem" API endpoint
+            const response = await fetch('/report-problem', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ description: problemDescription, page: currentPage }),
+            });
+
+            if (response.ok) {
+                // Report submitted successfully, you can add a success message or further actions here
+                console.log('Problem report submitted successfully.');
+                modal.classList.add('hidden'); // Close the modal
+            } else {
+                // Handle errors, such as non-200 responses
+                console.error('Failed to submit problem report.');
+                submitButton.disabled = false;
+            }
+        } catch (error) {
+            // Handle network errors or other exceptions
+            console.error('An error occurred:', error);
+            submitButton.disabled = false;
+        }
+    };
+
+    document.getElementById('problem-form').onsubmit = submitForm;
+</script>
+<script>
+    const h = document.documentElement, b = document.body;
+    const st = 'scrollTop';
+    const sh = 'scrollHeight';
+    const progress = document.getElementById('progress');
+    const header = document.getElementById('header');
+    const navcontent = document.getElementById('nav-content');
+
+    document.addEventListener('scroll', function () {
+        /* Refresh scroll % width */
+        const scroll = (h[st] || b[st]) / ((h[sh] || b[sh]) - h.clientHeight) * 100;
+        progress.style.setProperty('--scroll', scroll + '%');
+
+        /* Apply classes for slide in bar */
+        const shouldAddClass = window.scrollY > 10;
+    });
+
+    document.getElementById('nav-toggle').onclick = function () {
+        document.getElementById("nav-content").classList.toggle("hidden");
+    }
+
+    window.addEventListener('load', function () {
+        Lightense('img:not(.no-lightense)');
+    }, false);
+</script>
+<script>
+    var lazyLoadInstance = new LazyLoad({
+        callback_loaded: function (element) {
+            console.log(element);
+            console.log(element.tagName);
+            switch (element.tagName) {
+                case "IMG":
+                    console.log(`${element} is image, wrapping into lightense`);
+                    Lightense(element);
+                    break;
+                case "IFRAME":
+                    const resizeIframe = () => {
+                        console.log(`${element} is iframe, wrapping script`);
+                        let iframeHeight = element.contentWindow.document.body.scrollHeight;
+                        if (iframeHeight == 150) {
+                            iframeHeight = 500;
+                        }
+                        element.style.height = iframeHeight + 'px';
+                    };
+                    window.addEventListener('resize', resizeIframe);
+                    setInterval(resizeIframe, 4500);
+                    resizeIframe();
+                    break;
+            }
+        },
+        callback_error: (element) => {
+            console.log(element);
+            if (element.tagName === "IMG" && element.hasAttribute("data-src")) {
+                const srcAttribute = element.attributes["data-src"].value;
+                if (srcAttribute.startsWith("https://miro.medium.com/v2/")) {
+                    element.setAttribute("src", srcAttribute.replace("https://miro.medium.com/v2/", "{{host_address}}/@miro/v2/"));
+                }
+            }
+        }
+    });
+</script>
+<script>
+    function navigateToOrigin() {
+        window.location.href = window.location.origin;
+    }
+</script>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
         const notificationContainer = document.querySelector('.notification-container');
         const closeButton = document.querySelector('.close-button');
         const notificationFlagString = "showNotification-buymeacoffe-ban-block"
         const body = document.querySelector('body');
 
         function showNotification() {
-          if (!localStorage.getItem(notificationFlagString)) {
-                  notificationContainer.style.display = 'block';
-              body.classList.add('!overflow-hidden');
-          }
+            if (!localStorage.getItem(notificationFlagString)) {
+                notificationContainer.style.display = 'block';
+                body.classList.add('!overflow-hidden');
+            }
         }
 
         function hideNotification() {
-          localStorage.setItem(notificationFlagString, 'false');
-          notificationContainer.style.display = 'none';
+            localStorage.setItem(notificationFlagString, 'false');
+            notificationContainer.style.display = 'none';
             body.classList.remove('!overflow-hidden');
         }
 
         // Close button functionality
         closeButton.addEventListener('click', () => {
-          hideNotification();
+            hideNotification();
         });
 
         showNotification();
-      });
+    });
 </script>
 </body>
 
