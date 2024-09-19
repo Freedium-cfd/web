@@ -7,10 +7,14 @@ from typing import Union, Optional
 from abc import ABC, abstractmethod
 
 import psycopg2
-import sqlite_zstd
 import uuid
 from loguru import logger
 from psycopg2.extras import execute_batch
+
+try:
+    import sqlite_zstd
+except ImportError:
+    sqlite_zstd = None
 
 
 class CacheData:
@@ -94,7 +98,11 @@ class SQLiteCacheBackend(AbstractCacheBackend):
         self.cursor = self.connection.cursor()
 
         if self.zstd_enabled:
+            if sqlite_zstd is None:
+                raise ValueError("sqlite_zstd library not found.")
+
             sqlite_zstd.load(self.connection)
+            self.enable_zstd()
 
     def ensure_connection(self):
         if self.connection is None or self.cursor is None:
@@ -117,9 +125,6 @@ class SQLiteCacheBackend(AbstractCacheBackend):
             return [CacheResponse(key, value) for key, value in self.cursor]
 
     def enable_zstd(self):
-        if not self.zstd_enabled:
-            raise ValueError("Can't use zstd compression. Please install 'sqlite_zstd' package")
-
         self.ensure_connection()
         with self.connection:
             try:

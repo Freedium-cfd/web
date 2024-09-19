@@ -4,6 +4,7 @@ from typing import List, Dict
 from jinja2 import Template
 
 # Constants
+APP_ROOT = "/static"
 STATIC_DIR = "./static"
 ACCESS_DENIED_PATHS: List[str] = [
     "websocket",
@@ -41,12 +42,12 @@ def generate_static_file_rules(files: List[str]) -> List[str]:
     template = Template(
         """
     handle_path /{{ file }} {
-        root * ./static/{{ file }}
+        root * {{ app_root }}/{{ file }}
         file_server
     }
     """
     )
-    return [template.render(file=file) for file in files]
+    return [template.render(file=file, app_root=APP_ROOT) for file in files]
 
 
 def generate_access_denied_rules(paths: List[str]) -> List[str]:

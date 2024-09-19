@@ -63,4 +63,18 @@ sudo docker-compose -f docker-compose-dev.yml up
 And now you can access local instance of Freedium by opening browser and type `http://localhost:6752`.
 
 ## TODO:
+
 - Integrate library notifiers - https://github.com/liiight/notifiers
+- Do not use 'shturman/dante' image, because it is does not have updates for a long time. (Probably) Use https://hub.docker.com/r/vimagick/dante/
+
+## Roadmap
+
+- [ ] Speed up parser logic, port to Cython or rewrite to Golang
+- [ ] Make parse Medium format directly to Markdown, not HTML, in order to make it more universal. This helps to generate RSS feeds, PDF, HTML.
+      OR we need write separate parser for different formats, like PDF, Markdown, etc.
+- [ ] Add more services than just a Medium
+- [ ] Rewrite frontend to Svelte
+- [ ] Move frontend to Cloudflare Pages
+- [ ] Integrate Grafana/Prometheus to monitor our services
+- [ ] Add more metrics to our services to have ability to monitor it
+- [ ] Make able translate posts to different languages using translatepy library

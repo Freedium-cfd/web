@@ -5,170 +5,207 @@
 
 
     handle_path /android-chrome-192x192.png {
-        root * ./static/android-chrome-192x192.png
+        root * /static/android-chrome-192x192.png
         file_server
     }
+    
 
     handle_path /android-chrome-512x512.png {
-        root * ./static/android-chrome-512x512.png
+        root * /static/android-chrome-512x512.png
         file_server
     }
+    
 
     handle_path /apple-touch-icon.png {
-        root * ./static/apple-touch-icon.png
+        root * /static/apple-touch-icon.png
         file_server
     }
+    
 
     handle_path /browserconfig.xml {
-        root * ./static/browserconfig.xml
+        root * /static/browserconfig.xml
         file_server
     }
+    
 
     handle_path /favicon-16x16.png {
-        root * ./static/favicon-16x16.png
+        root * /static/favicon-16x16.png
         file_server
     }
+    
 
     handle_path /favicon-32x32.png {
-        root * ./static/favicon-32x32.png
+        root * /static/favicon-32x32.png
         file_server
     }
+    
 
     handle_path /favicon.ico {
-        root * ./static/favicon.ico
+        root * /static/favicon.ico
         file_server
     }
+    
 
     handle_path /humans.txt {
-        root * ./static/humans.txt
+        root * /static/humans.txt
         file_server
     }
+    
 
     handle_path /mstile-144x144.png {
-        root * ./static/mstile-144x144.png
+        root * /static/mstile-144x144.png
         file_server
     }
+    
 
     handle_path /mstile-150x150.png {
-        root * ./static/mstile-150x150.png
+        root * /static/mstile-150x150.png
         file_server
     }
+    
 
     handle_path /mstile-310x150.png {
-        root * ./static/mstile-310x150.png
+        root * /static/mstile-310x150.png
         file_server
     }
+    
 
     handle_path /mstile-310x310.png {
-        root * ./static/mstile-310x310.png
+        root * /static/mstile-310x310.png
         file_server
     }
+    
 
     handle_path /mstile-70x70.png {
-        root * ./static/mstile-70x70.png
+        root * /static/mstile-70x70.png
         file_server
     }
+    
 
     handle_path /robots.txt {
-        root * ./static/robots.txt
+        root * /static/robots.txt
         file_server
     }
+    
 
     handle_path /safari-pinned-tab.svg {
-        root * ./static/safari-pinned-tab.svg
+        root * /static/safari-pinned-tab.svg
         file_server
     }
+    
 
     handle_path /security.txt {
-        root * ./static/security.txt
+        root * /static/security.txt
         file_server
     }
+    
 
     handle_path /site.webmanifest {
-        root * ./static/site.webmanifest
+        root * /static/site.webmanifest
         file_server
     }
+    
 
     handle_path /sitemap.xml {
-        root * ./static/sitemap.xml
+        root * /static/sitemap.xml
         file_server
     }
+    
 
     handle_path /websocket {
         respond "Access denied" 403
     }
+    
 
     handle_path /meta.json {
         respond "Access denied" 403
     }
+    
 
     handle_path /cdn-cgi/challenge-platform/scripts/jsd/main.js {
         respond "Access denied" 403
     }
+    
 
     handle_path /cdn-cgi/rum {
         respond "Access denied" 403
     }
+    
 
     handle_path /graphql/websocket {
         respond "Access denied" 403
     }
+    
 
     handle_path /onboarding/* {
         respond "Access denied" 403
     }
+    
 
     handle_path /wp-* {
         respond "Access denied" 403
     }
+    
 
     handle_path /.env {
         respond "Access denied" 403
     }
+    
 
     handle_path /api* {
         respond "Access denied" 403
     }
+    
 
     handle_path /apple-touch-icon-precomposed.png {
         respond "Access denied" 403
     }
+    
 
     handle_path /rss.xml {
         respond "Access denied" 403
     }
+    
 
     handle_path /.git/* {
         respond "Access denied" 403
     }
+    
 
     handle_path /apple-touch-icon-120x120.png {
         respond "Access denied" 403
     }
+    
 
     handle_path /apple-touch-icon-120x120-precomposed.png {
         respond "Access denied" 403
     }
+    
 
     handle_path /apple-touch-icon-152x152.png {
         respond "Access denied" 403
     }
+    
 
     handle_path /apple-touch-icon-152x152-precomposed.png {
         respond "Access denied" 403
     }
+    
 
     handle_path /.well-known/* {
         respond "Access denied" 403
     }
+    
 
     handle_path /cdn-cgi/challenge-platform/h/b/orchestrate/chl_page/v1 {
         respond "Access denied" 403
     }
+    
 
     handle_path /cdn-cgi/challenge-platform/h/g/orchestrate/chl_page/v1 {
         respond "Access denied" 403
     }
+    
 
     route /* {
 		reverse_proxy web:7080

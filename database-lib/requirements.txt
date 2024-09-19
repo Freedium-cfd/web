@@ -1,4 +1,4 @@
 loguru==0.6.0
 psycopg2-binary==2.9.9
-sqlite-zstd-build
+# sqlite-zstd-build
 # git+https://github.com/phiresky/sqlite-zstd.git#egg=sqlite_zstd&subdirectory=python
