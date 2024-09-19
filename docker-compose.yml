@@ -13,18 +13,14 @@ services:
     ports:
       - "6752:6752"
     volumes:
-      - ./CaddyfileDev:/etc/caddy/Caddyfile
-        # - ./CaddyfileMaintance:/etc/caddy/Caddyfile
+      - ./CaddyfileDev:/etc/caddy/Caddyfile # - ./CaddyfileMaintance:/etc/caddy/Caddyfile
       - caddy_data:/data
       - caddy_config:/config
+      - ./static:/static
     networks:
       - caddy_net
     healthcheck:
-      test:
-        [
-          "CMD-SHELL",
-          "curl -f http://caddy_freedium:6752/ --max-time 80 --header 'User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.3 Safari/605.1.15'"
-        ]
+      test: [ "CMD-SHELL", "curl -f http://localhost:6752/ --max-time 80 --header 'User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.3 Safari/605.1.15'" ]
       interval: 30s
       start_period: 20s
       timeout: 80s
@@ -32,78 +28,13 @@ services:
     # restart: always
     stop_grace_period: 2m
 
-  wgcf1:
-    image: neilpang/wgcf-docker:latest
-    container_name: wgcf1
-    volumes:
-      #   - ./wgcf:/wgcf
-      - /lib/modules:/lib/modules
-      - ./scripts/entryWGCF.sh:/entry.sh
-      - /etc/localtime:/etc/localtime:ro
-    privileged: true
-    sysctls:
-      net.ipv6.conf.all.disable_ipv6: 0
-    cap_add:
-      - NET_ADMIN
-    # ports:
-    #   - "9681:1080"
-    restart: always
-    networks:
-      - caddy_net
-    healthcheck:
-      test: curl -fs https://www.cloudflare.com/cdn-cgi/trace | grep -q -E 'warp=(on|plus)' && exit 0 || exit 1
-      interval: 5s
-      timeout: 2s
-      retries: 10
-
-  dante_1:
-    image: shturman/dante:1.4.2
-    container_name: dante_1
-    # build:
-    #   context: ./
-    #   dockerfile: ./DockerfileDante
-    volumes:
-      - ./scripts/dante.config:/etc/sockd.conf
-      - /etc/localtime:/etc/localtime:ro
-    restart: always
-    environment:
-      - CFGFILE=/etc/sockd.conf
-    network_mode: "service:wgcf1"
-    depends_on:
-      wgcf1:
-        condition: service_healthy
-    # healthcheck:
-    #   test: curl --proxy socks5://localhost:1080 https://google.com
-    #   interval: 5s
-    #   timeout: 2s
-    #   retries: 5
-
-  wgcf1_healthcare_service:
-    build:
-      context: .
-      dockerfile: DockerfileHealthcare
-    environment:
-      - TG_TOKEN=${TELEGRAM_BOT_TOKEN}
-      - TG_CHAT_ID=${TELEGRAM_ADMIN_ID}
-      - PROXY_HOST=wgcf1
-      - PROXY_PORT=1080
-    depends_on:
-      - dante_1
-    networks:
-      - caddy_net
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-      - /etc/localtime:/etc/localtime:ro
-      - ./scripts/service_up.py:/scripts/service_up.py
-    # network_mode: "host"
-
   web:
     build:
       context: ./
       dockerfile: ./Dockerfile
     command: python3 -m server server
     environment:
-      - "PROXY_LIST=socks5://wgcf1:1080"
+      - "PROXY_LIST=socks5://wgcf1:1080,socks5://wgcf2:1080"
     volumes:
       # - ./.env:/app/.env
       # - ./server/user_data/logs:/app/server/user_data/logs
@@ -142,18 +73,159 @@ services:
     mem_limit: 4g
     stop_grace_period: 2m
 
-  # redis_service:
-  #   image: redis:latest
-  #   networks:
-  #     - caddy_net
-  #   healthcheck:
-  #     test: ["CMD", "redis-cli", "ping"]
-  #     interval: 30s
-  #     start_period: 20s
-  #     timeout: 10s
-  #     retries: 3
-  #   restart: always
-  #   stop_grace_period: 2m
+  ########## WGCF PROXY ----1---- ##########
+
+  wgcf1:
+    image: neilpang/wgcf-docker:latest
+    container_name: wgcf1
+    volumes:
+      #   - ./wgcf:/wgcf
+      - /lib/modules:/lib/modules
+      - ./scripts/entryWGCF.sh:/entry.sh
+      - /etc/localtime:/etc/localtime:ro
+    privileged: true
+    sysctls:
+      net.ipv6.conf.all.disable_ipv6: 0
+    cap_add:
+      - NET_ADMIN
+    # ports:
+    #   - "9681:1080"
+    restart: always
+    networks:
+      - caddy_net
+    healthcheck:
+      test: curl -fs https://www.cloudflare.com/cdn-cgi/trace | grep -q -E 'warp=(on|plus)' && exit 0 || exit 1
+      interval: 5s
+      timeout: 2s
+      retries: 10000
+
+  dante_1:
+    image: shturman/dante:1.4.2
+    container_name: dante_1
+    # build:
+    #   context: ./
+    #   dockerfile: ./DockerfileDante
+    volumes:
+      - ./scripts/dante.config:/etc/sockd.conf
+      - /etc/localtime:/etc/localtime:ro
+    restart: always
+    environment:
+      - CFGFILE=/etc/sockd.conf
+    network_mode: "service:wgcf1"
+    depends_on:
+      wgcf1:
+        condition: service_healthy
+    # healthcheck:
+    #   test: curl --proxy socks5://localhost:1080 https://google.com
+    #   interval: 5s
+    #   timeout: 2s
+    #   retries: 5
+
+  wgcf1_healthcare_service:
+    build:
+      context: ./scripts/wgcf-healthcare
+      dockerfile: Dockerfile
+    environment:
+      - TG_TOKEN=${TELEGRAM_BOT_TOKEN}
+      - TG_CHAT_ID=${TELEGRAM_ADMIN_ID}
+      - CONTAINERS_TO_RESTART=wgcf1,dante_1
+      - PROXY_HOST=wgcf1
+      - PROXY_PORT=1080
+      - SLEEP_DURATION=30
+    # depends_on:
+    #   - dante_1
+    restart: always
+    networks:
+      - caddy_net
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /etc/localtime:/etc/localtime:ro
+    # network_mode: "host"
+
+    ########## WGCF PROXY ----2---- ##########
+
+  wgcf2:
+    image: neilpang/wgcf-docker:latest
+    container_name: wgcf2
+    volumes:
+      #   - ./wgcf:/wgcf
+      - /lib/modules:/lib/modules
+      - ./scripts/entryWGCF.sh:/entry.sh
+      - /etc/localtime:/etc/localtime:ro
+    privileged: true
+    sysctls:
+      net.ipv6.conf.all.disable_ipv6: 0
+    depends_on:
+      wgcf1:
+        condition: service_healthy
+    cap_add:
+      - NET_ADMIN
+    # ports:
+    #   - "9681:1080"
+    restart: always
+    networks:
+      - caddy_net
+    healthcheck:
+      test: curl -fs https://www.cloudflare.com/cdn-cgi/trace | grep -q -E 'warp=(on|plus)' && exit 0 || exit 1
+      interval: 5s
+      timeout: 2s
+      retries: 10000
+
+  dante_2:
+    image: shturman/dante:1.4.2
+    container_name: dante_2
+    # build:
+    #   context: ./
+    #   dockerfile: ./DockerfileDante
+    volumes:
+      - ./scripts/dante.config:/etc/sockd.conf
+      - /etc/localtime:/etc/localtime:ro
+    restart: always
+    environment:
+      - CFGFILE=/etc/sockd.conf
+    network_mode: "service:wgcf2"
+    depends_on:
+      wgcf2:
+        condition: service_healthy
+    # healthcheck:
+    #   test: curl --proxy socks5://localhost:1080 https://google.com
+    #   interval: 5s
+    #   timeout: 2s
+    #   retries: 5
+
+  wgcf2_healthcare_service:
+    build:
+      context: ./scripts/wgcf-healthcare
+      dockerfile: Dockerfile
+    environment:
+      - TG_TOKEN=${TELEGRAM_BOT_TOKEN}
+      - TG_CHAT_ID=${TELEGRAM_ADMIN_ID}
+      - CONTAINERS_TO_RESTART=wgcf2,dante_2
+      - PROXY_HOST=wgcf2
+      - PROXY_PORT=1080
+      - SLEEP_DURATION=40
+    # depends_on:
+    #   - dante_2
+    restart: always
+    networks:
+      - caddy_net
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /etc/localtime:/etc/localtime:ro
+    # network_mode: "host"
+
+    # redis_service:
+    #   image: redis:latest
+    #   networks:
+    #     - caddy_net
+    #   healthcheck:
+    #     test: ["CMD", "redis-cli", "ping"]
+    #     interval: 30s
+    #     start_period: 20s
+    #     timeout: 10s
+    #     retries: 3
+    #   restart: always
+    #   stop_grace_period: 2m
 
   redis_service:
     image: 'docker.dragonflydb.io/dragonflydb/dragonfly'
@@ -173,7 +245,7 @@ services:
       retries: 3
     restart: always
     stop_grace_period: 2m
-    # mem_limit: 1g
+    mem_limit: 2g
 
   postgres:
     image: postgres:16.3-alpine3.20
