@@ -33,6 +33,9 @@ services:
       dockerfile: Dockerfile
     environment:
       - "PROXY_LIST=socks5://wgcf1:1080,socks5://wgcf2:1080"
+    depends_on:
+      - dante_1
+      - dante_2
     # volumes:
     #   - ./web:/app/web
     #   - ./core/medium_parser/:/app/medium_parser
