@@ -12,7 +12,6 @@ RUN CGO_ENABLED=0 GOOS=linux go build -ldflags="-s -w" -o /main ./main.go
 FROM alpine:3.20
 WORKDIR /app
 
-# COPY .env .
 COPY --from=builder /main .
 
 ENTRYPOINT ["/app/main"]

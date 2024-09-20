@@ -1,3 +1,0 @@
-[submodule "server/toolkits/core"]
-	path = server/toolkits/core
-	url = https://github.com/Freedium-cfd/core

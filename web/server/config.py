@@ -30,9 +30,11 @@ REDIS_HOST = config("REDIS_HOST", default="redis_service")
 REDIS_PORT = config("REDIS_PORT", cast=int, default=6379)
 REDIS_TIMEOUT = config("REDIS_TIMEOUT", cast=int, default=1.75)
 
+DATABASE_URL = config("DATABASE_URL", default="postgresql://postgres:postgres@postgres:5432/postgres")
+
 SENTRY_SDK_DSN = config("SENTRY_SDK_DSN", default=None)
 SENTRY_TRACES_SAMPLE_RATE = config("SENTRY_TRACES_SAMPLE_RATE", cast=float, default=0.2)
 SENTRY_PROFILES_SAMPLE_RATE = config("SENTRY_PROFILES_SAMPLE_RATE", cast=float, default=0.2)
 
-_PROXY_LIST = config("PROXY_LIST", cast=str, default="")
-PROXY_LIST = _PROXY_LIST.split(",") if _PROXY_LIST else []
+PROXY_LIST_RAW = config("PROXY_LIST", cast=str, default="")
+PROXY_LIST = PROXY_LIST_RAW.split(",") if PROXY_LIST_RAW else []

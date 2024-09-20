@@ -19,10 +19,14 @@ fastapi = "0.108.0"
 gunicorn = "21.2.0"
 redis = {version = "4.6.0", extras = ["hiredis"]}
 xkcdpass = "1.19.3"
-apscheduler = "3.10.4"
 loguru = "0.6.0"
 anyio = "<=4.0.0"
 
+
+[tool.poetry.group.dev.dependencies]
+djlint = "^1.35.2"
+ruff = "^0.6.6"
+black = "^24.8.0"
 
 [build-system]
 requires = ["poetry-core"]

@@ -43,9 +43,9 @@ wait_for_postgres()
 # logging.basicConfig(handlers=[InterceptHandler()], level=0, force=True)
 configure_logger()
 
-medium_cache = PostgreSQLCacheBackend("postgresql://postgres:postgres@postgres:5432/postgres")
+medium_cache = PostgreSQLCacheBackend(config.DATABASE_URL)
 medium_cache.init_db()
-# migrate_to_postgres_thread = execute_migrate_to_postgres_in_thread("medium_db_cache.sqlite", "postgresql://postgres:postgres@postgres:5432/postgres")
+
 logger.debug(f"Database length: {medium_cache.all_length()}")
 
 medium_api = MediumApi(auth_cookies=config.MEDIUM_AUTH_COOKIES, timeout=3, proxy_list=config.PROXY_LIST)

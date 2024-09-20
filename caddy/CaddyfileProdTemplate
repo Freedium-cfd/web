@@ -7,6 +7,6 @@ freedium.cfd {
     {{ template }}
 
     route /* {
-		reverse_proxy web:7080
+		reverse_proxy freedium_web:7080
 	}
 }

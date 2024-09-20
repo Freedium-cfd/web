@@ -1,2 +1,0 @@
-ruff check ./ --fix
-black .

@@ -1,0 +1,12 @@
+version: '3.7'
+
+services:
+  autoheal:
+    container_name: freedium_autoheal
+    restart: always
+    image: willfarrell/autoheal
+    environment:
+      - AUTOHEAL_CONTAINER_LABEL=all
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    stop_grace_period: 2m

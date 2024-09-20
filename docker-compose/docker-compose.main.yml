@@ -1,0 +1,55 @@
+version: '3.7'
+
+services:
+  caddy_freedium:
+    container_name: caddy_freedium
+    build:
+      context: ../caddy
+      dockerfile: Dockerfile
+    cap_add:
+      - NET_ADMIN
+    ports:
+      - "6752:6752"
+    volumes:
+      - ../caddy/CaddyfileDev:/etc/caddy/Caddyfile
+      - freedium_caddy_data:/data
+      - freedium_caddy_config:/config
+      - ../caddy/static:/static
+    networks:
+      - freedium_net
+      - caddy_net
+    healthcheck:
+      test: [ "CMD-SHELL", "curl -f http://localhost:6752/ --max-time 80 --header 'User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.3 Safari/605.1.15'" ]
+      interval: 30s
+      start_period: 20s
+      timeout: 80s
+      retries: 3
+    stop_grace_period: 2m
+
+  freedium_web:
+    container_name: freedium_web
+    build:
+      context: ../
+      dockerfile: Dockerfile
+    environment:
+      - "PROXY_LIST=socks5://wgcf1:1080,socks5://wgcf2:1080"
+    # volumes:
+    #   - ./web:/app/web
+    #   - ./core/medium_parser/:/app/medium_parser
+    #   - ./core/rl_string_helper/:/app/rl_string_helper
+    ports:
+      - "7080:7080"
+    networks:
+      - freedium_net
+    mem_limit: 4g
+    stop_grace_period: 2m
+
+volumes:
+  freedium_caddy_data:
+  freedium_caddy_config:
+
+
+networks:
+  caddy_net:
+    external: true
+  freedium_net:

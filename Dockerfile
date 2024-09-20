@@ -1,7 +1,9 @@
-FROM python:3.12.3-slim
+FROM python:3.12.3
+# -slim
 
 ENV DEBIAN_FRONTEND=noninteractive
-RUN apt update && apt upgrade -y && apt install gcc -y && apt clean # && rm /var/lib/apt/lists/*
+
+RUN pip install poetry && poetry config virtualenvs.create false
 
 WORKDIR /app
 
@@ -16,14 +18,12 @@ RUN pip3 install --no-cache-dir ./database-lib
 COPY ./core ./core
 RUN pip3 install --no-cache-dir ./core
 
-# COPY ./server ./server
+COPY ./web ./web
 
-COPY ./requirements.txt ./
-RUN pip3 install --no-cache-dir -r requirements.txt
+WORKDIR /app/web
 
-COPY ./requirements-fast.txt ./
-RUN pip3 install --no-cache-dir -r requirements-fast.txt
+RUN poetry install
 
-EXPOSE 7080
+# EXPOSE 7080
 
 CMD ["python3", "-m", "server", "server"]

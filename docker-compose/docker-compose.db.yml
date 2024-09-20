@@ -1,0 +1,37 @@
+version: '3.7'
+
+services:
+  redis_service:
+    container_name: redis_service
+    image: 'docker.dragonflydb.io/dragonflydb/dragonfly'
+    ulimits:
+      memlock: -1
+    networks:
+      - freedium_net
+    volumes:
+      - freedium_dragonflydata:/data
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 30s
+      start_period: 20s
+      timeout: 10s
+      retries: 3
+    restart: always
+    stop_grace_period: 2m
+    mem_limit: 2g
+
+  postgres:
+    image: postgres:16.3-alpine3.20
+    container_name: freedium_postgres
+    networks:
+      - freedium_net
+    volumes:
+      - ./postgres:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_DB=postgres
+    stop_grace_period: 2m
+
+volumes:
+  freedium_dragonflydata:

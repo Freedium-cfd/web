@@ -1,10 +1,9 @@
-# https://futurestud.io/tutorials/caddy-reverse-proxy-a-node-js-app
-freedium.cfd {
+:6752 {
 	# header Server "nginx"
     encode gzip
 	header -Server
 
-    
+
     handle_path /android-chrome-192x192.png {
         root * /static/android-chrome-192x192.png
         file_server
@@ -107,12 +106,6 @@ freedium.cfd {
     }
     
 
-    handle_path /sitemap.xml {
-        root * /static/sitemap.xml
-        file_server
-    }
-    
-
     handle_path /websocket {
         respond "Access denied" 403
     }
@@ -209,6 +202,6 @@ freedium.cfd {
     
 
     route /* {
-		reverse_proxy web:7080
+		reverse_proxy freedium_web:7080
 	}
 }

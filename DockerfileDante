@@ -1,4 +1,0 @@
-FROM shturman/dante:1.4.2
-
-ENV DEBIAN_FRONTEND=noninteractive
-RUN apt update && apt upgrade -y && apt install -y curl && apt clean && rm -rf /var/lib/apt/lists/*

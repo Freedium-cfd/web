@@ -1,0 +1,111 @@
+version: '3.7'
+
+services:
+  wgcf1:
+    image: neilpang/wgcf-docker:latest
+    container_name: wgcf1
+    volumes:
+      - /lib/modules:/lib/modules
+      - /etc/localtime:/etc/localtime:ro
+      - ../wgcf/entry.sh:/entry.sh
+    privileged: true
+    sysctls:
+      net.ipv6.conf.all.disable_ipv6: 0
+    cap_add:
+      - NET_ADMIN
+    restart: always
+    networks:
+      - freedium_net
+    healthcheck:
+      test: curl -fs https://www.cloudflare.com/cdn-cgi/trace | grep -q -E 'warp=(on|plus)' && exit 0 || exit 1
+      interval: 5s
+      timeout: 2s
+      retries: 10000
+
+  dante_1:
+    image: shturman/dante:1.4.2
+    container_name: dante_1
+    volumes:
+      - ../wgcf/dante/sockd.conf:/etc/sockd.conf
+      - /etc/localtime:/etc/localtime:ro
+    restart: always
+    environment:
+      - CFGFILE=/etc/sockd.conf
+    network_mode: "service:wgcf1"
+    depends_on:
+      wgcf1:
+        condition: service_healthy
+
+  wgcf1_healthcare_service:
+    build:
+      context: ../wgcf/wgcf-healthcare
+      dockerfile: Dockerfile
+    environment:
+      - TG_TOKEN=${TELEGRAM_BOT_TOKEN}
+      - TG_CHAT_ID=${TELEGRAM_ADMIN_ID}
+      - CONTAINERS_TO_RESTART=wgcf1,dante_1
+      - PROXY_HOST=wgcf1
+      - PROXY_PORT=1080
+      - SLEEP_DURATION=30
+    restart: always
+    networks:
+      - freedium_net
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /etc/localtime:/etc/localtime:ro
+
+  wgcf2:
+    image: neilpang/wgcf-docker:latest
+    container_name: wgcf2
+    volumes:
+      - /lib/modules:/lib/modules
+      - /etc/localtime:/etc/localtime:ro
+      - ../wgcf/entry.sh:/entry.sh
+    privileged: true
+    sysctls:
+      net.ipv6.conf.all.disable_ipv6: 0
+    depends_on:
+      wgcf1:
+        condition: service_healthy
+    cap_add:
+      - NET_ADMIN
+    restart: always
+    networks:
+      - freedium_net
+    healthcheck:
+      test: curl -fs https://www.cloudflare.com/cdn-cgi/trace | grep -q -E 'warp=(on|plus)' && exit 0 || exit 1
+      interval: 5s
+      timeout: 2s
+      retries: 10000
+
+  dante_2:
+    image: shturman/dante:1.4.2
+    container_name: dante_2
+    volumes:
+      - ../wgcf/dante/sockd.conf:/etc/sockd.conf
+      - /etc/localtime:/etc/localtime:ro
+    restart: always
+    environment:
+      - CFGFILE=/etc/sockd.conf
+    network_mode: "service:wgcf2"
+    depends_on:
+      wgcf2:
+        condition: service_healthy
+
+  wgcf2_healthcare_service:
+    build:
+      context: ../wgcf/wgcf-healthcare
+      dockerfile: Dockerfile
+    environment:
+      - TG_TOKEN=${TELEGRAM_BOT_TOKEN}
+      - TG_CHAT_ID=${TELEGRAM_ADMIN_ID}
+      - CONTAINERS_TO_RESTART=wgcf2,dante_2
+      - PROXY_HOST=wgcf2
+      - PROXY_PORT=1080
+      - SLEEP_DURATION=40
+    restart: always
+    networks:
+      - freedium_net
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /etc/localtime:/etc/localtime:ro

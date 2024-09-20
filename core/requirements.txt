@@ -9,4 +9,5 @@ bs4==0.0.1
 Jinja2==3.1.2
 beautifulsoup4==4.12.2
 async-lru==2.0.4
+orjson==3.10.6
 asyncer
