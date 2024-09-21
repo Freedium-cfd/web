@@ -73,62 +73,112 @@ class TestRLStringHelper:
         helper.set_template(0, 11, "<i>{{text}}</i>")
         assert str(helper) == "<i><a>Hello</a> <b>world</b></i>"
 
-    # def test_super_duper_overlapsing(self):
-    #     # https://medium.com/google-cloud/implementing-semantic-caching-a-step-by-step-guide-to-faster-cost-effective-genai-workflows-ef85d8e72883#bypass
-    #     text = "Note: The patterns and ideas discussed in this post are broadly applicable and can be adopted for other cloud providers."
-    #     helper = RLStringHelper(text)
-    #     markups = (
-    #         [
-    #             {
-    #                 "__typename": "Markup",
-    #                 "name": None,
-    #                 "type": "CODE",
-    #                 "start": 0,
-    #                 "end": 5,
-    #                 "href": None,
-    #                 "title": None,
-    #                 "rel": None,
-    #                 "anchorType": None,
-    #                 "userId": None,
-    #                 "creatorIds": None,
-    #             },
-    #             {
-    #                 "__typename": "Markup",
-    #                 "name": None,
-    #                 "type": "STRONG",
-    #                 "start": 0,
-    #                 "end": 6,
-    #                 "href": None,
-    #                 "title": None,
-    #                 "rel": None,
-    #                 "anchorType": None,
-    #                 "userId": None,
-    #                 "creatorIds": None,
-    #             },
-    #             {
-    #                 "__typename": "Markup",
-    #                 "name": None,
-    #                 "type": "EM",
-    #                 "start": 0,
-    #                 "end": 6,
-    #                 "href": None,
-    #                 "title": None,
-    #                 "rel": None,
-    #                 "anchorType": None,
-    #                 "userId": None,
-    #                 "creatorIds": None,
-    #             },
-    #         ],
-    #     )
-    #     parsed_markups = parse_markups(markups[0])
-    #     logger.debug(parsed_markups)
-    #     parsed_markups = split_overlapping_ranges(parsed_markups)
-    #     logger.debug(parsed_markups)
-    #     for markup in parsed_markups:
-    #         helper.set_template(markup["start"], markup["end"], markup["template"])
+    def test_super_duper_overlapsing(self):
+        text = "Note: The patterns and ideas discussed in this post are broadly applicable."
+        helper = RLStringHelper(text)
 
-    #     expected_pattern = r"<em><strong><code[^>]*>Note:</code> </strong></em>The patterns and ideas discussed in this post are broadly applicable and can be adopted for other cloud providers\."
-    #     assert re.match(expected_pattern, str(helper))
+        markups = [
+            {"start": 0, "end": 5, "type": "code", "template": "<code>{{text}}</code>"},
+            {
+                "start": 0,
+                "end": 6,
+                "type": "strong",
+                "template": "<strong>{{text}}</strong>",
+            },
+            {"start": 0, "end": 6, "type": "em", "template": "<em>{{text}}</em>"},
+        ]
+
+        parsed_markups = split_overlapping_ranges(markups)
+        for markup in parsed_markups:
+            helper.set_template(markup["start"], markup["end"], markup["template"])
+
+        expected_pattern = r"<em><strong><code>Note:</code></strong></em><em><strong> </strong></em>The patterns and ideas discussed in this post are broadly applicable\."
+        result = str(helper)
+        assert re.match(expected_pattern, result)
+
+    def test_complex_overlapping_tags(self):
+        text = "The quick (brown) fox jumps over 13 lazy dogs!"
+        helper = RLStringHelper(text)
+
+        markups = [
+            {
+                "start": 0,
+                "end": 46,
+                "type": "span",
+                "template": "<span>{{text}}</span>",
+            },
+            {"start": 4, "end": 17, "type": "bold", "template": "<b>{{text}}</b>"},
+            {"start": 10, "end": 21, "type": "italic", "template": "<i>{{text}}</i>"},
+            {
+                "start": 18,
+                "end": 27,
+                "type": "underline",
+                "template": "<u>{{text}}</u>",
+            },
+            {
+                "start": 33,
+                "end": 41,
+                "type": "code",
+                "template": "<code>{{text}}</code>",
+            },
+            {
+                "start": 40,
+                "end": 46,
+                "type": "link",
+                "template": '<a href="#">{{text}}</a>',
+            },
+        ]
+
+        parsed_markups = split_overlapping_ranges(markups)
+        for markup in parsed_markups:
+            helper.set_template(markup["start"], markup["end"], markup["template"])
+
+        expected_output = (
+            "<span>The <b>quick <i>(brown)</b> <u>fox</u></i><u> jumps</u> "
+            'over <code>13 lazy</code><a href="#"><code> </code>dogs!</a></span>'
+        )
+        assert str(helper) == expected_output
+
+    def test_nmultibyte_emoji(self):
+        from medium_parser.markups import parse_markups
+
+        data = {
+            "__typename": "Paragraph",
+            "id": "236e7049b537_33",
+            "name": "ba8c",
+            "href": None,
+            "text": "Noah dragged his two printers out from Settings ⚙️  < Printers & Scanners \ud83d\udda8️  and dropped them in Dock or Desktop, I don’t remember — but you can drag to both the places.",
+            "iframe": None,
+            "layout": None,
+            "markups": [
+                {
+                    "__typename": "Markup",
+                    "name": None,
+                    "type": "CODE",
+                    "start": 39,
+                    "end": 76,
+                    "href": None,
+                    "title": None,
+                    "rel": None,
+                    "anchorType": None,
+                    "userId": None,
+                    "creatorIds": None,
+                }
+            ],
+            "metadata": None,
+            "mixtapeMetadata": None,
+            "type": "P",
+            "hasDropCap": None,
+            "dropCapImage": None,
+            "codeBlockMetadata": None,
+        }
+        helper = RLStringHelper(data["text"])
+        parsed_markups = split_overlapping_ranges(parse_markups(data["markups"]))
+        for markup in parsed_markups:
+            helper.set_template(markup["start"], markup["end"], markup["template"])
+        print(str(helper))
+
+        assert str(helper) == data["text"]
 
     def test_basic_replace(self):
         # Replace A to B - ONE to ONE char
@@ -188,26 +238,23 @@ class TestRLStringHelper:
         helper = RLStringHelper(issue_text)
         assert helper.get_text() == issue_text
 
-    # def test_markup_parser(self):
-    #     href_markup = {
-    #         "__typename": 'Markup',
-    #         "anchorType": 'LINK',
-    #         "end": 12,
-    #         "href": 'https://readwise.io/bookreview/{{book_id',
-    #         "name": None,
-    #         "rel": 'nofollow',
-    #         "start": 0,
-    #         "title": '',
-    #         "type": 'A',
-    #         "userId": None
-    #     }
+    def test_markup_parser(self):
+        href_markup = {
+            "start": 0,
+            "end": 12,
+            "type": "a",
+            "template": '<a href="https://readwise.io/bookreview/{{ book_id }}">{{ text }}</a>',
+        }
 
-    #     helper = RLStringHelper("Hello world")
-    #     markups = parse_markups([href_markup])
-    #     parsed_markups = split_overlapping_ranges(markups)
-    #     for markup in parsed_markups:
-    #         helper.set_template(markup["start"], markup["end"], markup["template"])
-    #     assert helper.get_text() == '<a style="text-decoration: underline;" rel="nofollow" title="" href="https://readwise.io/bookreview/{{book_id" target="_blank">Hello world</a>'
+        helper = RLStringHelper("Hello world")
+        parsed_markups = split_overlapping_ranges([href_markup])
+        for markup in parsed_markups:
+            helper.set_template(markup["start"], markup["end"], markup["template"])
+
+        assert (
+            helper.get_text()
+            == '<a href="https://readwise.io/bookreview/{{ book_id }}">Hello world</a>'
+        )
 
     def test_medium_all(self):
         helper = RLStringHelper("ABC Hello world")

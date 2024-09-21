@@ -101,7 +101,7 @@ class MediumParser:
         async def _get_from_cache():
             logger.debug("Using cache backend")
             post_data = self.cache.pull(post_id)
-            if post_data and post_data.data.has_data():
+            if post_data:
                 logger.debug("post query was found on cache")
                 parsed_data = post_data.json()
                 if parsed_data:

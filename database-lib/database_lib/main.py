@@ -45,7 +45,9 @@ class CacheResponse:
 
     def __init__(self, key: str, data: Union[CacheData, str]):
         self.key: str = key
-        self.data: CacheData = CacheData(data) if isinstance(data, str) else data
+        self.data: CacheData = (
+            CacheData(data) if not isinstance(data, CacheData) else data
+        )
 
     def json(self):
         return self.data.json()

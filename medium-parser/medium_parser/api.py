@@ -15,7 +15,12 @@ from medium_parser.utils import generate_random_sha256_hash
 class MediumApi:
     __slots__ = ("auth_cookies", "proxy_list", "timeout")
 
-    def __init__(self, auth_cookies: Optional[str] = None, proxy_list: Optional[List[str]] = None, timeout: int = 3):
+    def __init__(
+        self,
+        auth_cookies: Optional[str] = None,
+        proxy_list: Optional[List[str]] = None,
+        timeout: int = 3,
+    ):
         self.auth_cookies = auth_cookies
         self.proxy_list = proxy_list
         self.timeout = timeout
@@ -50,7 +55,7 @@ class MediumApi:
             "Connection": "Keep-Alive",
         }
 
-        if self.auth_cookies:
+        if self.auth_cookies is not None:
             headers["Cookie"] = self.auth_cookies
 
         graphql_data = {
@@ -68,7 +73,11 @@ class MediumApi:
         logger.debug(f"Request started...")
 
         async with aiohttp.ClientSession(connector=connector) as session:
-            async with RetryClient(client_session=session, raise_for_status=False, retry_options=retry_options) as retry_client:
+            async with RetryClient(
+                client_session=session,
+                raise_for_status=False,
+                retry_options=retry_options,
+            ) as retry_client:
                 async with retry_client.post(
                     "https://medium.com/_/graphql",
                     headers=headers,
@@ -76,7 +85,9 @@ class MediumApi:
                     timeout=self.timeout,
                 ) as request:
                     if request.status != 200:
-                        logger.error(f"Failed to fetch post by ID {post_id} with status code: {request.status}")
+                        logger.error(
+                            f"Failed to fetch post by ID {post_id} with status code: {request.status}"
+                        )
                         return None
 
                     try:
@@ -89,7 +100,9 @@ class MediumApi:
         logger.debug(f"Request finished...")
 
         if exception:
-            logger.error(f"Exception occured while fetching post {post_id}, so let's just fuck it up")
+            logger.error(
+                f"Exception occured while fetching post {post_id}, so let's just fuck it up"
+            )
             raise exception
 
         return response_data

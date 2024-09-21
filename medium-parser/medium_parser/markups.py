@@ -1,4 +1,4 @@
-from medium_parser import jinja_env
+from medium_parser import jinja_env_debug
 
 
 def raw_render(**kwargs):
@@ -15,7 +15,7 @@ def parse_markups(markups: list[str]):
     for markup in markups:
         if markup["type"] == "A":
             if markup["anchorType"] == "LINK":
-                template = jinja_env.from_string(
+                template = jinja_env_debug.from_string(
                     '<a style="text-decoration: underline;" rel="{{rel}}" title="{{title}}" href="{{href}}" target="_blank">{{text}}</a>'
                 )
                 template = template.render(
@@ -26,7 +26,7 @@ def parse_markups(markups: list[str]):
                     )
                 )
             elif markup["anchorType"] == "USER":
-                template = jinja_env.from_string(
+                template = jinja_env_debug.from_string(
                     '<a style="text-decoration: underline;" href="https://medium.com/u/{{userId}}">{{text}}</a>'
                 )
                 template = template.render(userId=markup["userId"])
@@ -43,7 +43,7 @@ def parse_markups(markups: list[str]):
         else:
             continue
 
-        template = jinja_env.from_string(template)
+        template = jinja_env_debug.from_string(template)
         markup["template"] = template
         markups_out.append(markup)
 
