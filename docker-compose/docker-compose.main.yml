@@ -28,6 +28,7 @@ services:
 
   freedium_web:
     container_name: freedium_web
+    env_file: ../.env
     build:
       context: ../
       dockerfile: Dockerfile
