@@ -16,6 +16,7 @@ In UTF-16, each Unicode character may be encoded as one or two code units (byte)
 the value returned by length might not match the actual number of Unicode characters in the string.
 
 Python uses UTF-8 encoding, which each character is encoded as one byte. So here is a workaround to get the actual number of characters and manipulate them in string as in UTF-16 encoding. See pre_utf_16_bang and post_utf_16_bang function. 
+More info to read: https://habr.com/ru/articles/769256/
 """
 
 
@@ -38,14 +39,16 @@ class RLStringHelper:
         _default_bang_char: str = "R",
     ):
         self.string: str = quote_symbol(string)
-        self.templates = []
-        self.quote_replaces = []
-        self.replaces = []
+        self.templates: list[tuple[tuple[int, int], Template]] = []
+        self.quote_replaces: list[tuple[tuple[int, int], str]] = []
+        self.replaces: list[tuple[tuple[int, int], str]] = []
         self.quote_html_type = quote_html_type
         self._default_bang_char = _default_bang_char
 
-    def pre_utf_16_bang(self, string: str, string_pos_matrix: list):
-        utf_16_bang_list = []
+    def pre_utf_16_bang(
+        self, string: str, string_pos_matrix: list
+    ) -> tuple[str, list, list[tuple[int, int, int]]]:
+        utf_16_bang_list: list[tuple[int, int, int]] = []
         string_len_utf_16 = len(string.encode("utf-16-le")) // 2
         if string_len_utf_16 == len(string):
             logger.trace("String doesn't contain multibyte characters")
@@ -68,7 +71,13 @@ class RLStringHelper:
 
         return string, string_pos_matrix, utf_16_bang_list
 
-    def _paste_char(self, string: str, string_pos_matrix: list, pos: int, char: str):
+    def _paste_char(
+        self,
+        string: StringAssignmentMixin,
+        string_pos_matrix: list,
+        pos: int,
+        char: str,
+    ) -> tuple[StringAssignmentMixin, list]:
         char_len = len(char)
         string_pos_matrix.insert(pos, string_pos_matrix[pos])
         for matrix_i in range(pos + 1, len(string_pos_matrix)):
@@ -78,7 +87,7 @@ class RLStringHelper:
 
     def _delete_char(
         self,
-        string: str,
+        string: StringAssignmentMixin,
         string_pos_matrix: list,
         pos: int,
         char_len: int,
@@ -115,7 +124,7 @@ class RLStringHelper:
             post_transbang += char_len
         return string, string_pos_matrix
 
-    def set_template(self, start: int, end: int, template: str):
+    def set_template(self, start: int, end: int, template: str | Template):
         if not isinstance(template, Template):
             template = jinja_env.from_string(template)
         self.templates.append(((start, end), template))
@@ -334,51 +343,3 @@ def split_overlapping_range_position(positions):
             result[-1]["end"] = max(last["end"], pos["end"])
 
     return result
-
-
-def raw_render(**kwargs):
-    for key, value in kwargs.items():
-        if isinstance(value, str):
-            kwargs[key] = f"{{% raw %}}{value}{{% endraw %}}"
-    return kwargs
-
-
-def parse_markups(markups: list[str]):
-    markups_out = []
-
-    for markup in markups:
-        if markup["type"] == "A":
-            if markup["anchorType"] == "LINK":
-                template = jinja_env.from_string(
-                    '<a style="text-decoration: underline;" rel="{{rel}}" title="{{title}}" href="{{href}}" target="_blank">{{text}}</a>'
-                )
-                template = template.render(
-                    raw_render(
-                        rel=markup.get("rel", ""),
-                        title=markup.get("title", ""),
-                        href=markup["href"],
-                    )
-                )
-            elif markup["anchorType"] == "USER":
-                template = jinja_env.from_string(
-                    '<a style="text-decoration: underline;" href="https://medium.com/u/{{userId}}">{{text}}</a>'
-                )
-                template = template.render(userId=markup["userId"])
-            else:
-                continue
-        elif markup["type"] == "STRONG":
-            template = "<strong>{{text}}</strong>"
-        elif markup["type"] == "EM":
-            template = "<em>{{text}}</em>"
-        elif markup["type"] == "CODE":
-            template = (
-                "<code class='p-1.5 bg-gray-300 dark:bg-gray-600'>{{text}}</code>"
-            )
-        else:
-            continue
-
-        template = jinja_env.from_string(template)
-        markup["template"] = template
-        markups_out.append(markup)
-
-    return markups_out

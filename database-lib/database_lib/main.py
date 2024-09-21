@@ -32,6 +32,8 @@ class CacheData:
     def __str__(self):
         return self.data
 
+    def has_data(self):
+        return self.data is not None and self.data != ""
 
 class CacheResponse:
     __slots__ = ("key", "data")

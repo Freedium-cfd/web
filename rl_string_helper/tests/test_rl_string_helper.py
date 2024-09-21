@@ -1,7 +1,11 @@
 import sys
 import re
 from loguru import logger
-from rl_string_helper import RLStringHelper, quote_html, parse_markups, split_overlapping_ranges
+from rl_string_helper import (
+    RLStringHelper,
+    quote_html,
+    split_overlapping_ranges,
+)
 
 
 class TestRLStringHelper:
@@ -16,19 +20,46 @@ class TestRLStringHelper:
         # Test with standard HTML characters
         html = '<div class="test">Hello & World</div>'
         result = list(quote_html(html, "full"))
-        expected = [((0, 1), "&lt;"), ((11, 12), "&quot;"), ((16, 17), "&quot;"), ((17, 18), "&gt;"), ((24, 25), "&amp;"), ((31, 32), "&lt;"), ((36, 37), "&gt;")]
+        expected = [
+            ((0, 1), "&lt;"),
+            ((11, 12), "&quot;"),
+            ((16, 17), "&quot;"),
+            ((17, 18), "&gt;"),
+            ((24, 25), "&amp;"),
+            ((31, 32), "&lt;"),
+            ((36, 37), "&gt;"),
+        ]
         assert sorted(result) == sorted(expected)
 
         # Test with extra characters
         html = '<div class="test">\nHello & World</div>'
         result = list(quote_html(html, "extra"))
-        expected = [((0, 1), "&lt;"), ((11, 12), "&quot;"), ((16, 17), "&quot;"), ((17, 18), "&gt;"), ((25, 26), "&amp;"), ((32, 33), "&lt;"), ((37, 38), "&gt;"), ((18, 19), "<br />")]
+        expected = [
+            ((0, 1), "&lt;"),
+            ((11, 12), "&quot;"),
+            ((16, 17), "&quot;"),
+            ((17, 18), "&gt;"),
+            ((25, 26), "&amp;"),
+            ((32, 33), "&lt;"),
+            ((37, 38), "&gt;"),
+            ((18, 19), "<br />"),
+        ]
         assert sorted(result) == sorted(expected)
 
         # Test with quote characters
-        html = '<div class="test">Hello & \'World\'</div>'
+        html = "<div class=\"test\">Hello & 'World'</div>"
         result = list(quote_html(html, "full"))
-        expected = [((0, 1), "&lt;"), ((11, 12), "&quot;"), ((16, 17), "&quot;"), ((17, 18), "&gt;"), ((24, 25), "&amp;"), ((26, 27), "&#39"), ((32, 33), "&#39"), ((33, 34), "&lt;"), ((38, 39), "&gt;")]
+        expected = [
+            ((0, 1), "&lt;"),
+            ((11, 12), "&quot;"),
+            ((16, 17), "&quot;"),
+            ((17, 18), "&gt;"),
+            ((24, 25), "&amp;"),
+            ((26, 27), "&#39"),
+            ((32, 33), "&#39"),
+            ((33, 34), "&lt;"),
+            ((38, 39), "&gt;"),
+        ]
         assert sorted(result) == sorted(expected)
 
     def test_basic_template(self):
@@ -42,26 +73,62 @@ class TestRLStringHelper:
         helper.set_template(0, 11, "<i>{{text}}</i>")
         assert str(helper) == "<i><a>Hello</a> <b>world</b></i>"
 
-    def test_super_duper_overlapsing(self):
-        # https://medium.com/google-cloud/implementing-semantic-caching-a-step-by-step-guide-to-faster-cost-effective-genai-workflows-ef85d8e72883#bypass
-        text = "Note: The patterns and ideas discussed in this post are broadly applicable and can be adopted for other cloud providers."
-        helper = RLStringHelper(text)
-        markups = (
-            [
-                {"__typename": "Markup", "name": None, "type": "CODE", "start": 0, "end": 5, "href": None, "title": None, "rel": None, "anchorType": None, "userId": None, "creatorIds": None},
-                {"__typename": "Markup", "name": None, "type": "STRONG", "start": 0, "end": 6, "href": None, "title": None, "rel": None, "anchorType": None, "userId": None, "creatorIds": None},
-                {"__typename": "Markup", "name": None, "type": "EM", "start": 0, "end": 6, "href": None, "title": None, "rel": None, "anchorType": None, "userId": None, "creatorIds": None},
-            ],
-        )
-        parsed_markups = parse_markups(markups[0])
-        logger.debug(parsed_markups)
-        parsed_markups = split_overlapping_ranges(parsed_markups)
-        logger.debug(parsed_markups)
-        for markup in parsed_markups:
-            helper.set_template(markup["start"], markup["end"], markup["template"])
+    # def test_super_duper_overlapsing(self):
+    #     # https://medium.com/google-cloud/implementing-semantic-caching-a-step-by-step-guide-to-faster-cost-effective-genai-workflows-ef85d8e72883#bypass
+    #     text = "Note: The patterns and ideas discussed in this post are broadly applicable and can be adopted for other cloud providers."
+    #     helper = RLStringHelper(text)
+    #     markups = (
+    #         [
+    #             {
+    #                 "__typename": "Markup",
+    #                 "name": None,
+    #                 "type": "CODE",
+    #                 "start": 0,
+    #                 "end": 5,
+    #                 "href": None,
+    #                 "title": None,
+    #                 "rel": None,
+    #                 "anchorType": None,
+    #                 "userId": None,
+    #                 "creatorIds": None,
+    #             },
+    #             {
+    #                 "__typename": "Markup",
+    #                 "name": None,
+    #                 "type": "STRONG",
+    #                 "start": 0,
+    #                 "end": 6,
+    #                 "href": None,
+    #                 "title": None,
+    #                 "rel": None,
+    #                 "anchorType": None,
+    #                 "userId": None,
+    #                 "creatorIds": None,
+    #             },
+    #             {
+    #                 "__typename": "Markup",
+    #                 "name": None,
+    #                 "type": "EM",
+    #                 "start": 0,
+    #                 "end": 6,
+    #                 "href": None,
+    #                 "title": None,
+    #                 "rel": None,
+    #                 "anchorType": None,
+    #                 "userId": None,
+    #                 "creatorIds": None,
+    #             },
+    #         ],
+    #     )
+    #     parsed_markups = parse_markups(markups[0])
+    #     logger.debug(parsed_markups)
+    #     parsed_markups = split_overlapping_ranges(parsed_markups)
+    #     logger.debug(parsed_markups)
+    #     for markup in parsed_markups:
+    #         helper.set_template(markup["start"], markup["end"], markup["template"])
 
-        expected_pattern = r"<em><strong><code[^>]*>Note:</code> </strong></em>The patterns and ideas discussed in this post are broadly applicable and can be adopted for other cloud providers\."
-        assert re.match(expected_pattern, str(helper))
+    #     expected_pattern = r"<em><strong><code[^>]*>Note:</code> </strong></em>The patterns and ideas discussed in this post are broadly applicable and can be adopted for other cloud providers\."
+    #     assert re.match(expected_pattern, str(helper))
 
     def test_basic_replace(self):
         # Replace A to B - ONE to ONE char
@@ -90,10 +157,15 @@ class TestRLStringHelper:
         helper.set_replace(0, 6, "B")
         assert helper.get_text() == "B - 📊 - ABC"
 
-        helper = RLStringHelper("Your support means the world to me. If you found this article valuable and insightful, please consider giving it a round of applause by clicking the clapping hands icon 👏.")
+        helper = RLStringHelper(
+            "Your support means the world to me. If you found this article valuable and insightful, please consider giving it a round of applause by clicking the clapping hands icon 👏."
+        )
         helper.set_template(0, 200, "<kr>{{text}}</kr>")
         helper.set_template(0, 200, "<kz>{{text}}</kz>")
-        assert helper.get_text() == "<kz><kr>Your support means the world to me. If you found this article valuable and insightful, please consider giving it a round of applause by clicking the clapping hands icon 👏.</kr></kz>"
+        assert (
+            helper.get_text()
+            == "<kz><kr>Your support means the world to me. If you found this article valuable and insightful, please consider giving it a round of applause by clicking the clapping hands icon 👏.</kr></kz>"
+        )
 
         helper = RLStringHelper("TESERT ALMACOM - 📊 - ABC")
         helper.set_replace(0, 14, "B")
@@ -116,26 +188,26 @@ class TestRLStringHelper:
         helper = RLStringHelper(issue_text)
         assert helper.get_text() == issue_text
 
-    def test_markup_parser(self):
-        href_markup = {
-            "__typename": 'Markup',
-            "anchorType": 'LINK',
-            "end": 12,
-            "href": 'https://readwise.io/bookreview/{{book_id',
-            "name": None,
-            "rel": 'nofollow',
-            "start": 0,
-            "title": '',
-            "type": 'A',
-            "userId": None
-        }
+    # def test_markup_parser(self):
+    #     href_markup = {
+    #         "__typename": 'Markup',
+    #         "anchorType": 'LINK',
+    #         "end": 12,
+    #         "href": 'https://readwise.io/bookreview/{{book_id',
+    #         "name": None,
+    #         "rel": 'nofollow',
+    #         "start": 0,
+    #         "title": '',
+    #         "type": 'A',
+    #         "userId": None
+    #     }
 
-        helper = RLStringHelper("Hello world")
-        markups = parse_markups([href_markup])
-        parsed_markups = split_overlapping_ranges(markups)
-        for markup in parsed_markups:
-            helper.set_template(markup["start"], markup["end"], markup["template"])
-        assert helper.get_text() == '<a style="text-decoration: underline;" rel="nofollow" title="" href="https://readwise.io/bookreview/{{book_id" target="_blank">Hello world</a>'
+    #     helper = RLStringHelper("Hello world")
+    #     markups = parse_markups([href_markup])
+    #     parsed_markups = split_overlapping_ranges(markups)
+    #     for markup in parsed_markups:
+    #         helper.set_template(markup["start"], markup["end"], markup["template"])
+    #     assert helper.get_text() == '<a style="text-decoration: underline;" rel="nofollow" title="" href="https://readwise.io/bookreview/{{book_id" target="_blank">Hello world</a>'
 
     def test_medium_all(self):
         helper = RLStringHelper("ABC Hello world")

@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import asyncio
 import math
 import textwrap
@@ -10,28 +12,61 @@ import tld
 from asyncer import asyncify
 from loguru import logger
 
-from rl_string_helper import RLStringHelper, parse_markups, split_overlapping_ranges
+from rl_string_helper import RLStringHelper, split_overlapping_ranges
 
 from . import jinja_env
-from .exceptions import InvalidMediumPostID, InvalidMediumPostURL, InvalidURL, MediumParserException, MediumPostQueryError
+from .exceptions import (
+    InvalidMediumPostID,
+    InvalidMediumPostURL,
+    InvalidURL,
+    MediumParserException,
+    MediumPostQueryError,
+)
 from .api import MediumApi
 from .models.html_result import HtmlResult
 from .time import convert_datetime_to_human_readable
-from .utils import correct_url, extract_hex_string, getting_percontage_of_match, is_has_valid_medium_post_id, is_valid_medium_url, is_valid_url, resolve_medium_url
+from .utils import (
+    correct_url,
+    extract_hex_string,
+    getting_percontage_of_match,
+    is_has_valid_medium_post_id,
+    is_valid_medium_url,
+    is_valid_url,
+    resolve_medium_url,
+)
+from .markups import parse_markups
 
 if typing.TYPE_CHECKING:
     from database_lib import AbstractCacheBackend
 
 
 class MediumParser:
-    __slots__ = ("cache", "host_address", "jinja_template", "post_template", "timeout", "medium_api")
+    __slots__ = (
+        "cache",
+        "host_address",
+        "jinja_template",
+        "post_template",
+        "timeout",
+        "medium_api",
+    )
 
-    def __init__(self, cache: "AbstractCacheBackend", medium_api: MediumApi, timeout: int, host_address: str, template_folder: str = "./templates"):
+    def __init__(
+        self,
+        cache: AbstractCacheBackend,
+        medium_api: MediumApi,
+        timeout: int,
+        host_address: str,
+        template_folder: str = "./templates",
+    ):
         self.timeout: int = timeout
         self.cache: AbstractCacheBackend = cache
         self.host_address: str = host_address
-        self.jinja_template: jinja2.Environment = jinja2.Environment(loader=jinja2.FileSystemLoader(template_folder))
-        self.post_template: jinja2.Template = self.jinja_template.get_template("post.html")
+        self.jinja_template: jinja2.Environment = jinja2.Environment(
+            loader=jinja2.FileSystemLoader(template_folder)
+        )
+        self.post_template: jinja2.Template = self.jinja_template.get_template(
+            "post.html"
+        )
         self.medium_api: MediumApi = medium_api
 
     async def resolve(self, unknown: str) -> str:
@@ -52,7 +87,9 @@ class MediumParser:
 
         post_id = await resolve_medium_url(sanitized_url, self.timeout)
         if not post_id:
-            raise InvalidMediumPostURL(f"Could not find Medium post ID for URL: {sanitized_url}")
+            raise InvalidMediumPostURL(
+                f"Could not find Medium post ID for URL: {sanitized_url}"
+            )
 
         return post_id
 
@@ -64,7 +101,8 @@ class MediumParser:
         async def _get_from_cache():
             logger.debug("Using cache backend")
             post_data = self.cache.pull(post_id)
-            if post_data:
+            logger.info(f"Found data in cache: {post_data[:10]}")
+            if post_data and post_data.data.has_data():
                 logger.debug("post query was found on cache")
                 return post_data.json()
             logger.debug(f"No data found in cache by {post_id}")
@@ -76,6 +114,7 @@ class MediumParser:
             logger.debug("Timeout while waiting for cache")
             return None
         except Exception as e:
+            logger.exception(e)
             logger.error(f"Error while waiting for cache: {e}")
             return None
 
@@ -109,7 +148,13 @@ class MediumParser:
 
         return post_data, cache_used
 
-    async def query(self, post_id: str, use_cache: bool = True, retry: int = 2, force_cache: bool = False):
+    async def query(
+        self,
+        post_id: str,
+        use_cache: bool = True,
+        retry: int = 2,
+        force_cache: bool = False,
+    ):
         logger.debug(f"Medium QUERY: {use_cache=}, {retry=}, {force_cache=}")
 
         post_data, is_cache_used = None, False
@@ -118,7 +163,9 @@ class MediumParser:
         reason = None
         while not post_data and attempt < retry:
             try:
-                post_data, is_cache_used = await self.query_get(post_id, use_cache, force_cache)
+                post_data, is_cache_used = await self.query_get(
+                    post_id, use_cache, force_cache
+                )
 
                 if not post_data:
                     reason = "No post data returned"
@@ -144,7 +191,9 @@ class MediumParser:
             if not reason:
                 reason = "Unknown"
 
-            raise MediumPostQueryError(f"Could not query post by ID from API: {post_id}. Reason: {reason}")
+            raise MediumPostQueryError(
+                f"Could not query post by ID from API: {post_id}. Reason: {reason}"
+            )
 
         if not is_cache_used:
             logger.debug("Pushing post data to cache")
@@ -153,13 +202,23 @@ class MediumParser:
         logger.trace(f"Query: done")
         return post_data
 
-    def _parse_and_render_content_html_post(self, content: dict, title: str, subtitle: str, preview_image_id: str, highlights: list, tags: list) -> tuple[list, str, str]:
+    def _parse_and_render_content_html_post(
+        self,
+        content: dict,
+        title: str,
+        subtitle: str,
+        preview_image_id: str,
+        highlights: list,
+        tags: list,
+    ) -> tuple[list, str, str]:
         paragraphs = content["bodyModel"]["paragraphs"]
         tags_list = [tag["displayTitle"] for tag in tags]
         out_paragraphs: list[str] = []
         current_pos = 0
 
-        def parse_paragraph_text(text: str, markups: list, is_code: bool = False) -> str:
+        def parse_paragraph_text(
+            text: str, markups: list, is_code: bool = False
+        ) -> RLStringHelper:
             if is_code:
                 quote_html_type = ["minimal"]
             else:
@@ -170,7 +229,9 @@ class MediumParser:
             fixed_markups = split_overlapping_ranges(parsed_markups)
 
             for markup in fixed_markups:
-                text_formater.set_template(markup["start"], markup["end"], markup["template"])
+                text_formater.set_template(
+                    markup["start"], markup["end"], markup["template"]
+                )
 
             return text_formater
 
@@ -199,33 +260,48 @@ class MediumParser:
                         current_pos += 1
                         continue
                 if paragraph["type"] in ["H4", "P"]:
-                    is_paragraph_subtitle = getting_percontage_of_match(paragraph["text"], subtitle) > 80
+                    is_paragraph_subtitle = (
+                        getting_percontage_of_match(paragraph["text"], subtitle) > 80
+                    )
                     if is_paragraph_subtitle and not subtitle.endswith("…"):
                         logger.trace("Subtitle was detected, ignore...")
                         subtitle = paragraph["text"]
                         current_pos += 1
                         continue
-                    elif subtitle and subtitle.endswith("…") and len(paragraph["text"]) > 100:
+                    elif (
+                        subtitle
+                        and subtitle.endswith("…")
+                        and len(paragraph["text"]) > 100
+                    ):
                         subtitle = ""
                 elif paragraph["type"] == "IMG":
-                    if paragraph["metadata"] and paragraph["metadata"]["id"] == preview_image_id:
+                    if (
+                        paragraph["metadata"]
+                        and paragraph["metadata"]["id"] == preview_image_id
+                    ):
                         logger.trace("Preview image was detected, ignore...")
                         current_pos += 1
                         continue
 
             if paragraph["text"] is not None:
-                text_formater = parse_paragraph_text(paragraph["text"], paragraph["markups"])
+                text_formater = parse_paragraph_text(
+                    paragraph["text"], paragraph["markups"]
+                )
             else:
-                text_formater = None
+                text_formater = parse_paragraph_text("", [])
 
             for highlight in highlights:
                 for highlight_paragraph in highlight["paragraphs"]:
                     if highlight_paragraph["name"] == paragraph["name"]:
                         logger.trace("Apply highlight to this paragraph")
                         if highlight_paragraph["text"] != text_formater.get_text():
-                            logger.warning("Highlighted text and paragraph text are not the same! Skip...")
+                            logger.warning(
+                                "Highlighted text and paragraph text are not the same! Skip..."
+                            )
                             break
-                        quote_markup_template = '<mark class="bg-emerald-300">{{ text }}</mark>'
+                        quote_markup_template = (
+                            '<mark class="bg-emerald-300">{{ text }}</mark>'
+                        )
                         text_formater.set_template(
                             highlight["startOffset"],
                             highlight["endOffset"],
@@ -237,45 +313,65 @@ class MediumParser:
                 css_class = []
                 if out_paragraphs:
                     css_class.append("pt-12")
-                header_template = jinja_env.from_string('<h2 class="font-bold font-sans break-normal text-gray-900 dark:text-gray-100 text-1xl md:text-2xl {{ css_class }}">{{ text }}</h2>')
-                header_template_rendered = header_template.render(text=text_formater.get_text(), css_class="".join(css_class))
+                header_template = jinja_env.from_string(
+                    '<h2 class="font-bold font-sans break-normal text-gray-900 dark:text-gray-100 text-1xl md:text-2xl {{ css_class }}">{{ text }}</h2>'
+                )
+                header_template_rendered = header_template.render(
+                    text=text_formater.get_text(), css_class="".join(css_class)
+                )
                 out_paragraphs.append(header_template_rendered)
             elif paragraph["type"] == "H3":
                 css_class = []
                 if out_paragraphs:
                     css_class.append("pt-12")
-                header_template = jinja_env.from_string('<h3 class="font-bold font-sans break-normal text-gray-900 dark:text-gray-100 text-1xl md:text-2xl {{ css_class }}">{{ text }}</h3>')
-                header_template_rendered = header_template.render(text=text_formater.get_text(), css_class="".join(css_class))
+                header_template = jinja_env.from_string(
+                    '<h3 class="font-bold font-sans break-normal text-gray-900 dark:text-gray-100 text-1xl md:text-2xl {{ css_class }}">{{ text }}</h3>'
+                )
+                header_template_rendered = header_template.render(
+                    text=text_formater.get_text(), css_class="".join(css_class)
+                )
                 out_paragraphs.append(header_template_rendered)
             elif paragraph["type"] == "H4":
                 css_class = []
                 if out_paragraphs:
                     css_class.append("pt-8")
-                header_template = jinja_env.from_string('<h4 class="font-bold font-sans break-normal text-gray-900 dark:text-gray-100 text-l md:text-xl {{ css_class }}">{{ text }}</h4>')
-                header_template_rendered = header_template.render(text=text_formater.get_text(), css_class="".join(css_class))
+                header_template = jinja_env.from_string(
+                    '<h4 class="font-bold font-sans break-normal text-gray-900 dark:text-gray-100 text-l md:text-xl {{ css_class }}">{{ text }}</h4>'
+                )
+                header_template_rendered = header_template.render(
+                    text=text_formater.get_text(), css_class="".join(css_class)
+                )
                 out_paragraphs.append(header_template_rendered)
             elif paragraph["type"] == "IMG":
                 image_template = jinja_env.from_string(
                     '<div class="mt-7"><img alt="{{ paragraph.metadata.alt }}" class="pt-5 lazy m-auto" role="presentation" data-src="https://miro.medium.com/v2/resize:fit:700/{{ paragraph.metadata.id }}"></div>'
                 )
-                image_caption_template = jinja_env.from_string("<figcaption class='mt-3 text-sm text-center text-gray-500 dark:text-gray-200'>{{ text }}</figcaption>")
+                image_caption_template = jinja_env.from_string(
+                    "<figcaption class='mt-3 text-sm text-center text-gray-500 dark:text-gray-200'>{{ text }}</figcaption>"
+                )
                 if paragraph["layout"] == "OUTSET_ROW":
                     image_templates_row = []
-                    img_row_template = jinja_env.from_string('<div class="mx-5"><div class="flex flex-row justify-center">{{ images }}</div></div>')
+                    img_row_template = jinja_env.from_string(
+                        '<div class="mx-5"><div class="flex flex-row justify-center">{{ images }}</div></div>'
+                    )
                     image_template_rendered = image_template.render(paragraph=paragraph)
                     image_templates_row.append(image_template_rendered)
                     _tmp_current_pos = current_pos + 1
                     while len(paragraphs) > _tmp_current_pos:
                         _paragraph = paragraphs[_tmp_current_pos]
                         if _paragraph["layout"] == "OUTSET_ROW_CONTINUE":
-                            image_template_rendered = image_template.render(paragraph=_paragraph)
+                            image_template_rendered = image_template.render(
+                                paragraph=_paragraph
+                            )
                             image_templates_row.append(image_template_rendered)
                         else:
                             break
 
                         _tmp_current_pos += 1
 
-                    img_row_template_rendered = img_row_template.render(images="".join(image_templates_row))
+                    img_row_template_rendered = img_row_template.render(
+                        images="".join(image_templates_row)
+                    )
                     out_paragraphs.append(img_row_template_rendered)
 
                     current_pos = _tmp_current_pos - 1
@@ -287,18 +383,26 @@ class MediumParser:
                     image_template_rendered = image_template.render(paragraph=paragraph)
                     out_paragraphs.append(image_template_rendered)
                     if paragraph["text"]:
-                        out_paragraphs.append(image_caption_template.render(text=text_formater.get_text()))
+                        out_paragraphs.append(
+                            image_caption_template.render(text=text_formater.get_text())
+                        )
             elif paragraph["type"] == "P":
                 css_class = ["leading-8"]
-                paragraph_template = jinja_env.from_string('<p class="{{ css_class }}">{{ text }}</p>')
+                paragraph_template = jinja_env.from_string(
+                    '<p class="{{ css_class }}">{{ text }}</p>'
+                )
                 if paragraphs[current_pos - 1]["type"] in ["H4", "H3"]:
                     css_class.append("mt-3")
                 else:
                     css_class.append("mt-7")
-                paragraph_template_rendered = paragraph_template.render(text=text_formater.get_text(), css_class=" ".join(css_class))
+                paragraph_template_rendered = paragraph_template.render(
+                    text=text_formater.get_text(), css_class=" ".join(css_class)
+                )
                 out_paragraphs.append(paragraph_template_rendered)
             elif paragraph["type"] == "ULI":
-                uli_template = jinja_env.from_string('<ul class="list-disc pl-8 mt-2">{{ li }}</ul>')
+                uli_template = jinja_env.from_string(
+                    '<ul class="list-disc pl-8 mt-2">{{ li }}</ul>'
+                )
                 li_template = jinja_env.from_string("<li class='mt-3'>{{ text }}</li>")
                 li_templates = []
 
@@ -306,8 +410,12 @@ class MediumParser:
                 while len(paragraphs) > _tmp_current_pos:
                     _paragraph = paragraphs[_tmp_current_pos]
                     if _paragraph["type"] == "ULI":
-                        text_formater = parse_paragraph_text(_paragraph["text"], _paragraph["markups"])
-                        li_template_rendered = li_template.render(text=text_formater.get_text())
+                        text_formater = parse_paragraph_text(
+                            _paragraph["text"], _paragraph["markups"]
+                        )
+                        li_template_rendered = li_template.render(
+                            text=text_formater.get_text()
+                        )
                         li_templates.append(li_template_rendered)
                     else:
                         break
@@ -319,7 +427,9 @@ class MediumParser:
 
                 current_pos = _tmp_current_pos - 1
             elif paragraph["type"] == "OLI":
-                ol_template = jinja_env.from_string('<ol class="list-decimal pl-8 mt-2">{{ li }}</ol>')
+                ol_template = jinja_env.from_string(
+                    '<ol class="list-decimal pl-8 mt-2">{{ li }}</ol>'
+                )
                 li_template = jinja_env.from_string("<li class='mt-3'>{{ text }}</li>")
                 li_templates = []
 
@@ -327,8 +437,12 @@ class MediumParser:
                 while len(paragraphs) > _tmp_current_pos:
                     _paragraph = paragraphs[_tmp_current_pos]
                     if _paragraph["type"] == "OLI":
-                        text_formater = parse_paragraph_text(_paragraph["text"], _paragraph["markups"])
-                        li_template_rendered = li_template.render(text=text_formater.get_text())
+                        text_formater = parse_paragraph_text(
+                            _paragraph["text"], _paragraph["markups"]
+                        )
+                        li_template_rendered = li_template.render(
+                            text=text_formater.get_text()
+                        )
                         li_templates.append(li_template_rendered)
                     else:
                         break
@@ -340,12 +454,21 @@ class MediumParser:
 
                 current_pos = _tmp_current_pos - 1
             elif paragraph["type"] == "PRE":
-                pre_template = jinja_env.from_string('<pre class="mt-7 flex flex-col justify-center border dark:border-gray-700">{{code_block}}</pre>')
-                code_block_template = jinja_env.from_string('<code class="p-2 bg-gray-100 dark:bg-gray-900 overflow-x-auto {{ code_css_class }}">{{ text }}</code>')
+                pre_template = jinja_env.from_string(
+                    '<pre class="mt-7 flex flex-col justify-center border dark:border-gray-700">{{code_block}}</pre>'
+                )
+                code_block_template = jinja_env.from_string(
+                    '<code class="p-2 bg-gray-100 dark:bg-gray-900 overflow-x-auto {{ code_css_class }}">{{ text }}</code>'
+                )
 
                 code_css_class = []
-                if paragraph["codeBlockMetadata"] and paragraph["codeBlockMetadata"]["lang"] is not None:
-                    code_css_class.append(f'language-{paragraph["codeBlockMetadata"]["lang"]}')
+                if (
+                    paragraph["codeBlockMetadata"]
+                    and paragraph["codeBlockMetadata"]["lang"] is not None
+                ):
+                    code_css_class.append(
+                        f'language-{paragraph["codeBlockMetadata"]["lang"]}'
+                    )
                 else:
                     code_css_class.append("nohighlight")
                     # code_css_class.append("auto")
@@ -355,15 +478,21 @@ class MediumParser:
                 while len(paragraphs) > _tmp_current_pos:
                     _paragraph = paragraphs[_tmp_current_pos]
                     if _paragraph["type"] == "PRE":
-                        text_formater = parse_paragraph_text(_paragraph["text"], _paragraph["markups"], is_code=True)
+                        text_formater = parse_paragraph_text(
+                            _paragraph["text"], _paragraph["markups"], is_code=True
+                        )
                         code_list.append(text_formater.get_text())
                     else:
                         break
 
                     _tmp_current_pos += 1
 
-                code_block_template_rendered = code_block_template.render(text="\n".join(code_list), code_css_class=" ".join(code_css_class))
-                pre_template_rendered = pre_template.render(code_block=code_block_template_rendered)
+                code_block_template_rendered = code_block_template.render(
+                    text="\n".join(code_list), code_css_class=" ".join(code_css_class)
+                )
+                pre_template_rendered = pre_template.render(
+                    code_block=code_block_template_rendered
+                )
 
                 out_paragraphs.append(pre_template_rendered)
                 current_pos = _tmp_current_pos - 1
@@ -375,7 +504,9 @@ class MediumParser:
                 logger.trace(bq_template_rendered)
                 out_paragraphs.append(bq_template_rendered)
             elif paragraph["type"] == "PQ":
-                pq_template = jinja_env.from_string('<blockquote class="mt-7 text-2xl ml-5 text-gray-600 dark:text-gray-300"><p>{{ text }}</p></blockquote>')
+                pq_template = jinja_env.from_string(
+                    '<blockquote class="mt-7 text-2xl ml-5 text-gray-600 dark:text-gray-300"><p>{{ text }}</p></blockquote>'
+                )
                 pq_template_rendered = pq_template.render(text=text_formater.get_text())
                 logger.trace(pq_template_rendered)
                 out_paragraphs.append(pq_template_rendered)
@@ -387,14 +518,18 @@ class MediumParser:
                 if paragraph.get("mixtapeMetadata") is not None:
                     url = paragraph["mixtapeMetadata"]["href"]
                 else:
-                    logger.warning("Ignore MIXTAPE_EMBED paragraph type, since we can't get url")
+                    logger.warning(
+                        "Ignore MIXTAPE_EMBED paragraph type, since we can't get url"
+                    )
                     current_pos += 1
                     continue
 
                 text_raw = paragraph["text"]
 
                 if len(paragraph["markups"]) != 3:
-                    logger.warning("Ignore MIXTAPE_EMBED paragraph type, since we can't split text")
+                    logger.warning(
+                        "Ignore MIXTAPE_EMBED paragraph type, since we can't split text"
+                    )
                     current_pos += 1
                     continue
 
@@ -405,7 +540,9 @@ class MediumParser:
                 logger.trace(f"{description_range=}")
 
                 embed_title = text_raw[title_range["start"] : title_range["end"]]
-                embed_description = text_raw[description_range["start"] : description_range["end"]]
+                embed_description = text_raw[
+                    description_range["start"] : description_range["end"]
+                ]
 
                 logger.trace(f"{embed_title=}")
                 logger.trace(f"{embed_description=}")
@@ -413,19 +550,30 @@ class MediumParser:
                 try:
                     embed_site = tld.get_fld(url)
                 except Exception as ex:
-                    logger.warning(f"Can't get embed site fld: {ex}. Using custom logic...")
+                    logger.warning(
+                        f"Can't get embed site fld: {ex}. Using custom logic..."
+                    )
                     parsed_url = urllib.parse.urlparse(url)
                     embed_site = parsed_url.hostname
 
                 logger.trace(f"{embed_site=}")
 
-                embed_template_rendered = embed_template.render(paragraph=paragraph, url=url, embed_title=embed_title, embed_description=embed_description, embed_site=embed_site)
+                embed_template_rendered = embed_template.render(
+                    paragraph=paragraph,
+                    url=url,
+                    embed_title=embed_title,
+                    embed_description=embed_description,
+                    embed_site=embed_site,
+                )
                 out_paragraphs.append(embed_template_rendered)
             elif paragraph["type"] == "IFRAME":
                 iframe_template = jinja_env.from_string(
                     '<div class="mt-7"><iframe class="lazy w-full" data-src="{{ host_address }}/render_iframe/{{ iframe_id }}" allowfullscreen="" frameborder="0" scrolling="no"></iframe></div>'
                 )
-                iframe_template_rendered = iframe_template.render(host_address=self.host_address, iframe_id=paragraph["iframe"]["mediaResource"]["id"])
+                iframe_template_rendered = iframe_template.render(
+                    host_address=self.host_address,
+                    iframe_id=paragraph["iframe"]["mediaResource"]["id"],
+                )
                 out_paragraphs.append(iframe_template_rendered)
 
             else:
@@ -444,10 +592,18 @@ class MediumParser:
         else:
             return result
 
-    async def generate_metadata(self, post_data: dict, post_id: str, as_dict: bool = False) -> tuple:
-        title = RLStringHelper(post_data["data"]["post"]["title"], ["minimal"]).get_text()
-        subtitle = RLStringHelper(post_data["data"]["post"]["previewContent"]["subtitle"]).get_text()
-        description = RLStringHelper(textwrap.shorten(subtitle, width=100, placeholder="...")).get_text()
+    async def generate_metadata(
+        self, post_data: dict, post_id: str, as_dict: bool = False
+    ) -> tuple | dict[str, str]:
+        title = RLStringHelper(
+            post_data["data"]["post"]["title"], ["minimal"]
+        ).get_text()
+        subtitle = RLStringHelper(
+            post_data["data"]["post"]["previewContent"]["subtitle"]
+        ).get_text()
+        description = RLStringHelper(
+            textwrap.shorten(subtitle, width=100, placeholder="...")
+        ).get_text()
         preview_image_id = post_data["data"]["post"]["previewImage"]["id"]
         creator = post_data["data"]["post"]["creator"]
         collection = post_data["data"]["post"]["collection"]
@@ -455,8 +611,12 @@ class MediumParser:
 
         reading_time = math.ceil(post_data["data"]["post"]["readingTime"])
         free_access = "No" if post_data["data"]["post"]["isLocked"] else "Yes"
-        updated_at = convert_datetime_to_human_readable(post_data["data"]["post"]["updatedAt"])
-        first_published_at = convert_datetime_to_human_readable(post_data["data"]["post"]["firstPublishedAt"])
+        updated_at = convert_datetime_to_human_readable(
+            post_data["data"]["post"]["updatedAt"]
+        )
+        first_published_at = convert_datetime_to_human_readable(
+            post_data["data"]["post"]["firstPublishedAt"]
+        )
         tags = post_data["data"]["post"]["tags"]
 
         if as_dict:
@@ -476,14 +636,29 @@ class MediumParser:
                 "tags": tags,
             }
 
-        return title, subtitle, description, url, creator, collection, reading_time, free_access, updated_at, first_published_at, preview_image_id, tags
+        return (
+            title,
+            subtitle,
+            description,
+            url,
+            creator,
+            collection,
+            reading_time,
+            free_access,
+            updated_at,
+            first_published_at,
+            preview_image_id,
+            tags,
+        )
 
     async def _render_as_html(self, post_data: dict, post_id: str) -> "HtmlResult":
         # Generate metadata in parallel
         metadata_task = asyncio.create_task(self.generate_metadata(post_data, post_id))
 
         # Parse and render content in parallel
-        content, title, subtitle = await asyncify(self._parse_and_render_content_html_post)(
+        content, title, subtitle = await asyncify(
+            self._parse_and_render_content_html_post
+        )(
             post_data["data"]["post"]["content"],
             post_data["data"]["post"]["title"],
             post_data["data"]["post"]["previewContent"]["subtitle"],
@@ -493,13 +668,28 @@ class MediumParser:
         )
 
         # Await metadata
-        title, subtitle, description, url, creator, collection, reading_time, free_access, updated_at, first_published_at, preview_image_id, tags = await metadata_task
+        (
+            title,
+            subtitle,
+            description,
+            url,
+            creator,
+            collection,
+            reading_time,
+            free_access,
+            updated_at,
+            first_published_at,
+            preview_image_id,
+            tags,
+        ) = await metadata_task
 
         post_page_title_raw = "{{ title }} | by {{ creator.name }}"
         if collection:
             post_page_title_raw += " | in {{ collection.name }}"
         post_page_title = jinja_env.from_string(post_page_title_raw)
-        post_page_title_rendered = post_page_title.render(title=title, creator=creator, collection=collection)
+        post_page_title_rendered = post_page_title.render(
+            title=title, creator=creator, collection=collection
+        )
 
         post_context = {
             "subtitle": subtitle,
@@ -517,7 +707,11 @@ class MediumParser:
         }
         post_template_rendered = self.post_template.render(post_context)
 
-        return HtmlResult(post_page_title_rendered, description, url, post_template_rendered)
+        return HtmlResult(
+            post_page_title_rendered, description, url, post_template_rendered
+        )
 
     async def render_as_markdown(self) -> str:
-        raise NotImplementedError("Markdown rendering is not implemented. Please use HTML rendering instead")
+        raise NotImplementedError(
+            "Markdown rendering is not implemented. Please use HTML rendering instead"
+        )

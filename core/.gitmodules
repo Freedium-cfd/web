@@ -1,3 +1,0 @@
-[submodule "medium_parser/toolkits/rl_string_helper"]
-	path = medium_parser/toolkits/rl_string_helper
-	url = https://github.com/Freedium-cfd/rl-string-helper

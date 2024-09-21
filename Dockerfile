@@ -15,8 +15,8 @@ RUN pip3 install --no-cache-dir ./rl_string_helper
 COPY ./database-lib ./database-lib
 RUN pip3 install --no-cache-dir ./database-lib
 
-COPY ./core ./core
-RUN pip3 install --no-cache-dir ./core
+COPY ./medium-parser ./medium-parser
+RUN pip3 install --no-cache-dir ./medium-parser
 
 COPY ./web ./web
 
