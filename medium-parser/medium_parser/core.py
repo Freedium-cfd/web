@@ -220,8 +220,11 @@ class MediumParser:
         def parse_paragraph_text(
             text: str, markups: list, is_code: bool = False
         ) -> RLStringHelper:
-            if is_code:
-                quote_html_type = ["minimal"]
+            # Hotfix, workaround for code block
+            has_code_block = any(markup["type"] == "CODE" for markup in markups)
+            if is_code or has_code_block:
+                # quote_html_type = ["minimal"]
+                quote_html_type = None
             else:
                 quote_html_type = ["full"]
             text_formater = RLStringHelper(text, quote_html_type=quote_html_type)
@@ -315,10 +318,12 @@ class MediumParser:
                 if out_paragraphs:
                     css_class.append("pt-12")
                 header_template = jinja_env.from_string(
-                    '<h2 class="font-bold font-sans break-normal text-gray-900 dark:text-gray-100 text-1xl md:text-2xl {{ css_class }}">{{ text }}</h2>'
+                    '<h2 id={{ id }} class="font-bold font-sans break-normal text-gray-900 dark:text-gray-100 text-1xl md:text-2xl {{ css_class }}">{{ text }}</h2>'
                 )
                 header_template_rendered = header_template.render(
-                    text=text_formater.get_text(), css_class="".join(css_class)
+                    id=paragraph["name"],
+                    text=text_formater.get_text(),
+                    css_class="".join(css_class),
                 )
                 out_paragraphs.append(header_template_rendered)
             elif paragraph["type"] == "H3":
@@ -326,10 +331,12 @@ class MediumParser:
                 if out_paragraphs:
                     css_class.append("pt-12")
                 header_template = jinja_env.from_string(
-                    '<h3 class="font-bold font-sans break-normal text-gray-900 dark:text-gray-100 text-1xl md:text-2xl {{ css_class }}">{{ text }}</h3>'
+                    '<h3 id={{ id }} class="font-bold font-sans break-normal text-gray-900 dark:text-gray-100 text-1xl md:text-2xl {{ css_class }}">{{ text }}</h3>'
                 )
                 header_template_rendered = header_template.render(
-                    text=text_formater.get_text(), css_class="".join(css_class)
+                    id=paragraph["name"],
+                    text=text_formater.get_text(),
+                    css_class="".join(css_class),
                 )
                 out_paragraphs.append(header_template_rendered)
             elif paragraph["type"] == "H4":
@@ -337,10 +344,12 @@ class MediumParser:
                 if out_paragraphs:
                     css_class.append("pt-8")
                 header_template = jinja_env.from_string(
-                    '<h4 class="font-bold font-sans break-normal text-gray-900 dark:text-gray-100 text-l md:text-xl {{ css_class }}">{{ text }}</h4>'
+                    '<h4 id={{ id }} class="font-bold font-sans break-normal text-gray-900 dark:text-gray-100 text-l md:text-xl {{ css_class }}">{{ text }}</h4>'
                 )
                 header_template_rendered = header_template.render(
-                    text=text_formater.get_text(), css_class="".join(css_class)
+                    id=paragraph["name"],
+                    text=text_formater.get_text(),
+                    css_class="".join(css_class),
                 )
                 out_paragraphs.append(header_template_rendered)
             elif paragraph["type"] == "IMG":

@@ -38,7 +38,7 @@ services:
       - dante_1
       - dante_2
     # volumes:
-    #   - ./web:/app/web
+    #   - ../web:/app/web
     #   - ./core/medium_parser/:/app/medium_parser
     #   - ./core/rl_string_helper/:/app/rl_string_helper
     ports:

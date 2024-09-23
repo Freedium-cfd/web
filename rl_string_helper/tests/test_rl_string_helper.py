@@ -3,6 +3,8 @@ import re
 from loguru import logger
 from rl_string_helper import (
     RLStringHelper,
+    UTF16Handler,
+    StringAssignmentMixin,
     quote_html,
     split_overlapping_ranges,
 )
@@ -133,52 +135,37 @@ class TestRLStringHelper:
         for markup in parsed_markups:
             helper.set_template(markup["start"], markup["end"], markup["template"])
 
-        expected_output = (
-            "<span>The <b>quick <i>(brown)</b> <u>fox</u></i><u> jumps</u> "
-            'over <code>13 lazy</code><a href="#"><code> </code>dogs!</a></span>'
-        )
+        expected_output = """<span>The </span><b><span>quick </span></b><i><b><span>(brown)</span></b></i><i><span> </span></i><u><i><span>fox</span></i></u><u><span> jumps</span></u><span> over </span><code><span>13 lazy</span></code><a href="#"><code><span> </span></code></a><a href="#"><span>dogs!</span></a>"""
+
         assert str(helper) == expected_output
 
     def test_nmultibyte_emoji(self):
-        from medium_parser.markups import parse_markups
+        text = "Noah dragged his two printers out from Settings ⚙️  < Printers & Scanners 🖨️  and dropped them in Dock or Desktop, I don’t remember — but you can drag to both the places."
+        string_helper = StringAssignmentMixin(text)
+        utf_handler = UTF16Handler()
+        string_pos_matrix = list(range(len(text)))
+        updated_text, string_pos_matrix, utf_16_bang_list = utf_handler.pre_utf_16_bang(
+            string_helper, string_pos_matrix
+        )
+        updated_text, string_pos_matrix = utf_handler.post_utf_16_bang(
+            updated_text, string_pos_matrix, utf_16_bang_list
+        )
+        assert str(updated_text) == text
+        from icecream import ic
 
-        data = {
-            "__typename": "Paragraph",
-            "id": "236e7049b537_33",
-            "name": "ba8c",
-            "href": None,
-            "text": "Noah dragged his two printers out from Settings ⚙️  < Printers & Scanners \ud83d\udda8️  and dropped them in Dock or Desktop, I don’t remember — but you can drag to both the places.",
-            "iframe": None,
-            "layout": None,
-            "markups": [
-                {
-                    "__typename": "Markup",
-                    "name": None,
-                    "type": "CODE",
-                    "start": 39,
-                    "end": 76,
-                    "href": None,
-                    "title": None,
-                    "rel": None,
-                    "anchorType": None,
-                    "userId": None,
-                    "creatorIds": None,
-                }
-            ],
-            "metadata": None,
-            "mixtapeMetadata": None,
-            "type": "P",
-            "hasDropCap": None,
-            "dropCapImage": None,
-            "codeBlockMetadata": None,
-        }
-        helper = RLStringHelper(data["text"])
-        parsed_markups = split_overlapping_ranges(parse_markups(data["markups"]))
-        for markup in parsed_markups:
-            helper.set_template(markup["start"], markup["end"], markup["template"])
-        print(str(helper))
+        string_helper = RLStringHelper(text, None)
+        string_helper.set_template(0, 100000, "<span>{{text}}</span>")
+        assert str(string_helper) == f"<span>{text}</span>".replace("’", "'")
 
-        assert str(helper) == data["text"]
+        string_helper = RLStringHelper(text, ["None"])
+        string_helper.set_template(39, 76, "<code class='test'>{{text}}</code>")
+        with open("test.txt", "w") as f:
+            f.write(str(string_helper) + "\n")
+        assert str(
+            string_helper
+        ) == f"{text[:39]}<code class='test'>Settings ⚙️  < Printers & Scanners 🖨</code>️{text[76:]}".replace(
+            "’", "'"
+        )
 
     def test_basic_replace(self):
         # Replace A to B - ONE to ONE char
