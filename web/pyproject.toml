@@ -2,7 +2,7 @@
 line-length = 220
 
 [tool.poetry]
-name = "freedium web"
+name = "server"
 version = "0.1.0"
 description = ""
 authors = ["ZhymabekRoman <robanokssamit@yandex.ru>"]
@@ -21,6 +21,7 @@ redis = {version = "4.6.0", extras = ["hiredis"]}
 xkcdpass = "1.19.3"
 loguru = "0.6.0"
 anyio = "<=4.0.0"
+cython = "^3.0.11"
 
 
 [tool.poetry.group.dev.dependencies]
@@ -29,5 +30,5 @@ ruff = "^0.6.6"
 black = "^24.8.0"
 
 [build-system]
-requires = ["poetry-core"]
+requires = ["poetry-core", "cython"]
 build-backend = "poetry.core.masonry.api"
