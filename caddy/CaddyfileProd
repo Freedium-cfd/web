@@ -203,6 +203,9 @@ freedium.cfd {
     
 
     route /* {
-		reverse_proxy freedium_web:7080
+		reverse_proxy freedium_web:7080 {
+			lb_try_duration 30s
+        	lb_try_interval 1s
+		}
 	}
 }
