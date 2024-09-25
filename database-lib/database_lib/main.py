@@ -1,13 +1,15 @@
-import orjson as json
-import time
+import codecs
+import json as py_json
 import sqlite3
 import threading
-from itertools import islice
-from typing import Union, Optional
-from abc import ABC, abstractmethod
-
-import psycopg2
+import time
 import uuid
+from abc import ABC, abstractmethod
+from itertools import islice
+from typing import Optional, Union
+
+import orjson as json
+import psycopg2
 from loguru import logger
 from psycopg2.extras import execute_batch
 
@@ -27,8 +29,21 @@ class CacheData:
         try:
             return json.loads(self.data)
         except json.JSONDecodeError:
-            logger.warning(f"Failed to decode JSON data: {self.data[:100]}...")
-            return None
+            logger.warning(
+                f"Failed to decode JSON data: {self.data[:100]}... Trying workaround"
+            )
+            return self.workaround_decode_json()
+
+    def workaround_decode_json(self):
+        if self.data.startswith("\\x"):
+            s = self.data[2:]
+        else:
+            s = self.data
+
+        byte_string = codecs.decode(s, "hex")
+        json_string = byte_string.decode("utf-8")
+
+        return json.loads(json_string)
 
     def __repr__(self):
         return self.data
@@ -172,7 +187,7 @@ class SQLiteCacheBackend(AbstractCacheBackend):
     def push(self, key: str, value: Union[str, dict]) -> None:
         if isinstance(value, dict):
             try:
-                value = json.dumps(value)
+                value = py_json.dumps(value)
             except TypeError as e:
                 raise ValueError(f"Unable to serialize value to JSON: {e}")
         elif not isinstance(value, str):
@@ -337,7 +352,7 @@ class PostgreSQLCacheBackend(AbstractCacheBackend):
     def push(self, key: str, value: Union[str, dict]) -> None:
         if isinstance(value, dict):
             try:
-                value = json.dumps(value)
+                value = py_json.dumps(value)
             except TypeError as e:
                 raise ValueError(f"Unable to serialize value to JSON: {e}")
         elif not isinstance(value, str):
