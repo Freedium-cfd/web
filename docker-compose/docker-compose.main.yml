@@ -33,12 +33,11 @@ services:
       context: ../
       dockerfile: Dockerfile
     environment:
-      - "PROXY_LIST=socks5://wgcf1:1080,socks5://wgcf2:1080"
+      - "PROXY_LIST=socks5://haproxy-pb:1080"
     depends_on:
-      - dante_1
-      - dante_2
+      - haproxy-proxy-balancer
     # volumes:
-    #   - ../web:/app/web
+    #   - ../user_data:/tmp/user_data
     #   - ./core/medium_parser/:/app/medium_parser
     #   - ./core/rl_string_helper/:/app/rl_string_helper
     ports:

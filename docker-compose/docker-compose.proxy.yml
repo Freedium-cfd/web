@@ -1,0 +1,21 @@
+version: '3.7'
+
+services:
+  haproxy-proxy-balancer:
+    build:
+      context: ../proxy-balancer
+      dockerfile: Dockerfile
+    container_name: haproxy-proxy-balancer
+    hostname: haproxy-pb
+    ports:
+      - "1080:1080"
+    volumes:
+      - ../proxy-balancer/haproxy:/usr/local/etc/haproxy/
+    restart: always
+    depends_on:
+      wgcf1:
+        condition: service_healthy
+      wgcf2:
+        condition: service_healthy
+    networks:
+      - freedium_net
