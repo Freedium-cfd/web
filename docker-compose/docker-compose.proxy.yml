@@ -7,8 +7,8 @@ services:
       dockerfile: Dockerfile
     container_name: haproxy-proxy-balancer
     hostname: haproxy-pb
-    ports:
-      - "1080:1080"
+    # ports:
+    #   - "1080:1080"
     volumes:
       - ../proxy-balancer/haproxy:/usr/local/etc/haproxy/
     restart: always
@@ -17,5 +17,15 @@ services:
         condition: service_healthy
       wgcf2:
         condition: service_healthy
+      # dante_1:
+      #   condition: service_started
+      # dante_2:
+      #   condition: service_started
     networks:
       - freedium_net
+    healthcheck:
+      test: [ "CMD", "nc", "-z", "localhost", "1080" ]
+      interval: 5s
+      # interval: 120s
+      timeout: 15s
+      retries: 3

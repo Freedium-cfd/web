@@ -26,7 +26,7 @@ def wait_for_postgres(max_retries=5, retry_interval=5):
     retries = 0
     while retries < max_retries:
         try:
-            conn = connect("postgresql://postgres:postgres@postgres:5432/postgres")
+            conn = connect(config.DATABASE_URL)
             conn.close()
             logger.info("Successfully connected to PostgreSQL")
             return

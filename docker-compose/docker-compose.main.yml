@@ -18,6 +18,7 @@ services:
     networks:
       - freedium_net
       - caddy_net
+    restart: always
     healthcheck:
       test: [ "CMD-SHELL", "curl -f http://localhost:6752/ --max-time 80 --header 'User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.3 Safari/605.1.15'" ]
       interval: 30s
@@ -33,18 +34,28 @@ services:
       context: ../
       dockerfile: Dockerfile
     environment:
-      - "PROXY_LIST=socks5://haproxy-pb:1080"
+      - "PROXY_LIST=${PROXY_LIST:-socks5://haproxy-pb:1080}"
     depends_on:
-      - haproxy-proxy-balancer
-    # volumes:
-    #   - ../user_data:/tmp/user_data
-    #   - ./core/medium_parser/:/app/medium_parser
-    #   - ./core/rl_string_helper/:/app/rl_string_helper
+      haproxy-proxy-balancer:
+        condition: service_healthy
+      # postgres_freedium:
+      #   condition: service_healthy
+      # volumes:
+      #   - ../user_data:/tmp/user_data
+      #   - ./core/medium_parser/:/app/medium_parser
+      #   - ./core/rl_string_helper/:/app/rl_string_helper
     ports:
       - "7080:7080"
     networks:
       - freedium_net
     mem_limit: 4g
+    restart: always
+    healthcheck:
+      test: [ "CMD-SHELL", "curl -f http://localhost:7080/ --max-time 80 --header 'User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.3 Safari/605.1.15'" ]
+      interval: 30s
+      start_period: 20s
+      timeout: 80s
+      retries: 3
     stop_grace_period: 2m
 
 volumes:

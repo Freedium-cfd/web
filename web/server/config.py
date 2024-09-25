@@ -30,7 +30,7 @@ REDIS_HOST = config("REDIS_HOST", default="redis_service")
 REDIS_PORT = config("REDIS_PORT", cast=int, default=6379)
 REDIS_TIMEOUT = config("REDIS_TIMEOUT", cast=int, default=1.75)
 
-DATABASE_URL = config("DATABASE_URL", default="postgresql://postgres:postgres@postgres:5432/postgres")
+DATABASE_URL = config("DATABASE_URL", default="postgresql://postgres:postgres@postgres_freedium:5432/postgres")
 
 SENTRY_SDK_DSN = config("SENTRY_SDK_DSN", default=None)
 SENTRY_TRACES_SAMPLE_RATE = config("SENTRY_TRACES_SAMPLE_RATE", cast=float, default=0.2)

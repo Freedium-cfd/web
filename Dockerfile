@@ -28,6 +28,9 @@ WORKDIR /app/web
 
 RUN --mount=type=cache,target=/tmp/poetry_cache poetry install --without dev --only main --no-ansi
 
-# EXPOSE 7080
+RUN apt install -y curl
+
+RUN useradd -m freedium
+USER freedium
 
 CMD ["python3", "-m", "server", "server"]
