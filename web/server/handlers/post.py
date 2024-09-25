@@ -59,7 +59,7 @@ async def render_medium_post_link(path: str, use_cache: bool = True, use_redis: 
             logger.debug(f"Redis cache hit for post_id: {post_id}")
 
         if not redis_result:
-            logger.debug(f"No cache found, querying...: {post_id}")
+            logger.debug(f"No Redis cache found, querying...: {post_id}")
             rendered_medium_post = await medium_parser.render_as_html(post_id)
             logger.debug("Rendered Medium post from HTML template")
             if redis_available and use_redis:
