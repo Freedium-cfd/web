@@ -20,6 +20,7 @@ url_for_test = {
     "https://johndanielraines.medium.com/be-an-engineer-not-a-frameworker-c58fe28d0c88",
     "https://medium.com/coding-beauty/parseint-strange-behavior-cdff5e1f9ff7",  # <---- Title renderer some weird characters
     "https://medium.com/macoclock/the-11-craziest-and-most-advanced-macos-tips-tricks-ive-ever-seen-cd842ce3f0a3",  # Still have some problem on paragraph_id 236e7049b537_43
+    "https://www.freedium.cfd/c81e00f6320d",
 }
 
 blacklist_url = {"51e23c5a2aac"}
