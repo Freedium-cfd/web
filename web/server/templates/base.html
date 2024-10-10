@@ -58,52 +58,55 @@
         </svg>
     </button>
 </div>
+
 <div class="notification-container fixed top-5 p-2 max-h-[95vh] overflow-y-auto hidden" style="z-index: 999999;">
     <div class="bg-white border border-gray-300 shadow-sm p-5 rounded-md text-center dark:bg-gray-800 bg-white">
-        <p class="text-2xl pb-5 text-black dark:text-white">Bad news</p>
+        <p class="text-2xl pb-5 text-black dark:text-white">Support Freedium</p>
         <p class="pb-3 text-black dark:text-white">
-            We regret to inform you that our account on BuyMeACoffee has been suspended due to a violation of their
-            terms of service. This was an unexpected development, and we are currently addressing the matter with utmost
-            priority.
+            Dear Freedium users,
             </br>
             </br>
-            However, our mission at Freedium remains unchanged, and your support is more crucial than ever. We are
-            transitioning to Patreon, a platform that aligns with our values and offers us the freedom to share our work
-            with you.
+            We've updated our donation options to provide you with more ways to support our mission. Your contributions are invaluable in helping us maintain and improve Freedium, ensuring we can continue to provide unrestricted access to quality content.
             </br>
             </br>
-            Please join us on Patreon and continue to support our endeavors. Your contributions are invaluable to us,
-            and we are committed to delivering the quality content you’ve come to expect from Freedium.
+            We now offer multiple platforms for donations, including Patreon, Ko-fi, and Liberapay. Each option allows you to support us in the way that's most convenient for you.
             </br>
             </br>
-            Thank you for your understanding and unwavering support.
+            Your support, no matter the platform or amount, makes a significant difference. It allows us to cover our operational costs and invest in enhancing Freedium's features and reliability.
             </br>
             </br>
-            Support Us on Patreon
+            Thank you for being a part of the Freedium community and for your continued support.
             </br>
             </br>
-            Warm regards, The Freedium Team
+            Choose Your Preferred Donation Platform:
         </p>
         <a href="https://patreon.com/Freedium" rel="noreferrer" target="_blank" title="Patreon">
             <button
                 class="bg-red-400 mx-1 text-white hover:bg-red-500 font-semibold py-1 px-2 rounded mt-2">Patreon</button>
         </a>
+        <a href="https://ko-fi.com/zhymabekroman" rel="noreferrer" target="_blank" title="Ko-fi">
+            <button
+                class="bg-blue-400 mx-1 text-white hover:bg-blue-500 font-semibold py-1 px-2 rounded mt-2">Ko-fi</button>
+        </a>
+        <a href="https://liberapay.com/ZhymabekRoman/" rel="noreferrer" target="_blank" title="Liberapay">
+            <button
+                class="bg-yellow-400 mx-1 text-white hover:bg-yellow-500 font-semibold py-1 px-2 rounded mt-2">Liberapay</button>
+        </a>
         <button
             class="bg-gray-300 mx-1 hover:bg-gray-400 text-gray-800 font-semibold py-1 px-2 rounded mt-2 close-button">Close</button>
         <a href="https://codeberg.org/Freedium-cfd/web" rel="noreferrer" target="_blank" title="Codeberg">
             <button class="bg-blue-800 hover:bg-blue-900 mx-1 text-white font-semibold py-1 px-2 rounded mt-2">
-                Source
-                code - Codeberg
+                Source code - Codeberg
             </button>
         </a>
-        <a href="https://github.com/Freedium-cfd/web" rel="noreferrer" target="_blank" title="GitHub"></a>
-        <button class="bg-gray-700 hover:bg-gray-600 mx-1 text-white font-semibold py-1 px-2 rounded mt-2">
-            Source code -
-            GitHub
-        </button>
+        <a href="https://github.com/Freedium-cfd/web" rel="noreferrer" target="_blank" title="GitHub">
+            <button class="bg-gray-700 hover:bg-gray-600 mx-1 text-white font-semibold py-1 px-2 rounded mt-2">
+                Source code - GitHub
+            </button>
         </a>
     </div>
 </div>
+
 <nav id="header" class="fixed w-full z-9 top-0 dark:bg-gray-800 dark:text-white bg-white shadow"
     style="z-index: 999990;">
     {% if enable_ads_header %}
@@ -386,7 +389,7 @@
     document.addEventListener('DOMContentLoaded', () => {
         const notificationContainer = document.querySelector('.notification-container');
         const closeButton = document.querySelector('.close-button');
-        const notificationFlagString = "showNotification-buymeacoffe-ban-block"
+        const notificationFlagString = "showNotification-trada432dfgd"
         const body = document.querySelector('body');
 
         function showNotification() {
