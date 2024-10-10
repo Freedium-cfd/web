@@ -1,14 +1,14 @@
 from fastapi import Request
 from fastapi.responses import HTMLResponse, JSONResponse
-from html5lib import serialize
-from html5lib.html5parser import parse
+from html5lib import serialize  # type: ignore
+from html5lib.html5parser import parse  # type: ignore
 from loguru import logger
 
 from server import config
-from server.handlers.misc import delete_from_cache, report_problem
-from server.handlers.post import render_medium_post_link, render_homepage
-from server.handlers.miro import miro_proxy
 from server.handlers.iframe import iframe_proxy
+from server.handlers.miro import miro_proxy
+from server.handlers.misc import delete_from_cache, report_problem
+from server.handlers.post import render_homepage, render_medium_post_link
 from server.services.jinja import base_template, main_template
 from server.utils.logger_trace import trace
 
@@ -19,8 +19,8 @@ async def route_processing(path: str, request: Request):
         return await main_page()
 
     query_params = request.query_params
-    redis = not "no-redis" in query_params
-    db_cache = not "no-db-cache" in query_params
+    redis = "no-redis" not in query_params
+    db_cache = "no-db-cache" not in query_params
 
     logger.trace(f"no_cache: {db_cache}, no_redis: {redis}")
 
@@ -54,7 +54,9 @@ async def route_processing(path: str, request: Request):
 async def main_page():
     homepage_template = await render_homepage(as_html=True)
     main_template_rendered = main_template.render(postleter=homepage_template)
-    base_template_rendered = base_template.render(body_template=main_template_rendered, host_address=config.HOST_ADDRESS)
+    base_template_rendered = base_template.render(
+        body_template=main_template_rendered, host_address=config.HOST_ADDRESS
+    )
     parsed_template = parse(base_template_rendered)
     serialized_template = serialize(parsed_template, encoding="utf-8")
     return HTMLResponse(serialized_template)

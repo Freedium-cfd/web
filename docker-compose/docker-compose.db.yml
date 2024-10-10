@@ -39,5 +39,18 @@ services:
       retries: 5
     stop_grace_period: 2m
 
+  pgadmin4_freedium:
+    image: dpage/pgadmin4:8.12
+    container_name: pgadmin4_freedium
+    networks:
+      - freedium_net
+    ports:
+      - 5433:80
+    env_file:
+      - ../.env
+    hostname: pgadmin4_freedium
+    restart: always
+    tty: true
+
 volumes:
   freedium_dragonflydata:

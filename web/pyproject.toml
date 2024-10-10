@@ -22,12 +22,33 @@ redis = {version = "4.6.0", extras = ["hiredis"]}
 xkcdpass = "1.19.3"
 loguru = "0.6.0"
 anyio = "<=4.0.0"
+pydantic-settings = "^2.5.2"
 
 
 [tool.poetry.group.dev.dependencies]
 djlint = "^1.35.2"
 ruff = "^0.6.6"
 black = "^24.8.0"
+mypy = "^1.11.2"
+
+[tool.ruff]
+# extend-select = ["I"]
+target-version = "py312"
+
+select = [
+  "E",   # pycodestyle
+  "F",   # pyflakes
+  "UP",  # pyupgrade,
+  "I",   # isort
+  "C4",  # pycodestyle
+]
+
+line-length = 120
+per-file-ignores = {"__init__.py" = ["F401"]}
+ignore = ["UP007"]
+
+[tool.mypy]
+strict = true
 
 [build-system]
 requires = ["poetry-core"]

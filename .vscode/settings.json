@@ -1,0 +1,4 @@
+{
+    "python.REPL.enableREPLSmartSend": false,
+    "python.analysis.typeCheckingMode": "strict"
+}

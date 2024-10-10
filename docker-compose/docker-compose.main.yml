@@ -40,10 +40,8 @@ services:
         condition: service_healthy
       # postgres_freedium:
       #   condition: service_healthy
-      # volumes:
-      #   - ../user_data:/tmp/user_data
-      #   - ./core/medium_parser/:/app/medium_parser
-      #   - ./core/rl_string_helper/:/app/rl_string_helper
+    volumes:
+      - ../web:/app/web
     ports:
       - "7080:7080"
     networks:
