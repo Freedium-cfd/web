@@ -1,9 +1,9 @@
 <script lang="ts">
 	import Header from '$lib/elements/Header.svelte';
 	import Masonry from 'svelte-bricks';
-
 	import HomeBanner from '$lib/elements/HomeBanner.svelte';
 	import BlogCard from '$lib/elements/BlogCard.svelte';
+	import Footer from '$lib/elements/Footer.svelte';
 
 	const blogPosts = [
 		{
@@ -105,12 +105,9 @@
 		}
 	];
 
-	// Reactive statement to create items array from blogPosts
 	$: items = blogPosts.map((post, index) => ({ ...post, id: index }));
 
-	// Masonry configuration
 	let [minColWidth, maxColWidth, gap] = [300, 600, 20];
-	let width, height;
 </script>
 
 <head>
@@ -125,3 +122,5 @@
 		<BlogCard {...item} />
 	</Masonry>
 </div>
+
+<Footer />

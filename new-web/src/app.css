@@ -4,7 +4,7 @@
 
 @layer base {
 	:root {
-		--background: 0 0% 100%;
+		--background: 0, 0%, 97%;
 		--foreground: 240 10% 3.9%;
 
 		--muted: 240 4.8% 95.9%;
@@ -37,7 +37,7 @@
 	}
 
 	.dark {
-		--background: 240 10% 3.9%;
+		--background: 240 10% 12%;
 		--foreground: 0 0% 98%;
 
 		--muted: 240 3.7% 15.9%;
@@ -75,4 +75,9 @@
 	body {
 		@apply bg-background text-foreground;
 	}
+}
+
+.medium-zoom-overlay,
+.medium-zoom-image--opened {
+	z-index: 999;
 }

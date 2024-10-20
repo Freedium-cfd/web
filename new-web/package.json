@@ -17,6 +17,7 @@
 		"@sveltejs/vite-plugin-svelte": "^3.0.0",
 		"autoprefixer": "^10.4.20",
 		"clsx": "^2.1.1",
+		"cmdk-sv": "^0.0.18",
 		"lucide-svelte": "^0.453.0",
 		"mode-watcher": "^0.4.1",
 		"postcss": "^8.4.47",
@@ -36,6 +37,10 @@
 		"@iconify/svelte": "^4.0.2",
 		"bits-ui": "^0.21.16",
 		"copy-to-clipboard": "^3.3.3",
-		"svelte-bricks": "^0.2.1"
+		"es-toolkit": "^1.25.2",
+		"medium-zoom": "^1.1.0",
+		"svelte-bricks": "^0.2.1",
+		"svelte-lazy": "^1.2.9",
+		"svelte-markdown": "^0.4.1"
 	}
 }

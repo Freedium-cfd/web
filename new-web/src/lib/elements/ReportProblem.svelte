@@ -54,6 +54,10 @@
 							<Label.Root for="suggestion">Suggestion</Label.Root>
 						</div>
 						<div class="flex items-center space-x-2">
+							<RadioGroup.Item value="vulnerability" id="vulnerability" />
+							<Label.Root for="vulnerability">Vulnerability (XSS, etc.)</Label.Root>
+						</div>
+						<div class="flex items-center space-x-2">
 							<RadioGroup.Item value="other" id="other" />
 							<Label.Root for="other">Other</Label.Root>
 						</div>
