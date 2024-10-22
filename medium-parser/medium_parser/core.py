@@ -5,7 +5,6 @@ import math
 import textwrap
 import typing
 import urllib.parse
-from typing import Optional
 
 import jinja2
 import tld
@@ -15,14 +14,13 @@ from loguru import logger
 from rl_string_helper import RLStringHelper, split_overlapping_ranges
 
 from . import jinja_env
+from .api import MediumApi
 from .exceptions import (
-    InvalidMediumPostID,
     InvalidMediumPostURL,
     InvalidURL,
-    MediumParserException,
     MediumPostQueryError,
 )
-from .api import MediumApi
+from .markups import parse_markups
 from .models.html_result import HtmlResult
 from .time import convert_datetime_to_human_readable
 from .utils import (
@@ -34,7 +32,6 @@ from .utils import (
     is_valid_url,
     resolve_medium_url,
 )
-from .markups import parse_markups
 
 if typing.TYPE_CHECKING:
     from database_lib import AbstractCacheBackend
@@ -71,13 +68,23 @@ class MediumParser:
 
     async def resolve(self, unknown: str) -> str:
         logger.debug(f"We got some unknown data: {unknown=}. Trying resolve them...///")
+        post_id = None
 
-        if is_has_valid_medium_post_id(unknown):
-            logger.debug("Seems like it's valid post_id")
-            return extract_hex_string(unknown)
+        try:
+            logger.debug("...maybe it's URL. Let's checkout...")
+            post_id = await self.resolve_url(unknown)
+        except Exception as e:
+            logger.exception(e)
+            logger.error(f"Error while resolving URL: {e}")
 
-        logger.debug("...maybe it's URL. Let's checkout...")
-        post_id = await self.resolve_url(unknown)
+            if is_has_valid_medium_post_id(unknown):
+                logger.debug("Seems like it's valid post_id")
+                return extract_hex_string(unknown)
+
+            logger.error(f"Unknown data: {unknown}")
+
+            raise e
+
         return post_id
 
     async def resolve_url(self, url: str) -> str:
@@ -200,7 +207,7 @@ class MediumParser:
             logger.debug("Pushing post data to cache")
             self.cache.push(post_id, post_data)
 
-        logger.trace(f"Query: done")
+        logger.trace("Query: done")
         return post_data
 
     def _parse_and_render_content_html_post(
@@ -223,8 +230,8 @@ class MediumParser:
             # Hotfix, workaround for code block
             has_code_block = any(markup["type"] == "CODE" for markup in markups)
             if is_code or has_code_block:
-                # quote_html_type = ["minimal"]
-                quote_html_type = None
+                quote_html_type = ["minimal"]
+                # quote_html_type = None
             else:
                 quote_html_type = ["full"]
             text_formater = RLStringHelper(text, quote_html_type=quote_html_type)
@@ -354,7 +361,7 @@ class MediumParser:
                 out_paragraphs.append(header_template_rendered)
             elif paragraph["type"] == "IMG":
                 image_template = jinja_env.from_string(
-                    '<div class="mt-7"><img alt="{{ paragraph.metadata.alt }}" class="pt-5 lazy m-auto" role="presentation" data-src="https://miro.medium.com/v2/resize:fit:700/{{ paragraph.metadata.id }}"></div>'
+                    '<div class="mt-7"><img alt="{{ paragraph.metadata.alt }}" class="pt-5 m-auto lazy" role="presentation" data-src="https://miro.medium.com/v2/resize:fit:700/{{ paragraph.metadata.id }}"></div>'
                 )
                 image_caption_template = jinja_env.from_string(
                     "<figcaption class='mt-3 text-sm text-center text-gray-500 dark:text-gray-200'>{{ text }}</figcaption>"
@@ -411,7 +418,7 @@ class MediumParser:
                 out_paragraphs.append(paragraph_template_rendered)
             elif paragraph["type"] == "ULI":
                 uli_template = jinja_env.from_string(
-                    '<ul class="list-disc pl-8 mt-2">{{ li }}</ul>'
+                    '<ul class="pl-8 mt-2 list-disc">{{ li }}</ul>'
                 )
                 li_template = jinja_env.from_string("<li class='mt-3'>{{ text }}</li>")
                 li_templates = []
@@ -438,7 +445,7 @@ class MediumParser:
                 current_pos = _tmp_current_pos - 1
             elif paragraph["type"] == "OLI":
                 ol_template = jinja_env.from_string(
-                    '<ol class="list-decimal pl-8 mt-2">{{ li }}</ol>'
+                    '<ol class="pl-8 mt-2 list-decimal">{{ li }}</ol>'
                 )
                 li_template = jinja_env.from_string("<li class='mt-3'>{{ text }}</li>")
                 li_templates = []
@@ -465,7 +472,7 @@ class MediumParser:
                 current_pos = _tmp_current_pos - 1
             elif paragraph["type"] == "PRE":
                 pre_template = jinja_env.from_string(
-                    '<pre class="mt-7 flex flex-col justify-center border dark:border-gray-700">{{code_block}}</pre>'
+                    '<pre class="flex flex-col justify-center border mt-7 dark:border-gray-700">{{code_block}}</pre>'
                 )
                 code_block_template = jinja_env.from_string(
                     '<code class="p-2 bg-gray-100 dark:bg-gray-900 overflow-x-auto {{ code_css_class }}">{{ text }}</code>'
@@ -515,7 +522,7 @@ class MediumParser:
                 out_paragraphs.append(bq_template_rendered)
             elif paragraph["type"] == "PQ":
                 pq_template = jinja_env.from_string(
-                    '<blockquote class="mt-7 text-2xl ml-5 text-gray-600 dark:text-gray-300"><p>{{ text }}</p></blockquote>'
+                    '<blockquote class="ml-5 text-2xl text-gray-600 mt-7 dark:text-gray-300"><p>{{ text }}</p></blockquote>'
                 )
                 pq_template_rendered = pq_template.render(text=text_formater.get_text())
                 logger.trace(pq_template_rendered)
@@ -523,7 +530,7 @@ class MediumParser:
             elif paragraph["type"] == "MIXTAPE_EMBED":
                 # TODO: redirect all Medium embeding articles to Fredium
                 embed_template = jinja_env.from_string(
-                    '<div class="border border-gray-300 p-2 mt-7 items-center overflow-hidden"><a rel="noopener follow" href="{{ url }}" target="_blank"> <div class="flex flex-row justify-between p-2 overflow-hidden"><div class="flex flex-col justify-center p-2"><h2 class="text-black dark:text-gray-100 text-base font-bold">{{ embed_title }}</h2><div class="mt-2 block"><h3 class="text-grey-darker text-sm">{{ embed_description }}</h3></div><div class="mt-5"><p class="text-grey-darker text-xs">{{ embed_site }}</p></div></div><div class="relative flex flew-row h-40 w-60"><div class="lazy absolute inset-0 bg-cover bg-center" data-bg="https://miro.medium.com/v2/resize:fit:320/{{ paragraph.mixtapeMetadata.thumbnailImageId }}"></div></div></div> </a></div>'
+                    '<div class="items-center p-2 overflow-hidden border border-gray-300 mt-7"><a rel="noopener follow" href="{{ url }}" target="_blank"> <div class="flex flex-row justify-between p-2 overflow-hidden"><div class="flex flex-col justify-center p-2"><h2 class="text-base font-bold text-black dark:text-gray-100">{{ embed_title }}</h2><div class="block mt-2"><h3 class="text-sm text-grey-darker">{{ embed_description }}</h3></div><div class="mt-5"><p class="text-xs text-grey-darker">{{ embed_site }}</p></div></div><div class="relative flex h-40 flew-row w-60"><div class="absolute inset-0 bg-center bg-cover lazy" data-bg="https://miro.medium.com/v2/resize:fit:320/{{ paragraph.mixtapeMetadata.thumbnailImageId }}"></div></div></div> </a></div>'
                 )
                 if paragraph.get("mixtapeMetadata") is not None:
                     url = paragraph["mixtapeMetadata"]["href"]
@@ -578,7 +585,7 @@ class MediumParser:
                 out_paragraphs.append(embed_template_rendered)
             elif paragraph["type"] == "IFRAME":
                 iframe_template = jinja_env.from_string(
-                    '<div class="mt-7"><iframe class="lazy w-full" data-src="{{ host_address }}/render_iframe/{{ iframe_id }}" allowfullscreen="" frameborder="0" scrolling="no"></iframe></div>'
+                    '<div class="mt-7"><iframe class="w-full lazy" data-src="{{ host_address }}/render_iframe/{{ iframe_id }}" allowfullscreen="" frameborder="0" scrolling="no"></iframe></div>'
                 )
                 iframe_template_rendered = iframe_template.render(
                     host_address=self.host_address,
