@@ -114,3 +114,10 @@ document.addEventListener('DOMContentLoaded', (event) => {
          cursor: pointer;
      }
     </style>
+    <div id="pdf-content" style="display: none;">
+        <h1>{{ title }}</h1>
+        {% if subtitle %}<h2>{{ subtitle }}</h2>{% endif %}
+        <div>
+            {% for paragraph in content %}{{ paragraph }}{% endfor %}
+        </div>
+    </div>

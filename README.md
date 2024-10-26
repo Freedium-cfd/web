@@ -87,3 +87,17 @@ These steps will set up and run your local Freedium instance.
 - [ ] Integrate Grafana/Prometheus to monitor our services
 - [ ] Add more metrics to our services to have ability to monitor it
 - [ ] Make able translate posts to different languages using translatepy library
+
+## New PDF Generation Feature
+
+We have added a new feature that allows you to save Medium articles as PDFs. Here are the steps to use this feature:
+
+1. Navigate to the article you want to save as a PDF.
+2. Click on the "Save as PDF" button.
+3. The article will be downloaded as a PDF file.
+
+This feature is powered by the WeasyPrint library, which converts HTML content to PDF format. The implementation details can be found in the following files:
+
+- `web/server/handlers/post.py`: Contains the endpoint for PDF generation.
+- `web/server/templates/post.html`: Ensures compatibility with PDF rendering.
+- `new-web/src/routes/[slug]/+page.svelte`: Adds the "Save as PDF" button and implements the function to call the PDF generation endpoint.

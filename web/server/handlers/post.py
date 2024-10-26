@@ -1,12 +1,12 @@
 import asyncio
 import pickle
-
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, Response
 from html5lib import serialize
 from html5lib.html5parser import parse
 from async_lru import alru_cache
 from loguru import logger
 from medium_parser import medium_parser_exceptions
+from weasyprint import HTML
 
 from server import config, medium_cache, redis_storage, medium_parser
 from server.services.jinja import base_template, homepage_template
@@ -47,7 +47,7 @@ async def render_homepage(limit: int = config.HOME_PAGE_MAX_POSTS, as_html: bool
     return HTMLResponse(homepage_template_rendered)
 
 
-async def render_medium_post_link(path: str, use_cache: bool = True, use_redis: bool = True):
+async def render_medium_post_link(path: str, use_cache: bool = True, use_redis: bool = True, as_pdf: bool = False):
     redis_available = await safe_check_redis_connection(redis_storage)
     logger.debug(f"Redis available: {redis_available}")
 
@@ -100,4 +100,13 @@ async def render_medium_post_link(path: str, use_cache: bool = True, use_redis: 
         serialized_rendered_post = serialize(parsed_rendered_post, encoding="utf-8")
 
         send_message(f"✅ Successfully rendered post: {path}", True, "GOOD")
+
+        if as_pdf:
+            pdf = HTML(string=serialized_rendered_post).write_pdf()
+            return Response(pdf, media_type='application/pdf', headers={'Content-Disposition': f'attachment; filename="{post_id}.pdf"'})
+
         return HTMLResponse(serialized_rendered_post)
+
+
+async def generate_pdf(path: str):
+    return await render_medium_post_link(path, as_pdf=True)

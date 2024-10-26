@@ -68,6 +68,19 @@ Stay tuned for more exciting updates as we continue to revolutionize the world o
 			contentLoaded = true;
 		}, 500);
 	});
+
+	async function saveAsPDF() {
+		const response = await fetch(`/generate-pdf?path=${encodeURIComponent(window.location.pathname)}`);
+		const blob = await response.blob();
+		const url = window.URL.createObjectURL(blob);
+		const a = document.createElement('a');
+		a.href = url;
+		a.download = `${data.title}.pdf`;
+		document.body.appendChild(a);
+		a.click();
+		a.remove();
+		window.URL.revokeObjectURL(url);
+	}
 </script>
 
 <svelte:head>
@@ -117,6 +130,11 @@ Stay tuned for more exciting updates as we continue to revolutionize the world o
 						<p>Loading content...</p>
 					{/if}
 				</div>
+			</div>
+			<div class="p-6">
+				<button on:click={saveAsPDF} class="px-4 py-2 text-white bg-blue-500 rounded hover:bg-blue-600">
+					Save as PDF
+				</button>
 			</div>
 		</article>
 
