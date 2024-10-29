@@ -1,9 +1,10 @@
 <script lang="ts">
+	import { goto } from '$app/navigation';
 	let url = '';
 
-	const handleSubmit = (event: Event) => {
+	const handleSubmit = async (event: Event) => {
 		event.preventDefault();
-		window.location.href = `/${url}`;
+		await goto(`/${url}`);
 	};
 </script>
 

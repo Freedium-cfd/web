@@ -74,7 +74,7 @@
 						rows={12}
 					></Textarea>
 					<p class="mt-2 text-sm text-foreground-alt">
-						The current opened link will be automatically attached to your report.
+						The current opened page will be automatically attached to your report.
 					</p>
 				</div>
 			</div>
