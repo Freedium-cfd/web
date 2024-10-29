@@ -1,6 +1,9 @@
+#!/bin/env python3
+
 from os import listdir
 from os.path import isfile, join
-from typing import List, Dict
+from typing import Dict, List
+
 from jinja2 import Template
 
 # Constants
@@ -29,8 +32,7 @@ ACCESS_DENIED_PATHS: List[str] = [
 ]
 
 CADDY_FILE_TEMPLATES: Dict[str, str] = {
-    "CaddyfileDevTemplate": "CaddyfileDev",
-    "CaddyfileProdTemplate": "CaddyfileProd",
+    "CaddyfileTemplate": "Caddyfile",
 }
 
 

@@ -6,25 +6,7 @@
     <img width="200px" height="50px" alt="Become a Patron" src="https://github.com/elsiehupp/patron-buttons/blob/master/svg/become_a_patron_4x1_black_logo_white_text_on_coral.svg?raw=True">
 </a>
 
-## FAQ
-
-### Why did we create Freedium?
-
-In mid-June to mid-July 2023, Medium changed their paywall method, and all old paywall bypass methods we had stopped working. So I became obsessed with the idea of creating a service to bypass Medium's paywalled posts. Honestly I am not a big fan of Medium, but I sometimes read articles to improve my knowledge.
-
-### How does Freedium work?
-
-In the first version of Freedium, we reverse-engineered Medium.com's GraphQL endpoints and built our own parser and toolkits to show you unpaywalled Medium posts. Unfortunately, Medium closed this loophole and nowadays we just pay subscriptions and share access through Freedium. Sometimes we got a bugs because of the self-written parser, but we are working to make Freedium bug-free.
-
-### Wow! I would like to contribute to Freedium. How can I do that?
-
-We need volunteers who have Medium subscriptions because we might get banned by Medium. And if you developer you can start from the this (https://codeberg.org/Freedium-cfd/web) repository.
-
-### Plans, future?
-
-Speed up Freedium, add support for more services than just Medium and (probably) create open source Medium frontend (in next life)
-
-## Technologies:
+## Stack:
 
 - Backend: Python 3.9+, Unicorn, FastAPI, Jinja2, Sentry
 - Frontend: Tailwinds CSS v3
@@ -32,6 +14,13 @@ Speed up Freedium, add support for more services than just Medium and (probably)
 - Utils: Caddy, Docker, Docker Compose, Cloudflare WARP proxy (wgcf)
 
 ## Local run:
+
+There is two profiles:
+
+- `min` - without 2 Cluster of Cloudflare WARP proxy, HAProxy proxy balancer, Plausible, Grafana.
+- `prod` - with all services for production.
+
+For local development, we recommend to use `min` profile.
 
 Requirements:
 
@@ -44,8 +33,8 @@ To configure your Freedium instance, follow these steps:
 1. Clone the repository:
 
    ```
-   git clone https://codeberg.org/Freedium-cfd/web/ ./web --depth 1
-   cd ./web
+   git clone https://codeberg.org/Freedium-cfd/web/ ./freedium-web --depth 1
+   cd ./freedium-web
    ```
 
 2. Create and configure the environment file:
@@ -56,24 +45,135 @@ To configure your Freedium instance, follow these steps:
 
    Open the `.env` file and adjust the values as needed for your setup.
 
-3. Set up the Docker network:
+3. (Optional) Set up the Docker network:
 
    ```
-   sudo docker network create caddy_net
+   sudo docker network create caddy_freedium_net
    ```
 
-4. Start the Freedium services:
+4. Change your hosts file:
+
    ```
-   sudo docker compose -f ./docker-compose/docker-compose.yml up
+   sudo nano /etc/hosts
    ```
 
-And now you can access local instance of Freedium by opening browser and type `http://localhost:6752`.
+   Add the following line:
 
-These steps will set up and run your local Freedium instance.
+   ```
+   127.0.0.1 freedium.local
+   ```
+
+5. Start the Freedium services (`min` profile):
+
+   ```
+   sudo docker compose --profile min -f ./docker-compose/docker-compose.yml up
+   ```
+
+   Stopping the services:
+
+   ```
+   sudo docker compose --profile min -f ./docker-compose/docker-compose.yml down
+   ```
+
+6. (Optional) Configure your reverse proxy (Caddy, Nginx, etc.) to use `freedium.local` as a host.
+
+If you use Dockerized reverse proxy, you can specify network `caddy_freedium_net` with `external: true` option in networks section of your reverse proxy container. Specify `caddy_freedium` hostname with port `80` (or `443`) in your reverse proxy configuration.
+
+And now you can access local instance of Freedium by opening browser and type `https://freedium.local`. There is would be a warning about insecure connection, because we use self-signed TLS certificate. Ignore it.
+
+## Architecture:
+
+```mermaid
+graph TB
+    subgraph "Main Application"
+        fw[freedium_web]
+        cdy[caddy_freedium]
+    end
+
+    subgraph "Database Layer"
+        rds[redis_service<br/>DragonFlyDB]
+        pg[(postgres_freedium<br/>PostgreSQL)]
+        pgadm[pgadmin4_freedium]
+    end
+
+    subgraph "Proxy Layer"
+        hpb[haproxy-proxy-balancer]
+
+        subgraph "WGCF Cluster 1"
+            wg1[wgcf1]
+            d1[dante_1]
+            wh1[wgcf1_healthcare_service]
+        end
+
+        subgraph "WGCF Cluster 2"
+            wg2[wgcf2]
+            d2[dante_2]
+            wh2[wgcf2_healthcare_service]
+        end
+    end
+
+    subgraph "Analytics"
+        pls[freedium_plausible]
+        pldb[(plausible_db)]
+        pledb[(plausible_events_db<br/>ClickHouse)]
+    end
+
+    subgraph "Utility"
+        ah[autoheal]
+    end
+
+    %% Dependencies
+    fw -->|depends_on| hpb
+    d1 -->|depends_on| wg1
+    d2 -->|depends_on| wg2
+    wg2 -->|depends_on| wg1
+    hpb -->|depends_on| wg1
+    hpb -->|depends_on| wg2
+    pls -->|depends_on| pldb
+    pls -->|depends_on| pledb
+
+    %% Network Connections
+    subgraph "Networks"
+        fn[freedium_net]
+        cn[caddy_net]
+        pn[plausible_net]
+    end
+
+    fw ---|freedium_net| fn
+    cdy ---|freedium_net & caddy_net| fn
+    rds ---|freedium_net| fn
+    pg ---|freedium_net| fn
+    pgadm ---|freedium_net| fn
+    hpb ---|freedium_net| fn
+    wg1 ---|freedium_net| fn
+    wg2 ---|freedium_net| fn
+    wh1 ---|freedium_net| fn
+    wh2 ---|freedium_net| fn
+    pls ---|all networks| fn
+
+    %% Port Exposures
+    cdy -->|":6752"| ext1[External Access]
+    fw -->|":7080"| ext2[External Access]
+    pgadm -->|":5433"| ext3[External Access]
+
+    classDef service fill:#2ecc71,stroke:#27ae60,color:white
+    classDef network fill:#3498db,stroke:#2980b9,color:white
+    classDef database fill:#e74c3c,stroke:#c0392b,color:white
+    classDef proxy fill:#f1c40f,stroke:#f39c12,color:black
+    classDef utility fill:#9b59b6,stroke:#8e44ad,color:white
+    classDef external fill:#95a5a6,stroke:#7f8c8d,color:white
+
+    class fw,cdy,pls service
+    class rds,pg,pldb,pledb database
+    class hpb,wg1,wg2,d1,d2 proxy
+    class ah,wh1,wh2 utility
+    class fn,cn,pn network
+    class ext1,ext2,ext3 external
+```
 
 ## TODO:
 
-- Integrate library notifiers - https://github.com/liiight/notifiers
+- ~~Integrate library notifiers - https://github.com/liiight/notifiers~~ Use Graphana and Loki instead
 - Do not use 'shturman/dante' image, because it is does not have updates for a long time. (Probably) Use https://hub.docker.com/r/vimagick/dante/
 
 ## Roadmap

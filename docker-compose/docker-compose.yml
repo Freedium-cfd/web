@@ -6,3 +6,4 @@ include:
   - docker-compose.db.yml
   - docker-compose.utility.yml
   - docker-compose.proxy.yml
+  - docker-compose.plausible.yml

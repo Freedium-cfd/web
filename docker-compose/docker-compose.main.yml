@@ -8,19 +8,23 @@ services:
       dockerfile: Dockerfile
     cap_add:
       - NET_ADMIN
+    networks:
+      freedium_local_net:
+        ipv4_address: 177.28.0.5
+      freedium_net:
+      caddy_freedium_net: # caddy_net:
     ports:
-      - "6752:6752"
+      - "80:6752"
+    #   - "80:80"
+    #   - "443:443"
     volumes:
-      - ../caddy/CaddyfileDev:/etc/caddy/Caddyfile
+      - ../caddy/Caddyfile:/etc/caddy/Caddyfile
       - freedium_caddy_data:/data
       - freedium_caddy_config:/config
       - ../caddy/static:/static
-    networks:
-      - freedium_net
-      - caddy_net
     restart: always
     healthcheck:
-      test: [ "CMD-SHELL", "curl -f http://localhost:6752/ --max-time 80 --header 'User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.3 Safari/605.1.15'" ]
+      test: [ "CMD-SHELL", "curl -f http://localhost:80/ --max-time 80 --header 'User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.3 Safari/605.1.15'" ]
       interval: 30s
       start_period: 20s
       timeout: 80s
@@ -62,6 +66,14 @@ volumes:
 
 
 networks:
-  caddy_net:
-    external: true
+  # caddy_net:
+  #   external: true
   freedium_net:
+  caddy_freedium_net:
+  freedium_local_net:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 177.28.0.0/16
+          gateway: 177.28.0.1

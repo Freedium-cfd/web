@@ -1,9 +1,9 @@
-:6752 {
-	# header Server "nginx"
+(common) {
+    tls internal
     encode gzip
 	header -Server
 
-
+	
     handle_path /android-chrome-192x192.png {
         root * /static/android-chrome-192x192.png
         file_server
@@ -200,11 +200,34 @@
         respond "Access denied" 403
     }
     
+}
 
-    route /* {
-		reverse_proxy freedium_web:7080 {
-			lb_try_duration 30s
-        	lb_try_interval 1s
-		}
+(header_up) {
+	header_up Host {host}
+    header_up X-Real-IP {remote_host}
+    header_up X-Forwarded-For {remote_host}
+    header_up X-Forwarded-Proto {scheme}
+}
+
+(lb_try) {
+	lb_try_duration 30s
+	lb_try_interval 1s
+}
+
+plausible.freedium.local {
+	import common
+
+	reverse_proxy freedium_plausible:8000 {
+		import header_up
+		import lb_try
+	}
+}
+
+freedium.local {
+	import common
+
+	reverse_proxy freedium_web:7080 {
+		import header_up
+		import lb_try
 	}
 }
