@@ -1,0 +1,2 @@
+class MediumService(BaseService):
+    pass
