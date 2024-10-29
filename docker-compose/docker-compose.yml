@@ -1,5 +1,3 @@
-version: '3.7'
-
 include:
   - docker-compose.main.yml
   - docker-compose.wgcf.yml

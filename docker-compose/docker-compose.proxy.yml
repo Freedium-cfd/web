@@ -1,7 +1,7 @@
-version: '3.7'
-
 services:
   haproxy-proxy-balancer:
+    profiles:
+      - prod
     build:
       context: ../proxy-balancer
       dockerfile: Dockerfile

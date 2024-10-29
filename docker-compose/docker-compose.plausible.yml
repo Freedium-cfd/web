@@ -1,5 +1,3 @@
-version: '3.7'
-
 # Based on: https://github.com/plausible/community-edition/blob/v2.1.4/compose.yml
 services:
   plausible_db:

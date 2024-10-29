@@ -1,5 +1,3 @@
-version: '3.7'
-
 services:
   wgcf1:
     image: neilpang/wgcf-docker:latest
@@ -21,6 +19,8 @@ services:
       interval: 5s
       timeout: 2s
       retries: 10000
+    profiles:
+      - prod
 
   dante_1:
     image: shturman/dante:1.4.2
@@ -35,6 +35,8 @@ services:
     depends_on:
       wgcf1:
         condition: service_healthy
+    profiles:
+      - prod
 
   wgcf1_healthcare_service:
     build:
@@ -53,6 +55,8 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - /etc/localtime:/etc/localtime:ro
+    profiles:
+      - prod
 
   wgcf2:
     image: neilpang/wgcf-docker:latest
@@ -77,6 +81,8 @@ services:
       interval: 5s
       timeout: 2s
       retries: 10000
+    profiles:
+      - prod
 
   dante_2:
     image: shturman/dante:1.4.2
@@ -91,6 +97,8 @@ services:
     depends_on:
       wgcf2:
         condition: service_healthy
+    profiles:
+      - prod
 
   wgcf2_healthcare_service:
     build:
@@ -109,3 +117,5 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - /etc/localtime:/etc/localtime:ro
+    profiles:
+      - prod

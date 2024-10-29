@@ -8,25 +8,33 @@
 
 ## Stack:
 
-- Backend: Python 3.9+, Unicorn, FastAPI, Jinja2, Sentry
-- Frontend: Tailwinds CSS v3
-- Database: PostgreSQL, Dragonfly (Redis and Memcached compatible key-value database)
-- Utils: Caddy, Docker, Docker Compose, Cloudflare WARP proxy (wgcf)
+- Backend:
+  - language: Python 3.9+
+  - framework: Unicorn, FastAPI
+- Frontend:
+  - framework: Tailwinds CSS v3, Jinja2
+  - monitoring: Sentry
+- Database:
+  - PostgreSQL, Dragonfly (Redis and Memcached compatible key-value database)
+- Utils:
+  - Caddy, Docker, Docker Compose, Cloudflare WARP proxy (wgcf)
 
-## Local run:
+## Project configuration:
 
-There is two profiles:
+There is three (3) docker-compose profiles:
 
 - `min` - without 2 Cluster of Cloudflare WARP proxy, HAProxy proxy balancer, Plausible, Grafana.
+- `local` - based on `min`, but with `freedium.local` exposed hostname, both 80 and 443 ports are exposed, with self-signed TLS certificate.
 - `prod` - with all services for production.
 
-For local development, we recommend to use `min` profile.
+### Requirements:
 
-Requirements:
-
-- Docker
+- Docker, Docker Compose, last version is preferred.
+- Linux, preferably rolling release. We can't guarantee that Freedium instance will work on other OS. Tested on Ubuntu 22.04 and Fedora 39.
 - git
-- Linux. Officially, we can't guarantee that Freedium will work on other OS.
+- Preferably, fresh and clean brain.
+
+### Local run:
 
 To configure your Freedium instance, follow these steps:
 
@@ -48,13 +56,16 @@ To configure your Freedium instance, follow these steps:
 3. (Optional) Set up the Docker network:
 
    ```
-   sudo docker network create caddy_freedium_net
+   sudo docker network create caddy_net
    ```
 
 4. Change your hosts file:
 
    ```
    sudo nano /etc/hosts
+   # or
+   vim /etc/hosts
+   # and when you are closed vim, type `:w !sudo tee %` to save file without executing vim in root mode
    ```
 
    Add the following line:
@@ -66,20 +77,22 @@ To configure your Freedium instance, follow these steps:
 5. Start the Freedium services (`min` profile):
 
    ```
-   sudo docker compose --profile min -f ./docker-compose/docker-compose.yml up
+   sudo docker compose --profile local -f ./docker-compose/docker-compose.yml up
    ```
 
    Stopping the services:
 
    ```
-   sudo docker compose --profile min -f ./docker-compose/docker-compose.yml down
+   sudo docker compose --profile local -f ./docker-compose/docker-compose.yml down
    ```
 
-6. (Optional) Configure your reverse proxy (Caddy, Nginx, etc.) to use `freedium.local` as a host.
-
-If you use Dockerized reverse proxy, you can specify network `caddy_freedium_net` with `external: true` option in networks section of your reverse proxy container. Specify `caddy_freedium` hostname with port `80` (or `443`) in your reverse proxy configuration.
-
 And now you can access local instance of Freedium by opening browser and type `https://freedium.local`. There is would be a warning about insecure connection, because we use self-signed TLS certificate. Ignore it.
+
+### Production run:
+
+All production services are running on `prod` profile. If you use Dockerized reverse proxy, you can specify network `caddy_freedium_net` with `external: true` option in networks section of your reverse proxy container. Specify `caddy_freedium` hostname with port `6752` (or `6753` for Plausible) in your reverse proxy configuration.
+
+As alternative, you can directly change docker-compose configurations to use your reverse proxy. See `docker-compose` and `caddy` folders for more details.
 
 ## Architecture:
 
@@ -174,7 +187,7 @@ graph TB
 ## TODO:
 
 - ~~Integrate library notifiers - https://github.com/liiight/notifiers~~ Use Graphana and Loki instead
-- Do not use 'shturman/dante' image, because it is does not have updates for a long time. (Probably) Use https://hub.docker.com/r/vimagick/dante/
+- ~~Do not use 'shturman/dante' image, because it is does not have updates for a long time. (Probably) Use https://hub.docker.com/r/vimagick/dante/~~ Works, don't touch
 
 ## Roadmap
 

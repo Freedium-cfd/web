@@ -1,5 +1,3 @@
-version: '3.7'
-
 services:
   redis_service:
     container_name: redis_service

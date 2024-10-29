@@ -1,66 +1,104 @@
 version: '3.7'
 
+x-expose: &expose
+  networks:
+    freedium_local_net:
+      ipv4_address: 177.28.0.5
+  ports:
+    - "80:80"
+    - "443:443"
+
+x-freedium_web: &freedium_web
+  env_file: ../.env
+  build:
+    context: ../
+    dockerfile: Dockerfile
+    # postgres_freedium:
+    #   condition: service_healthy
+  volumes:
+    - ../web:/app/web
+  ports:
+    - "7080:7080"
+  networks:
+    - freedium_net
+  mem_limit: 4g
+  restart: always
+  healthcheck:
+    test: [ "CMD-SHELL", "curl -f http://localhost:7080/ --max-time 80 --header 'User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.3 Safari/605.1.15'" ]
+    interval: 30s
+    start_period: 20s
+    timeout: 80s
+    retries: 3
+  stop_grace_period: 2m
+
+x-caddy_freedium: &caddy_freedium
+  build:
+    context: ../caddy
+    dockerfile: Dockerfile
+  cap_add:
+    - NET_ADMIN
+  volumes:
+    - ../caddy/Caddyfile:/etc/caddy/Caddyfile
+    - ../caddy/static:/static
+    - freedium_caddy_data:/data
+    - freedium_caddy_config:/config
+  restart: always
+  healthcheck:
+    test: [ "CMD-SHELL", "curl -f http://localhost:80/ --max-time 80 --header 'User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.3 Safari/605.1.15'" ]
+    interval: 30s
+    start_period: 20s
+    timeout: 80s
+    retries: 3
+  stop_grace_period: 2m
+
 services:
-  caddy_freedium:
-    container_name: caddy_freedium
-    build:
-      context: ../caddy
-      dockerfile: Dockerfile
-    cap_add:
-      - NET_ADMIN
+  caddy_freedium_local:
+    <<: [ *caddy_freedium, *expose ]
+    container_name: caddy_freedium_local
+    profiles:
+      - local
     networks:
-      freedium_local_net:
-        ipv4_address: 177.28.0.5
       freedium_net:
       caddy_freedium_net:
       caddy_net:
-        # ports:
-      # - "6752:6752"
-      # - "6753:6753"
-    #   - "80:80"
-    #   - "443:443"
-    volumes:
-      - ../caddy/Caddyfile:/etc/caddy/Caddyfile
-      - freedium_caddy_data:/data
-      - freedium_caddy_config:/config
-      - ../caddy/static:/static
-    restart: always
-    healthcheck:
-      test: [ "CMD-SHELL", "curl -f http://localhost:80/ --max-time 80 --header 'User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.3 Safari/605.1.15'" ]
-      interval: 30s
-      start_period: 20s
-      timeout: 80s
-      retries: 3
-    stop_grace_period: 2m
+      freedium_local_net:
+        ipv4_address: 177.28.0.5
+
+  caddy_freedium:
+    <<: *caddy_freedium
+    container_name: caddy_freedium
+    networks:
+      freedium_net:
+      caddy_freedium_net:
+      caddy_net:
+    ports:
+      - "6752:6752"
+      - "6753:6753"
+    profiles:
+      - prod
+      - min
+
+  freedium_web_mini:
+    <<: *freedium_web
+    profiles:
+      - min
+      - local
+    environment:
+      - "PROXY_LIST=${PROXY_LIST:-}"
+    container_name: freedium_web_mini
+    hostname: freedium_web
 
   freedium_web:
-    container_name: freedium_web
-    env_file: ../.env
-    build:
-      context: ../
-      dockerfile: Dockerfile
+    <<: *freedium_web
+    profiles:
+      - prod
     environment:
-      - "PROXY_LIST=${PROXY_LIST:-socks5://haproxy-pb:1080}"
+      - "PROXY_LIST=socks5://haproxy-pb:1080"
     depends_on:
       haproxy-proxy-balancer:
         condition: service_healthy
-      # postgres_freedium:
-      #   condition: service_healthy
-    volumes:
-      - ../web:/app/web
-    ports:
-      - "7080:7080"
-    networks:
-      - freedium_net
-    mem_limit: 4g
-    restart: always
-    healthcheck:
-      test: [ "CMD-SHELL", "curl -f http://localhost:7080/ --max-time 80 --header 'User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.3 Safari/605.1.15'" ]
-      interval: 30s
-      start_period: 20s
-      timeout: 80s
-      retries: 3
-    stop_grace_period: 2m
+    container_name: freedium_web
+    hostname: freedium_web
 
 volumes:
   freedium_caddy_data:
