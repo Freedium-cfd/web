@@ -1,5 +1,5 @@
 (common) {
-    tls internal
+    # tls internal
     encode gzip
 	header -Server
 
@@ -214,7 +214,7 @@
 	lb_try_interval 1s
 }
 
-plausible.freedium.local {
+plausible.freedium.local, :6753 {
 	import common
 
 	reverse_proxy freedium_plausible:8000 {
@@ -223,7 +223,7 @@ plausible.freedium.local {
 	}
 }
 
-freedium.local {
+freedium.local, :6752 {
 	import common
 
 	reverse_proxy freedium_web:7080 {

@@ -12,9 +12,11 @@ services:
       freedium_local_net:
         ipv4_address: 177.28.0.5
       freedium_net:
-      caddy_freedium_net: # caddy_net:
-    ports:
-      - "80:6752"
+      caddy_freedium_net:
+      caddy_net:
+        # ports:
+      # - "6752:6752"
+      # - "6753:6753"
     #   - "80:80"
     #   - "443:443"
     volumes:
@@ -66,8 +68,8 @@ volumes:
 
 
 networks:
-  # caddy_net:
-  #   external: true
+  caddy_net:
+    external: true
   freedium_net:
   caddy_freedium_net:
   freedium_local_net:
