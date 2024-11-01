@@ -29,5 +29,11 @@
 	bind:this={progress}
 	id="progress"
 	class="top-0 z-20 h-1"
-	style="background:linear-gradient(to right, hsl(var(--primary)) var(--scroll), transparent 0)"
+	style="background:linear-gradient(to right, hsl(var(--primary)) var(--scroll), transparent 0); width: var(--scroll, 0%);"
 />
+
+<style>
+	#progress {
+		transition: width 0.3s ease;
+	}
+</style>
