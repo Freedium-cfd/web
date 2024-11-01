@@ -28,7 +28,7 @@
 		<Dialog.Trigger class={buttonVariants({ variant: 'default' })}>
 			<div class="flex items-center space-x-2 text-white">
 				<Icon icon="heroicons:exclamation-triangle-solid" class="size-5" />
-				<span class="text-sm font-medium">Report a problem</span>
+				<span class="hidden text-sm font-medium lg:block">Report a problem</span>
 			</div>
 		</Dialog.Trigger>
 		<form on:submit|preventDefault={handleSubmit}>
@@ -99,7 +99,7 @@
 		<Drawer.Trigger class={buttonVariants({ variant: 'default' })}>
 			<div class="flex items-center space-x-2 text-white">
 				<Icon icon="heroicons:exclamation-triangle-solid" class="size-5" />
-				<span class="text-sm font-medium">Report a problem</span>
+				<span class="hidden text-sm font-medium lg:block">Report a problem</span>
 			</div>
 		</Drawer.Trigger>
 		<form on:submit|preventDefault={handleSubmit}>
