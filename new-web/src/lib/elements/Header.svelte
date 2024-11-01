@@ -21,11 +21,14 @@
 	const toggleSearch = () => {
 		isSearchOpen = !isSearchOpen;
 	};
+
+	// Add transition duration variable
+	const transitionDuration = 200;
 </script>
 
 <nav
 	id="header"
-	class="sticky top-0 z-20 w-full bg-white border-b shadow-sm dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800"
+	class="sticky top-0 z-20 w-full border-b shadow-sm bg-white/95 backdrop-blur-sm dark:bg-zinc-900/95 border-zinc-200 dark:border-zinc-800"
 >
 	<Advertise />
 	<ProgressLine />
@@ -37,11 +40,12 @@
 
 		<div class="flex-grow max-w-md mx-2">
 			<Button
-				class="items-center hidden w-full h-8 gap-2 pl-2 pr-3 text-sm transition bg-white rounded-full ui-not-focus-visible:outline-none text-zinc-500 ring-1 ring-zinc-900/10 hover:ring-zinc-900/20 lg:flex dark:bg-white/5 dark:text-zinc-400 dark:ring-inset dark:ring-white/10 dark:hover:ring-white/20"
+				class="items-center hidden w-full h-8 gap-2 pl-2 pr-3 text-sm transition bg-white rounded-full ui-not-focus-visible:outline-none text-zinc-500 ring-1 ring-zinc-900/10 hover:ring-zinc-900/20 hover:bg-zinc-50 focus-visible:ring-2 focus-visible:ring-primary lg:flex dark:bg-white/5 dark:text-zinc-400 dark:ring-inset dark:ring-white/10 dark:hover:ring-white/20 dark:hover:bg-white/10"
 				on:click={toggleSearch}
+				aria-label="Open search"
 			>
 				<Icon icon="heroicons:magnifying-glass" />
-				Search
+				<span>Search articles, topics, and more...</span>
 			</Button>
 		</div>
 
@@ -57,7 +61,7 @@
 				url="https://liberapay.com/ZhymabekRoman/"
 				icon="simple-icons:liberapay"
 			/>
-			<!-- <PayButtons name="PayPal" url="" icon="simple-icons:paypal" /> -->
+			<PayButtons name="Discord" url="discord.gg/dAxCuG9nYM" icon="simple-icons:discord" />
 			<div class="w-px h-6 bg-zinc-300 dark:bg-zinc-700"></div>
 			<ThemeToggle />
 			<ReportProblem />
@@ -68,19 +72,38 @@
 				<Icon class="size-5" icon="heroicons:magnifying-glass" />
 			</Button>
 			<ThemeToggle />
-			<Button variant="ghost" size="icon" on:click={toggleNav}>
-				<Menu />
+			<Button
+				variant="ghost"
+				size="icon"
+				on:click={toggleNav}
+				aria-expanded={isNavOpen}
+				aria-controls="mobile-menu"
+				class="hover:bg-zinc-100 dark:hover:bg-zinc-800"
+			>
+				<Menu aria-hidden="true" />
+				<span class="sr-only">Toggle menu</span>
 			</Button>
 		</div>
 	</div>
 
 	{#if isNavOpen}
 		<div
-			class="!sticky w-full bg-white border-b shadow-sm md:hidden dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800"
+			id="mobile-menu"
+			class="!sticky w-full bg-white/95 backdrop-blur-sm border-b shadow-sm md:hidden dark:bg-zinc-900/95 border-zinc-200 dark:border-zinc-800"
 		>
-			<div
-				class="sticky z-20 flex flex-wrap items-center justify-center px-4 py-2 mx-auto space-x-2 space-y-2"
-			>
+			<div class="sticky z-20 flex flex-wrap items-center justify-center gap-2 px-4 py-3 mx-auto">
+				<PayButtons
+					name="Ko-fi"
+					url="https://ko-fi.com/zhymabekroman"
+					icon="teenyicons:cup-solid"
+				/>
+				<PayButtons
+					name="Liberapay"
+					url="https://liberapay.com/ZhymabekRoman/"
+					icon="simple-icons:liberapay"
+				/>
+				<PayButtons name="Discord" url="discord.gg/dAxCuG9nYM" icon="simple-icons:discord" />
+				<!-- <ExtensionsButton /> -->
 				<ReportProblem />
 			</div>
 		</div>
