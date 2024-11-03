@@ -65,7 +65,7 @@ KNOWN_MEDIUM_DOMAINS = (
     "entrepreneurshandbook.co",
     "prototypr.io",
     "theascent.pub",
-    "storiusmag.com"
+    "storiusmag.com",
 )
 NOT_MEDIUM_DOMAINS = (
     "github.com",
@@ -151,6 +151,7 @@ def unquerify_url(url: str) -> str:
     query = parsed_url.query
     if query:
         parsed_url = parsed_url._replace(query="")
+
     sanitized_url = urllib.parse.urlunparse(parsed_url)
     return sanitized_url.removesuffix("/")
 
@@ -229,20 +230,24 @@ def basic_hex_check(hex_string: str) -> bool:
 @lru_cache(maxsize=100)
 def extract_hex_string(input_string: str) -> str:
     # First try to find a hexadecimal string preceded by a '-'
-    match = re.findall(r'-(\b[a-fA-F0-9]{8,12}\b)', input_string)
+    match = re.findall(r"-(\b[a-fA-F0-9]{8,12}\b)", input_string)
     if not match:
         # If no match, try to find a hexadecimal string without the '-'
-        match = re.findall(r'(\b[a-fA-F0-9]{8,12}\b)', input_string)
+        match = re.findall(r"(\b[a-fA-F0-9]{8,12}\b)", input_string)
     return match[-1] if match else None
 
 
 async def resolve_medium_short_link(short_url_id: str, timeout: int = 5) -> str:
     async with aiohttp.ClientSession() as session:
-        retry_client = RetryClient(client_session=session, raise_for_status=False, retry_options=retry_options)
+        retry_client = RetryClient(
+            client_session=session, raise_for_status=False, retry_options=retry_options
+        )
         request = await retry_client.get(
             f"https://rsci.app.link/{short_url_id}",
             timeout=timeout,
-            headers={"User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.116 Safari/537.36"},
+            headers={
+                "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.116 Safari/537.36"
+            },
             allow_redirects=False,
         )
         post_url = request.headers["Location"]
@@ -271,7 +276,10 @@ async def resolve_medium_url(url: str, timeout: int = 5) -> str:
         logger.debug("...but we get fucked up...")
         return False
 
-    elif parsed_netloc == "webcache.googleusercontent.com" and parsed_url.path.startswith("/search"):
+    elif (
+        parsed_netloc == "webcache.googleusercontent.com"
+        and parsed_url.path.startswith("/search")
+    ):
         logger.debug("URL seems like is Google Web Archive page link")
 
         parsed_query = parse_qs(parsed_url.query)
@@ -311,11 +319,15 @@ async def resolve_medium_url(url: str, timeout: int = 5) -> str:
         return False
 
     elif parsed_url.path.startswith("/m/global-identity-2"):
-        logger.debug("URL seems like is Medium redirect (tracking) link. Possibly from email subscription")
+        logger.debug(
+            "URL seems like is Medium redirect (tracking) link. Possibly from email subscription"
+        )
 
         parsed_query = parse_qs(parsed_url.query)
         if parsed_query.get("redirectUrl") and len(parsed_query["redirectUrl"]) == 1:
-            logger.debug("..and we got 'redirectUrl' passed param. Make resolve them....")
+            logger.debug(
+                "..and we got 'redirectUrl' passed param. Make resolve them...."
+            )
             post_url = parsed_query["redirectUrl"][0]
             return await resolve_medium_url(post_url)
 
@@ -323,13 +335,17 @@ async def resolve_medium_url(url: str, timeout: int = 5) -> str:
         return False
 
     elif parsed_netloc == "link.medium.com":
-        logger.debug("URL seems like is Medium short (SHORT) redirect (tracking) link. Make resolve them...")
+        logger.debug(
+            "URL seems like is Medium short (SHORT) redirect (tracking) link. Make resolve them..."
+        )
         short_url_id = parsed_url.path.removeprefix("/")
         post_url = await resolve_medium_short_link(short_url_id, timeout)
         return await resolve_medium_url(post_url)
 
     else:
-        logger.debug("We can't determine the URL type. Let's just try to extract the post_id...")
+        logger.debug(
+            "We can't determine the URL type. Let's just try to extract the post_id..."
+        )
         post_url = parsed_url.path.split("/")[-1]
         post_id = post_url.split("-")[-1]
 
@@ -342,7 +358,9 @@ async def resolve_medium_url(url: str, timeout: int = 5) -> str:
 
 async def resolve_medium_url_old(url: str, timeout: int = 5) -> str:
     async with aiohttp.ClientSession() as session:
-        retry_client = RetryClient(client_session=session, raise_for_status=False, retry_options=retry_options)
+        retry_client = RetryClient(
+            client_session=session, raise_for_status=False, retry_options=retry_options
+        )
         request = await retry_client.get(url, timeout=timeout)
         response = await request.text()
 
@@ -363,7 +381,9 @@ async def resolve_medium_url_old(url: str, timeout: int = 5) -> str:
 
 async def is_valid_medium_url_old(url: str, timeout: int = 5):
     async with aiohttp.ClientSession() as session:
-        retry_client = RetryClient(client_session=session, raise_for_status=False, retry_options=retry_options)
+        retry_client = RetryClient(
+            client_session=session, raise_for_status=False, retry_options=retry_options
+        )
 
         try:
             request = await retry_client.get(url, timeout=timeout)
