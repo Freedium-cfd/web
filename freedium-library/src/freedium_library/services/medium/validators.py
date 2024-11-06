@@ -32,6 +32,11 @@ class MediumServicePathValidator:
             path
         )
 
+    async def ais_valid(self, path: str) -> bool:
+        return await self.url_validator.ais_valid(
+            path
+        ) or await self.hash_validator.extract_hashes(path)
+
 
 class _MediumServiceURLValidator:
     def __init__(

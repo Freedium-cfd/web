@@ -1,5 +1,4 @@
 from abc import ABC, abstractmethod
-from typing import Any
 
 from dependency_injector.wiring import Provide
 
@@ -12,17 +11,17 @@ class BaseService(ABC):
         self.request = request
 
     @abstractmethod
-    def is_valid(self) -> bool:
+    def is_valid(self, path: str) -> bool:
         pass
 
     @abstractmethod
-    async def ais_valid(self) -> bool:
+    async def ais_valid(self, path: str) -> bool:
         pass
 
     @abstractmethod
-    def render(self) -> Any:
+    def render(self, path: str) -> str:
         pass
 
     @abstractmethod
-    async def arender(self) -> Any:
+    async def arender(self, path: str) -> str:
         pass

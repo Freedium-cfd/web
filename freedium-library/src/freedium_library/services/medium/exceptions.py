@@ -7,3 +7,11 @@ class MediumServiceError(BaseServiceError):
 
 class InvalidMediumServicePathError(MediumServiceError):
     pass
+
+
+class InvalidMediumServiceHashError(InvalidMediumServicePathError):
+    pass
+
+
+class InvalidMediumServiceUrlError(InvalidMediumServicePathError):
+    pass

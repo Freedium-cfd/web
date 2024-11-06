@@ -12,6 +12,7 @@ class TestMediumServiceHashesValidator:
     def validator(self) -> _MediumServiceHashesValidator:
         Container().wire(modules=[__name__])
         MediumContainer().wire(modules=[__name__])
+
         return _MediumServiceHashesValidator()
 
     def test_is_valid(self, validator: _MediumServiceHashesValidator):
@@ -81,6 +82,13 @@ class TestMediumServiceHashesValidator:
         assert validator.extract_hashes(
             "https://12ft.io/api/proxy?q=https%3A%2F%2Fednico.medium.com%2Fpkm-weekly-2024-05-26-6601694e4147"
         ) == ["6601694e4147"]
+
+        assert (
+            validator.extract_hashes(
+                "http://freedium.cfd/https://medium.com/funny-ai-quant/macroeconomic-regime-shifts-in-quant-trading-a-comprehensive-guide-2c250f243190T5BbIO-RCOq-9i3=s0-d-e1-ft"
+            )
+            == []
+        )
 
     def test_extract_multiple_hashes(self, validator: _MediumServiceHashesValidator):
         text = "first-515dd5a43948 second-c81e00f6320d"

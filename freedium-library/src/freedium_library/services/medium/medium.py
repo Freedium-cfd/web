@@ -9,6 +9,8 @@ from freedium_library.services.base import BaseService
 
 from .api import MediumApiService
 from .container import MediumContainer
+from .exceptions import InvalidMediumServicePathError
+from .models import MediumPostDataResponse
 from .validators import MediumServicePathValidator
 
 if TYPE_CHECKING:
@@ -27,7 +29,7 @@ class MediumService(BaseService):
         self.request = request
         self.api_service = api_service
         self.path_validator = path_validator
-        self._content: Optional[str] = None
+        _content: Optional[str] = None
 
     def is_valid(self, path: str) -> bool:
         return self.path_validator.is_valid(path)
@@ -36,24 +38,30 @@ class MediumService(BaseService):
         return await self.path_validator.ais_valid(path)
 
     def render(self, path: str) -> str:
-        if not self.is_valid():
-            raise ValueError("Invalid Medium URL")
-        if self._content is None:
-            response = self.request.get(self._url)
-            self._content = self._process_content(response.text)
-        return self._content
+        if not self.is_valid(path):
+            raise InvalidMediumServicePathError("Invalid Medium URL")
 
-    async def arender(self) -> str:
-        if not await self.ais_valid():
-            raise ValueError("Invalid Medium URL")
-        if self._content is None:
-            response = await self.request.aget(self._url)
-            self._content = self._process_content(response.text)
-        return self._content
+        response = self.request.get(self._url)
+        response_json = response.json()
+        _model = self._process_response(response_json)
+        _content = self._process_content(_model)
+        return _content
 
-    def _process_content(self, content: str) -> str:
-        return content
+    async def arender(self, path: str) -> str:
+        if not await self.ais_valid(path):
+            raise InvalidMediumServicePathError("Invalid Medium URL")
+
+        response = await self.request.aget(self._url)
+        _model = self._process_response(response.json())
+        _content = self._process_content(_model)
+        return _content
+
+    def _process_response(self, response: str) -> MediumPostDataResponse:
+        return MediumPostDataResponse.model_validate_json(response)
+
+    def _process_content(self, data: MediumPostDataResponse) -> str:
+        return "data"
 
     def set_url(self, url: str) -> None:
         self._url = url
-        self._content = None
+        _content = None
