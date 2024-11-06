@@ -14,7 +14,7 @@ from .models import MediumPostDataResponse
 from .validators import MediumServicePathValidator
 
 if TYPE_CHECKING:
-    from freedium_library.models.request import Request
+    from freedium_library.utils.http import Request
 
 
 class MediumService(BaseService):
@@ -31,27 +31,27 @@ class MediumService(BaseService):
         self.path_validator = path_validator
         _content: Optional[str] = None
 
-    def is_valid(self, path: str) -> bool:
+    def _is_valid(self, path: str) -> bool:
         return self.path_validator.is_valid(path)
 
-    async def ais_valid(self, path: str) -> bool:
+    async def _ais_valid(self, path: str) -> bool:
         return await self.path_validator.ais_valid(path)
 
-    def render(self, path: str) -> str:
-        if not self.is_valid(path):
+    def _render(self, path: str) -> str:
+        if not self._is_valid(path):
             raise InvalidMediumServicePathError("Invalid Medium URL")
 
-        response = self.request.get(self._url)
+        response = self.request.get(path)
         response_json = response.json()
         _model = self._process_response(response_json)
         _content = self._process_content(_model)
         return _content
 
-    async def arender(self, path: str) -> str:
-        if not await self.ais_valid(path):
+    async def _arender(self, path: str) -> str:
+        if not await self._ais_valid(path):
             raise InvalidMediumServicePathError("Invalid Medium URL")
 
-        response = await self.request.aget(self._url)
+        response = await self.request.aget(path)
         _model = self._process_response(response.json())
         _content = self._process_content(_model)
         return _content
@@ -61,7 +61,3 @@ class MediumService(BaseService):
 
     def _process_content(self, data: MediumPostDataResponse) -> str:
         return "data"
-
-    def set_url(self, url: str) -> None:
-        self._url = url
-        _content = None

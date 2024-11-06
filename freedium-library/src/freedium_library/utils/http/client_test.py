@@ -1,10 +1,9 @@
 from typing import Any, Literal, Optional
 
 import pytest
-from httpx import Response
 from pytest_httpx import HTTPXMock
 
-from freedium_library.models.request import Request, RequestConfig
+from freedium_library.utils.http.client import Request, RequestConfig
 
 
 @pytest.fixture
@@ -51,7 +50,7 @@ async def test_async_context_manager(
 
 @pytest.mark.asyncio
 async def test_async_without_context_manager(
-    httpx_mock: HTTPXMock, mock_response: Response
+    httpx_mock: HTTPXMock, mock_response: dict[str, Any]
 ):
     httpx_mock.add_response(**mock_response)
 
@@ -312,7 +311,10 @@ async def test_invalid_json_response_async(
 
 def test_closed_context_manager_access(httpx_mock: HTTPXMock):
     mock_response_json = {"test": "hahaha"}
-    httpx_mock.add_response(json=mock_response_json)
+    mock_headers = {"Content-Type": "application/json"}
+    httpx_mock.add_response(
+        json=mock_response_json, headers=mock_headers, status_code=200
+    )
 
     client = Request()
     with client:
@@ -320,7 +322,12 @@ def test_closed_context_manager_access(httpx_mock: HTTPXMock):
 
     response = client.get("https://api.example.com/data")
     assert response.is_closed is True
-    response.json() == mock_response_json
+    assert response.json() == mock_response_json
+    assert response.status_code == 200
+    assert response.headers["Content-Type"] == "application/json"
+    assert response.text == '{"test": "hahaha"}'
+    assert response.request.method == "GET"
+    assert str(response.request.url) == "https://api.example.com/data"
 
     response.close()
     assert response.is_closed
@@ -329,7 +336,10 @@ def test_closed_context_manager_access(httpx_mock: HTTPXMock):
 @pytest.mark.asyncio
 async def test_closed_context_manager_access_async(httpx_mock: HTTPXMock):
     mock_response_json = {"test": "hahaha"}
-    httpx_mock.add_response(json=mock_response_json)
+    mock_headers = {"Content-Type": "application/json"}
+    httpx_mock.add_response(
+        json=mock_response_json, headers=mock_headers, status_code=200
+    )
 
     client = Request()
     with client:
@@ -337,7 +347,12 @@ async def test_closed_context_manager_access_async(httpx_mock: HTTPXMock):
 
     response = await client.aget("https://api.example.com/data")
     assert response.is_closed is True
-    response.json() == mock_response_json
+    assert response.json() == mock_response_json
+    assert response.status_code == 200
+    assert response.headers["Content-Type"] == "application/json"
+    assert response.text == '{"test": "hahaha"}'
+    assert response.request.method == "GET"
+    assert str(response.request.url) == "https://api.example.com/data"
 
-    response.aclose()
+    await response.aclose()
     assert response.is_closed

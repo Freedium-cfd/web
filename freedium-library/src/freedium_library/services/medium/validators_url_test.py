@@ -2,12 +2,12 @@ from unittest.mock import AsyncMock, Mock
 
 import pytest
 
-from freedium_library.models.request import Request
 from freedium_library.services.medium.api import MediumApiService
 from freedium_library.services.medium.validators import (
     _MediumServiceHashesValidator,  # type: ignore
     _MediumServiceURLValidator,  # type: ignore
 )
+from freedium_library.utils.http import Request
 
 
 @pytest.fixture

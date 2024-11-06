@@ -8,10 +8,10 @@ from dependency_injector.wiring import Provide
 from loguru import logger
 
 from freedium_library.container import Container
-from freedium_library.utils import URLProcessor
+from freedium_library.utils.http import URLProcessor
 
 if TYPE_CHECKING:
-    from freedium_library.models.request import Request
+    from freedium_library.utils.http import Request
 
     from .api import MediumApiService
 
@@ -49,7 +49,7 @@ class _MediumServiceURLValidator:
         self.request = request
         self.hash_validator = hash_validator
 
-    def is_valid(self, url: str) -> bool: ...
+    def is_valid(self, url: str | URLProcessor) -> bool: ...
 
     def _get_short_link_request_params(
         self, short_url_id: str

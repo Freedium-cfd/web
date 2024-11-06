@@ -1,6 +1,6 @@
 from dependency_injector import containers, providers
 
-from freedium_library.models.request import Request
+from freedium_library.utils.http import Request
 
 
 class Container(containers.DeclarativeContainer):

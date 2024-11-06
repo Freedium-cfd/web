@@ -1,6 +1,6 @@
 import pytest
 
-from freedium_library.utils import URLProcessor
+from freedium_library.utils.http import URLProcessor
 
 
 class TestUnWwwify:
