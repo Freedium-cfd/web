@@ -1,10 +1,15 @@
+from __future__ import annotations
+
 from abc import ABC, abstractmethod
+from typing import TYPE_CHECKING
 
 from dependency_injector.wiring import Provide
 from loguru import logger
 
 from freedium_library.container import Container
-from freedium_library.utils.http import Request
+
+if TYPE_CHECKING:
+    from freedium_library.utils.http import Request
 
 
 class BaseService(ABC):

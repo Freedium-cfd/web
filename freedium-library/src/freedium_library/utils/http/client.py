@@ -1,4 +1,3 @@
-import asyncio
 import warnings
 from dataclasses import dataclass
 from typing import Any, Dict, Optional
@@ -68,7 +67,7 @@ class Request:
 
     def __del__(self):
         self._client.close()
-        asyncio.run(self._async_client.aclose())
+        # asyncio.run(self._async_client.aclose()) # TODO: doesnt works
 
     def _check_context_manager(self):
         if not self._in_context_manager:

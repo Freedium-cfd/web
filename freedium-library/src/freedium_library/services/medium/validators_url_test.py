@@ -3,6 +3,7 @@ from unittest.mock import AsyncMock, Mock
 import pytest
 
 from freedium_library.services.medium.api import MediumApiService
+from freedium_library.services.medium.config import MediumConfig
 from freedium_library.services.medium.validators import (
     _MediumServiceHashesValidator,  # type: ignore
     _MediumServiceURLValidator,  # type: ignore
@@ -117,7 +118,8 @@ async def test_resolve_medium_url_with_real_short_link(
 @pytest.mark.asyncio
 async def test_resolve_medium_url_with_real_short_link_integration() -> None:
     request = Request()
-    api_service = MediumApiService(request=request)
+    config = MediumConfig()
+    api_service = MediumApiService(request=request, config=config)
     hash_validator = _MediumServiceHashesValidator()
     url_validator = _MediumServiceURLValidator(api_service, hash_validator, request)
 

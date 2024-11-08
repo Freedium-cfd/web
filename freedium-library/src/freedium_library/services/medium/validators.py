@@ -1,10 +1,12 @@
 from __future__ import annotations
 
 import re
+import string
 from typing import TYPE_CHECKING, Any, Optional
 from urllib.parse import parse_qs, urlparse
 
 from dependency_injector.wiring import Provide
+from deprecation import deprecated
 from loguru import logger
 
 from freedium_library.container import Container
@@ -65,7 +67,7 @@ class _MediumServiceURLValidator:
         parsed_url = urlparse(url)
         parsed_netloc = URLProcessor.un_wwwify(parsed_url.netloc)
 
-        if parsed_url.path.startswith("/p/"):
+        if parsed_url.path.startswith("/p/"):  # TODO: add more information
             logger.debug("URL is Medium 'mobile' link")
             post_id = parsed_url.path.rsplit("/p/")[1]
 
@@ -83,7 +85,7 @@ class _MediumServiceURLValidator:
         elif (
             parsed_netloc == "webcache.googleusercontent.com"
             and parsed_url.path.startswith("/search")
-        ):
+        ):  # TODO: is'n it deprecated? https://www.seozoom.com/google-cache/
             logger.debug("URL seems like is Google Web Archive page link")
 
             parsed_query = parse_qs(parsed_url.query)
@@ -174,8 +176,31 @@ class _MediumServiceURLValidator:
 
 
 class _MediumServiceHashesValidator:
-    def is_valid(self, hash: str) -> bool:
-        return bool(self.extract_hashes(hash))
+    VALID_ID_CHARS = set(string.ascii_letters + string.digits)
+
+    def is_valid(self, path: str) -> bool:
+        return bool(self.extract_hashes(path))
+
+    @deprecated(details="Use is_valid instead")
+    def is_valid_old(self, hex_string: str) -> bool:
+        # Check if the string is a valid hexadecimal string
+        for char in hex_string:
+            if char not in self.VALID_ID_CHARS:
+                return False
+
+        # Unfortunately, this logic doesn't works correctly sometimes, because
+        # there is some unique URLs that are has only digits, like this:
+        # https://valeman.medium.com/python-vs-r-for-time-series-forecasting-395390432598
+
+        # Check if the string contains only lowercase hexadecimal characters
+        # if not hex_string.islower():
+        #     return False
+
+        # Check if the length of the string is correct for a hexadecimal string (e.g., 10, 11 or 12 characters)
+        if len(hex_string) not in range(8, 12 + 1):
+            return False
+
+        return True
 
     def extract_hashes(self, path: str) -> list[str]:
         logger.debug(f"Extracting hashes from path: {path}")

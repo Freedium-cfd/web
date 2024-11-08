@@ -21,10 +21,8 @@ class MediumService(BaseService):
     def __init__(
         self,
         request: Request = Provide[Container.request],
-        api_service: MediumApiService = Provide[MediumContainer.medium_api_service],
-        path_validator: MediumServicePathValidator = Provide[
-            MediumContainer.medium_path_validator
-        ],
+        api_service: MediumApiService = Provide[MediumContainer.api_service],
+        path_validator: MediumServicePathValidator = Provide[MediumContainer.validator],
     ):
         self.request = request
         self.api_service = api_service

@@ -7,6 +7,10 @@ authors = [
 ]
 dependencies = [
     "litestar>=2.12.1",
+    "deprecation>=2.1.0",
+    "orjson>=3.10.11",
+    "pendulum>=3.0.0",
+    "ujson>=5.10.0",
 ]
 requires-python = "==3.12.*"
 readme = "README.md"
@@ -21,4 +25,7 @@ dev = [
     "pytest-asyncio>=0.24.0",
     "pytest-httpx>=0.33.0",
     "pytest-xdist[psutil]>=3.6.1",
+    "orjson>=3.10.11",
+    "pytest-integration>=0.2.3",
+    "pre-commit>=4.0.1",
 ]
