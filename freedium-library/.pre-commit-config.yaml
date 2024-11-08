@@ -13,3 +13,14 @@ repos:
       - id: check-added-large-files
       - id: check-ast
       - id: check-merge-conflict
+
+  # - repo: local
+  #   hooks:
+  #     - id: pytest-check
+  #       name: pytest-check
+  #       entry: bash -c 'cd freedium-library && pdm run pytest'
+  #       language: system
+  #       types: [python]
+  #       pass_filenames: false
+  #       always_run: true
+  #       verbose: true
