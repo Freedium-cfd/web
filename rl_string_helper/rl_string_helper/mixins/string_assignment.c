@@ -1511,7 +1511,7 @@ struct __pyx_obj_16rl_string_helper_6mixins_17string_assignment_StringAssignment
 
 /* "rl_string_helper/mixins/string_assignment.pyx":3
  * # cython: language_level=3str
- * 
+ *
  * cdef class StringAssignmentMixin:             # <<<<<<<<<<<<<<
  *     def __cinit__(self, str string):
  *         self.string = str(string) if isinstance(string, StringAssignmentMixin) else string
@@ -2652,7 +2652,7 @@ static int __pyx_m_traverse(PyObject *m, visitproc visit, void *arg) {
 /* #### Code section: module_code ### */
 
 /* "rl_string_helper/mixins/string_assignment.pyx":4
- * 
+ *
  * cdef class StringAssignmentMixin:
  *     def __cinit__(self, str string):             # <<<<<<<<<<<<<<
  *         self.string = str(string) if isinstance(string, StringAssignmentMixin) else string
@@ -2759,9 +2759,9 @@ static int __pyx_pf_16rl_string_helper_6mixins_17string_assignment_21StringAssig
  *     def __cinit__(self, str string):
  *         self.string = str(string) if isinstance(string, StringAssignmentMixin) else string             # <<<<<<<<<<<<<<
  *         self.string_list = list(self.string)
- * 
+ *
  */
-  __pyx_t_2 = __Pyx_TypeCheck(__pyx_v_string, __pyx_ptype_16rl_string_helper_6mixins_17string_assignment_StringAssignmentMixin); 
+  __pyx_t_2 = __Pyx_TypeCheck(__pyx_v_string, __pyx_ptype_16rl_string_helper_6mixins_17string_assignment_StringAssignmentMixin);
   if (__pyx_t_2) {
     __pyx_t_3 = __Pyx_PyStr_Str(__pyx_v_string); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 5, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
@@ -2782,7 +2782,7 @@ static int __pyx_pf_16rl_string_helper_6mixins_17string_assignment_21StringAssig
  *     def __cinit__(self, str string):
  *         self.string = str(string) if isinstance(string, StringAssignmentMixin) else string
  *         self.string_list = list(self.string)             # <<<<<<<<<<<<<<
- * 
+ *
  *     cdef void __render_string(self):
  */
   __pyx_t_1 = PySequence_List(__pyx_v_self->string); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 6, __pyx_L1_error)
@@ -2794,7 +2794,7 @@ static int __pyx_pf_16rl_string_helper_6mixins_17string_assignment_21StringAssig
   __pyx_t_1 = 0;
 
   /* "rl_string_helper/mixins/string_assignment.pyx":4
- * 
+ *
  * cdef class StringAssignmentMixin:
  *     def __cinit__(self, str string):             # <<<<<<<<<<<<<<
  *         self.string = str(string) if isinstance(string, StringAssignmentMixin) else string
@@ -2816,10 +2816,10 @@ static int __pyx_pf_16rl_string_helper_6mixins_17string_assignment_21StringAssig
 
 /* "rl_string_helper/mixins/string_assignment.pyx":8
  *         self.string_list = list(self.string)
- * 
+ *
  *     cdef void __render_string(self):             # <<<<<<<<<<<<<<
  *         self.string = "".join(self.string_list)
- * 
+ *
  */
 
 static void __pyx_f_16rl_string_helper_6mixins_17string_assignment_21StringAssignmentMixin__StringAssignmentMixin__render_string(struct __pyx_obj_16rl_string_helper_6mixins_17string_assignment_StringAssignmentMixin *__pyx_v_self) {
@@ -2832,10 +2832,10 @@ static void __pyx_f_16rl_string_helper_6mixins_17string_assignment_21StringAssig
   __Pyx_RefNannySetupContext("_StringAssignmentMixin__render_string", 1);
 
   /* "rl_string_helper/mixins/string_assignment.pyx":9
- * 
+ *
  *     cdef void __render_string(self):
  *         self.string = "".join(self.string_list)             # <<<<<<<<<<<<<<
- * 
+ *
  *     def __len__(self):
  */
   __pyx_t_1 = __pyx_v_self->string_list;
@@ -2852,10 +2852,10 @@ static void __pyx_f_16rl_string_helper_6mixins_17string_assignment_21StringAssig
 
   /* "rl_string_helper/mixins/string_assignment.pyx":8
  *         self.string_list = list(self.string)
- * 
+ *
  *     cdef void __render_string(self):             # <<<<<<<<<<<<<<
  *         self.string = "".join(self.string_list)
- * 
+ *
  */
 
   /* function exit code */
@@ -2870,10 +2870,10 @@ static void __pyx_f_16rl_string_helper_6mixins_17string_assignment_21StringAssig
 
 /* "rl_string_helper/mixins/string_assignment.pyx":11
  *         self.string = "".join(self.string_list)
- * 
+ *
  *     def __len__(self):             # <<<<<<<<<<<<<<
  *         return len(self.string_list)
- * 
+ *
  */
 
 /* Python wrapper */
@@ -2902,10 +2902,10 @@ static Py_ssize_t __pyx_pf_16rl_string_helper_6mixins_17string_assignment_21Stri
   __Pyx_RefNannySetupContext("__len__", 1);
 
   /* "rl_string_helper/mixins/string_assignment.pyx":12
- * 
+ *
  *     def __len__(self):
  *         return len(self.string_list)             # <<<<<<<<<<<<<<
- * 
+ *
  *     cpdef StringAssignmentMixin pop(self, int key):
  */
   __pyx_t_1 = __pyx_v_self->string_list;
@@ -2921,10 +2921,10 @@ static Py_ssize_t __pyx_pf_16rl_string_helper_6mixins_17string_assignment_21Stri
 
   /* "rl_string_helper/mixins/string_assignment.pyx":11
  *         self.string = "".join(self.string_list)
- * 
+ *
  *     def __len__(self):             # <<<<<<<<<<<<<<
  *         return len(self.string_list)
- * 
+ *
  */
 
   /* function exit code */
@@ -2939,13 +2939,13 @@ static Py_ssize_t __pyx_pf_16rl_string_helper_6mixins_17string_assignment_21Stri
 
 /* "rl_string_helper/mixins/string_assignment.pyx":14
  *         return len(self.string_list)
- * 
+ *
  *     cpdef StringAssignmentMixin pop(self, int key):             # <<<<<<<<<<<<<<
  *         self.string_list.pop(key)
  *         return self
  */
 
-static PyObject *__pyx_pw_16rl_string_helper_6mixins_17string_assignment_21StringAssignmentMixin_5pop(PyObject *__pyx_v_self, 
+static PyObject *__pyx_pw_16rl_string_helper_6mixins_17string_assignment_21StringAssignmentMixin_5pop(PyObject *__pyx_v_self,
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 #else
@@ -3024,11 +3024,11 @@ static struct __pyx_obj_16rl_string_helper_6mixins_17string_assignment_StringAss
   }
 
   /* "rl_string_helper/mixins/string_assignment.pyx":15
- * 
+ *
  *     cpdef StringAssignmentMixin pop(self, int key):
  *         self.string_list.pop(key)             # <<<<<<<<<<<<<<
  *         return self
- * 
+ *
  */
   if (unlikely(__pyx_v_self->string_list == Py_None)) {
     PyErr_Format(PyExc_AttributeError, "'NoneType' object has no attribute '%.30s'", "pop");
@@ -3042,7 +3042,7 @@ static struct __pyx_obj_16rl_string_helper_6mixins_17string_assignment_StringAss
  *     cpdef StringAssignmentMixin pop(self, int key):
  *         self.string_list.pop(key)
  *         return self             # <<<<<<<<<<<<<<
- * 
+ *
  *     def encode(self, str encoding):
  */
   __Pyx_XDECREF((PyObject *)__pyx_r);
@@ -3052,7 +3052,7 @@ static struct __pyx_obj_16rl_string_helper_6mixins_17string_assignment_StringAss
 
   /* "rl_string_helper/mixins/string_assignment.pyx":14
  *         return len(self.string_list)
- * 
+ *
  *     cpdef StringAssignmentMixin pop(self, int key):             # <<<<<<<<<<<<<<
  *         self.string_list.pop(key)
  *         return self
@@ -3074,7 +3074,7 @@ static struct __pyx_obj_16rl_string_helper_6mixins_17string_assignment_StringAss
 }
 
 /* Python wrapper */
-static PyObject *__pyx_pw_16rl_string_helper_6mixins_17string_assignment_21StringAssignmentMixin_5pop(PyObject *__pyx_v_self, 
+static PyObject *__pyx_pw_16rl_string_helper_6mixins_17string_assignment_21StringAssignmentMixin_5pop(PyObject *__pyx_v_self,
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 #else
@@ -3082,7 +3082,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
 #endif
 ); /*proto*/
 static PyMethodDef __pyx_mdef_16rl_string_helper_6mixins_17string_assignment_21StringAssignmentMixin_5pop = {"pop", (PyCFunction)(void*)(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_16rl_string_helper_6mixins_17string_assignment_21StringAssignmentMixin_5pop, __Pyx_METH_FASTCALL|METH_KEYWORDS, 0};
-static PyObject *__pyx_pw_16rl_string_helper_6mixins_17string_assignment_21StringAssignmentMixin_5pop(PyObject *__pyx_v_self, 
+static PyObject *__pyx_pw_16rl_string_helper_6mixins_17string_assignment_21StringAssignmentMixin_5pop(PyObject *__pyx_v_self,
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 #else
@@ -3197,14 +3197,14 @@ static PyObject *__pyx_pf_16rl_string_helper_6mixins_17string_assignment_21Strin
 
 /* "rl_string_helper/mixins/string_assignment.pyx":18
  *         return self
- * 
+ *
  *     def encode(self, str encoding):             # <<<<<<<<<<<<<<
  *         self.__render_string()
  *         return self.string.encode(encoding, "surrogatepass")
  */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_16rl_string_helper_6mixins_17string_assignment_21StringAssignmentMixin_7encode(PyObject *__pyx_v_self, 
+static PyObject *__pyx_pw_16rl_string_helper_6mixins_17string_assignment_21StringAssignmentMixin_7encode(PyObject *__pyx_v_self,
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 #else
@@ -3212,7 +3212,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
 #endif
 ); /*proto*/
 static PyMethodDef __pyx_mdef_16rl_string_helper_6mixins_17string_assignment_21StringAssignmentMixin_7encode = {"encode", (PyCFunction)(void*)(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_16rl_string_helper_6mixins_17string_assignment_21StringAssignmentMixin_7encode, __Pyx_METH_FASTCALL|METH_KEYWORDS, 0};
-static PyObject *__pyx_pw_16rl_string_helper_6mixins_17string_assignment_21StringAssignmentMixin_7encode(PyObject *__pyx_v_self, 
+static PyObject *__pyx_pw_16rl_string_helper_6mixins_17string_assignment_21StringAssignmentMixin_7encode(PyObject *__pyx_v_self,
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 #else
@@ -3317,11 +3317,11 @@ static PyObject *__pyx_pf_16rl_string_helper_6mixins_17string_assignment_21Strin
   __Pyx_RefNannySetupContext("encode", 1);
 
   /* "rl_string_helper/mixins/string_assignment.pyx":19
- * 
+ *
  *     def encode(self, str encoding):
  *         self.__render_string()             # <<<<<<<<<<<<<<
  *         return self.string.encode(encoding, "surrogatepass")
- * 
+ *
  */
   ((struct __pyx_vtabstruct_16rl_string_helper_6mixins_17string_assignment_StringAssignmentMixin *)__pyx_v_self->__pyx_vtab)->_StringAssignmentMixin__render_string(__pyx_v_self); if (unlikely(PyErr_Occurred())) __PYX_ERR(1, 19, __pyx_L1_error)
 
@@ -3329,7 +3329,7 @@ static PyObject *__pyx_pf_16rl_string_helper_6mixins_17string_assignment_21Strin
  *     def encode(self, str encoding):
  *         self.__render_string()
  *         return self.string.encode(encoding, "surrogatepass")             # <<<<<<<<<<<<<<
- * 
+ *
  *     cpdef StringAssignmentMixin insert(self, int key, str value):
  */
   __Pyx_XDECREF(__pyx_r);
@@ -3363,7 +3363,7 @@ static PyObject *__pyx_pf_16rl_string_helper_6mixins_17string_assignment_21Strin
 
   /* "rl_string_helper/mixins/string_assignment.pyx":18
  *         return self
- * 
+ *
  *     def encode(self, str encoding):             # <<<<<<<<<<<<<<
  *         self.__render_string()
  *         return self.string.encode(encoding, "surrogatepass")
@@ -3384,13 +3384,13 @@ static PyObject *__pyx_pf_16rl_string_helper_6mixins_17string_assignment_21Strin
 
 /* "rl_string_helper/mixins/string_assignment.pyx":22
  *         return self.string.encode(encoding, "surrogatepass")
- * 
+ *
  *     cpdef StringAssignmentMixin insert(self, int key, str value):             # <<<<<<<<<<<<<<
  *         self.string_list.insert(key, value)
  *         return self
  */
 
-static PyObject *__pyx_pw_16rl_string_helper_6mixins_17string_assignment_21StringAssignmentMixin_9insert(PyObject *__pyx_v_self, 
+static PyObject *__pyx_pw_16rl_string_helper_6mixins_17string_assignment_21StringAssignmentMixin_9insert(PyObject *__pyx_v_self,
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 #else
@@ -3470,11 +3470,11 @@ static struct __pyx_obj_16rl_string_helper_6mixins_17string_assignment_StringAss
   }
 
   /* "rl_string_helper/mixins/string_assignment.pyx":23
- * 
+ *
  *     cpdef StringAssignmentMixin insert(self, int key, str value):
  *         self.string_list.insert(key, value)             # <<<<<<<<<<<<<<
  *         return self
- * 
+ *
  */
   if (unlikely(__pyx_v_self->string_list == Py_None)) {
     PyErr_Format(PyExc_AttributeError, "'NoneType' object has no attribute '%.30s'", "insert");
@@ -3486,7 +3486,7 @@ static struct __pyx_obj_16rl_string_helper_6mixins_17string_assignment_StringAss
  *     cpdef StringAssignmentMixin insert(self, int key, str value):
  *         self.string_list.insert(key, value)
  *         return self             # <<<<<<<<<<<<<<
- * 
+ *
  *     def __setitem__(self, object key, str value):
  */
   __Pyx_XDECREF((PyObject *)__pyx_r);
@@ -3496,7 +3496,7 @@ static struct __pyx_obj_16rl_string_helper_6mixins_17string_assignment_StringAss
 
   /* "rl_string_helper/mixins/string_assignment.pyx":22
  *         return self.string.encode(encoding, "surrogatepass")
- * 
+ *
  *     cpdef StringAssignmentMixin insert(self, int key, str value):             # <<<<<<<<<<<<<<
  *         self.string_list.insert(key, value)
  *         return self
@@ -3518,7 +3518,7 @@ static struct __pyx_obj_16rl_string_helper_6mixins_17string_assignment_StringAss
 }
 
 /* Python wrapper */
-static PyObject *__pyx_pw_16rl_string_helper_6mixins_17string_assignment_21StringAssignmentMixin_9insert(PyObject *__pyx_v_self, 
+static PyObject *__pyx_pw_16rl_string_helper_6mixins_17string_assignment_21StringAssignmentMixin_9insert(PyObject *__pyx_v_self,
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 #else
@@ -3526,7 +3526,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
 #endif
 ); /*proto*/
 static PyMethodDef __pyx_mdef_16rl_string_helper_6mixins_17string_assignment_21StringAssignmentMixin_9insert = {"insert", (PyCFunction)(void*)(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_16rl_string_helper_6mixins_17string_assignment_21StringAssignmentMixin_9insert, __Pyx_METH_FASTCALL|METH_KEYWORDS, 0};
-static PyObject *__pyx_pw_16rl_string_helper_6mixins_17string_assignment_21StringAssignmentMixin_9insert(PyObject *__pyx_v_self, 
+static PyObject *__pyx_pw_16rl_string_helper_6mixins_17string_assignment_21StringAssignmentMixin_9insert(PyObject *__pyx_v_self,
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 #else
@@ -3661,7 +3661,7 @@ static PyObject *__pyx_pf_16rl_string_helper_6mixins_17string_assignment_21Strin
 
 /* "rl_string_helper/mixins/string_assignment.pyx":26
  *         return self
- * 
+ *
  *     def __setitem__(self, object key, str value):             # <<<<<<<<<<<<<<
  *         self.string_list[key] = value
  *         # return self
@@ -3697,11 +3697,11 @@ static int __pyx_pf_16rl_string_helper_6mixins_17string_assignment_21StringAssig
   int __pyx_clineno = 0;
 
   /* "rl_string_helper/mixins/string_assignment.pyx":27
- * 
+ *
  *     def __setitem__(self, object key, str value):
  *         self.string_list[key] = value             # <<<<<<<<<<<<<<
  *         # return self
- * 
+ *
  */
   if (unlikely(__pyx_v_self->string_list == Py_None)) {
     PyErr_SetString(PyExc_TypeError, "'NoneType' object is not subscriptable");
@@ -3711,7 +3711,7 @@ static int __pyx_pf_16rl_string_helper_6mixins_17string_assignment_21StringAssig
 
   /* "rl_string_helper/mixins/string_assignment.pyx":26
  *         return self
- * 
+ *
  *     def __setitem__(self, object key, str value):             # <<<<<<<<<<<<<<
  *         self.string_list[key] = value
  *         # return self
@@ -3729,7 +3729,7 @@ static int __pyx_pf_16rl_string_helper_6mixins_17string_assignment_21StringAssig
 
 /* "rl_string_helper/mixins/string_assignment.pyx":30
  *         # return self
- * 
+ *
  *     def __getitem__(self, object key):             # <<<<<<<<<<<<<<
  *         if isinstance(key, slice):
  *             return "".join(self.string_list[key])
@@ -3762,13 +3762,13 @@ static PyObject *__pyx_pf_16rl_string_helper_6mixins_17string_assignment_21Strin
   __Pyx_RefNannySetupContext("__getitem__", 1);
 
   /* "rl_string_helper/mixins/string_assignment.pyx":31
- * 
+ *
  *     def __getitem__(self, object key):
  *         if isinstance(key, slice):             # <<<<<<<<<<<<<<
  *             return "".join(self.string_list[key])
  *         else:
  */
-  __pyx_t_1 = PySlice_Check(__pyx_v_key); 
+  __pyx_t_1 = PySlice_Check(__pyx_v_key);
   if (__pyx_t_1) {
 
     /* "rl_string_helper/mixins/string_assignment.pyx":32
@@ -3793,7 +3793,7 @@ static PyObject *__pyx_pf_16rl_string_helper_6mixins_17string_assignment_21Strin
     goto __pyx_L0;
 
     /* "rl_string_helper/mixins/string_assignment.pyx":31
- * 
+ *
  *     def __getitem__(self, object key):
  *         if isinstance(key, slice):             # <<<<<<<<<<<<<<
  *             return "".join(self.string_list[key])
@@ -3805,7 +3805,7 @@ static PyObject *__pyx_pf_16rl_string_helper_6mixins_17string_assignment_21Strin
  *             return "".join(self.string_list[key])
  *         else:
  *             return self.string_list[key]             # <<<<<<<<<<<<<<
- * 
+ *
  *     def __str__(self):
  */
   /*else*/ {
@@ -3823,7 +3823,7 @@ static PyObject *__pyx_pf_16rl_string_helper_6mixins_17string_assignment_21Strin
 
   /* "rl_string_helper/mixins/string_assignment.pyx":30
  *         # return self
- * 
+ *
  *     def __getitem__(self, object key):             # <<<<<<<<<<<<<<
  *         if isinstance(key, slice):
  *             return "".join(self.string_list[key])
@@ -3843,7 +3843,7 @@ static PyObject *__pyx_pf_16rl_string_helper_6mixins_17string_assignment_21Strin
 
 /* "rl_string_helper/mixins/string_assignment.pyx":36
  *             return self.string_list[key]
- * 
+ *
  *     def __str__(self):             # <<<<<<<<<<<<<<
  *         self.__render_string()
  *         return self.string
@@ -3873,11 +3873,11 @@ static PyObject *__pyx_pf_16rl_string_helper_6mixins_17string_assignment_21Strin
   __Pyx_RefNannySetupContext("__str__", 1);
 
   /* "rl_string_helper/mixins/string_assignment.pyx":37
- * 
+ *
  *     def __str__(self):
  *         self.__render_string()             # <<<<<<<<<<<<<<
  *         return self.string
- * 
+ *
  */
   ((struct __pyx_vtabstruct_16rl_string_helper_6mixins_17string_assignment_StringAssignmentMixin *)__pyx_v_self->__pyx_vtab)->_StringAssignmentMixin__render_string(__pyx_v_self); if (unlikely(PyErr_Occurred())) __PYX_ERR(1, 37, __pyx_L1_error)
 
@@ -3885,7 +3885,7 @@ static PyObject *__pyx_pf_16rl_string_helper_6mixins_17string_assignment_21Strin
  *     def __str__(self):
  *         self.__render_string()
  *         return self.string             # <<<<<<<<<<<<<<
- * 
+ *
  *     __repr__ = __str__
  */
   __Pyx_XDECREF(__pyx_r);
@@ -3895,7 +3895,7 @@ static PyObject *__pyx_pf_16rl_string_helper_6mixins_17string_assignment_21Strin
 
   /* "rl_string_helper/mixins/string_assignment.pyx":36
  *             return self.string_list[key]
- * 
+ *
  *     def __str__(self):             # <<<<<<<<<<<<<<
  *         self.__render_string()
  *         return self.string
@@ -3918,7 +3918,7 @@ static PyObject *__pyx_pf_16rl_string_helper_6mixins_17string_assignment_21Strin
  */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_16rl_string_helper_6mixins_17string_assignment_21StringAssignmentMixin_17__reduce_cython__(PyObject *__pyx_v_self, 
+static PyObject *__pyx_pw_16rl_string_helper_6mixins_17string_assignment_21StringAssignmentMixin_17__reduce_cython__(PyObject *__pyx_v_self,
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 #else
@@ -3926,7 +3926,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
 #endif
 ); /*proto*/
 static PyMethodDef __pyx_mdef_16rl_string_helper_6mixins_17string_assignment_21StringAssignmentMixin_17__reduce_cython__ = {"__reduce_cython__", (PyCFunction)(void*)(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_16rl_string_helper_6mixins_17string_assignment_21StringAssignmentMixin_17__reduce_cython__, __Pyx_METH_FASTCALL|METH_KEYWORDS, 0};
-static PyObject *__pyx_pw_16rl_string_helper_6mixins_17string_assignment_21StringAssignmentMixin_17__reduce_cython__(PyObject *__pyx_v_self, 
+static PyObject *__pyx_pw_16rl_string_helper_6mixins_17string_assignment_21StringAssignmentMixin_17__reduce_cython__(PyObject *__pyx_v_self,
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 #else
@@ -3998,7 +3998,7 @@ static PyObject *__pyx_pf_16rl_string_helper_6mixins_17string_assignment_21Strin
  */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_16rl_string_helper_6mixins_17string_assignment_21StringAssignmentMixin_19__setstate_cython__(PyObject *__pyx_v_self, 
+static PyObject *__pyx_pw_16rl_string_helper_6mixins_17string_assignment_21StringAssignmentMixin_19__setstate_cython__(PyObject *__pyx_v_self,
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 #else
@@ -4006,7 +4006,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
 #endif
 ); /*proto*/
 static PyMethodDef __pyx_mdef_16rl_string_helper_6mixins_17string_assignment_21StringAssignmentMixin_19__setstate_cython__ = {"__setstate_cython__", (PyCFunction)(void*)(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_16rl_string_helper_6mixins_17string_assignment_21StringAssignmentMixin_19__setstate_cython__, __Pyx_METH_FASTCALL|METH_KEYWORDS, 0};
-static PyObject *__pyx_pw_16rl_string_helper_6mixins_17string_assignment_21StringAssignmentMixin_19__setstate_cython__(PyObject *__pyx_v_self, 
+static PyObject *__pyx_pw_16rl_string_helper_6mixins_17string_assignment_21StringAssignmentMixin_19__setstate_cython__(PyObject *__pyx_v_self,
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 #else
@@ -4425,7 +4425,7 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
 
   /* "rl_string_helper/mixins/string_assignment.pyx":14
  *         return len(self.string_list)
- * 
+ *
  *     cpdef StringAssignmentMixin pop(self, int key):             # <<<<<<<<<<<<<<
  *         self.string_list.pop(key)
  *         return self
@@ -4437,7 +4437,7 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
 
   /* "rl_string_helper/mixins/string_assignment.pyx":18
  *         return self
- * 
+ *
  *     def encode(self, str encoding):             # <<<<<<<<<<<<<<
  *         self.__render_string()
  *         return self.string.encode(encoding, "surrogatepass")
@@ -4449,7 +4449,7 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
 
   /* "rl_string_helper/mixins/string_assignment.pyx":22
  *         return self.string.encode(encoding, "surrogatepass")
- * 
+ *
  *     cpdef StringAssignmentMixin insert(self, int key, str value):             # <<<<<<<<<<<<<<
  *         self.string_list.insert(key, value)
  *         return self
@@ -4881,7 +4881,7 @@ if (!__Pyx_RefNanny) {
 
   /* "rl_string_helper/mixins/string_assignment.pyx":14
  *         return len(self.string_list)
- * 
+ *
  *     cpdef StringAssignmentMixin pop(self, int key):             # <<<<<<<<<<<<<<
  *         self.string_list.pop(key)
  *         return self
@@ -4894,7 +4894,7 @@ if (!__Pyx_RefNanny) {
 
   /* "rl_string_helper/mixins/string_assignment.pyx":18
  *         return self
- * 
+ *
  *     def encode(self, str encoding):             # <<<<<<<<<<<<<<
  *         self.__render_string()
  *         return self.string.encode(encoding, "surrogatepass")
@@ -4907,7 +4907,7 @@ if (!__Pyx_RefNanny) {
 
   /* "rl_string_helper/mixins/string_assignment.pyx":22
  *         return self.string.encode(encoding, "surrogatepass")
- * 
+ *
  *     cpdef StringAssignmentMixin insert(self, int key, str value):             # <<<<<<<<<<<<<<
  *         self.string_list.insert(key, value)
  *         return self
@@ -4920,9 +4920,9 @@ if (!__Pyx_RefNanny) {
 
   /* "rl_string_helper/mixins/string_assignment.pyx":40
  *         return self.string
- * 
+ *
  *     __repr__ = __str__             # <<<<<<<<<<<<<<
- * 
+ *
  * # Make the class available to Python
  */
   __Pyx_GetNameInClass(__pyx_t_2, (PyObject *)__pyx_ptype_16rl_string_helper_6mixins_17string_assignment_StringAssignmentMixin, __pyx_n_s_str); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 40, __pyx_L1_error)
@@ -4953,7 +4953,7 @@ if (!__Pyx_RefNanny) {
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
   /* "rl_string_helper/mixins/string_assignment.pyx":43
- * 
+ *
  * # Make the class available to Python
  * StringAssignmentMixin_py = StringAssignmentMixin             # <<<<<<<<<<<<<<
  */
@@ -4961,7 +4961,7 @@ if (!__Pyx_RefNanny) {
 
   /* "rl_string_helper/mixins/string_assignment.pyx":1
  * # cython: language_level=3str             # <<<<<<<<<<<<<<
- * 
+ *
  * cdef class StringAssignmentMixin:
  */
   __pyx_t_2 = __Pyx_PyDict_NewPresized(0); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 1, __pyx_L1_error)

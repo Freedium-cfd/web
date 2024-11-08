@@ -14,7 +14,7 @@ In JavaScript, the `length` property of a String object returns the number of co
 In UTF-16, each Unicode character may be encoded as one or two code units (byte). This means that for certain scripts, such as emojis, mathematical symbols, or some Chinese characters,
 the value returned by length might not match the actual number of Unicode characters in the string.
 
-Python uses UTF-8 encoding, which each character is encoded as one byte. So here is a workaround to get the actual number of characters and manipulate them in string as in UTF-16 encoding. See pre_utf_16_bang and post_utf_16_bang function. 
+Python uses UTF-8 encoding, which each character is encoded as one byte. So here is a workaround to get the actual number of characters and manipulate them in string as in UTF-16 encoding. See pre_utf_16_bang and post_utf_16_bang function.
 More info to read: https://habr.com/ru/articles/769256/
 """
 

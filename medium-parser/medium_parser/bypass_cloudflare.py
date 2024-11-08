@@ -22,7 +22,7 @@ async def main():
             print(response.status)
 
 
-### 
+###
 
 # Port to Python 3.10+
 # https://github.com/fedora-infra/fedora-messaging/pull/250/commits/f3439350de7f55d42f4350e662392e9ffbdde028
