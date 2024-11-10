@@ -11,6 +11,7 @@ dependencies = [
     "orjson>=3.10.11",
     "pendulum>=3.0.0",
     "ujson>=5.10.0",
+    "httpx[socks]>=0.27.2",
 ]
 requires-python = "==3.12.*"
 readme = "README.md"

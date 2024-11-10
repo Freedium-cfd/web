@@ -1,6 +1,6 @@
 import warnings
 from dataclasses import dataclass
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Literal, Optional
 
 from httpx import (
     AsyncClient,
@@ -13,9 +13,32 @@ from httpx import (
 
 
 @dataclass
+class RequestProxyConfig:
+    type: Literal["http", "https", "socks5"]
+    host: str
+    port: int
+    username: Optional[str] = None
+    password: Optional[str] = None
+
+    @property
+    def url(self) -> str:
+        type = self.type.replace(
+            "https", "http"
+        )  # See: https://www.python-httpx.org/advanced/proxies/
+
+        proxy_url = f"{type}://"
+        if self.username and self.password:
+            proxy_url += f"{self.username}:{self.password}@"
+
+        proxy_url += f"{self.host}:{self.port}"
+        return proxy_url
+
+
+@dataclass
 class RequestConfig:
     timeout: int = 6
     retries: int = 3
+    proxy: Optional[RequestProxyConfig] = None
     # backoff_factor: float = 0.1 # not possible. Default value: 0.5. https://github.com/encode/httpx/discussions/1895
 
 
@@ -31,12 +54,19 @@ class Request:
         )
 
     @property
+    def proxy_url(self) -> Optional[str]:
+        return self.config.proxy.url if self.config.proxy else None
+
+    @property
     def _transport(self) -> HTTPTransport:
         return HTTPTransport(retries=self.config.retries)
 
     @property
     def _client(self) -> Client:
-        return Client(transport=self._transport)
+        return Client(
+            transport=self._transport,
+            proxies=self.proxy_url,
+        )
 
     @property
     def _async_transport(self) -> AsyncHTTPTransport:
@@ -44,7 +74,10 @@ class Request:
 
     @property
     def _async_client(self) -> AsyncClient:
-        return AsyncClient(transport=self._async_transport)
+        return AsyncClient(
+            transport=self._async_transport,
+            proxies=self.proxy_url,
+        )
 
     @property
     def _timeout_client(self) -> Timeout:
@@ -67,7 +100,7 @@ class Request:
 
     def __del__(self):
         self._client.close()
-        # asyncio.run(self._async_client.aclose()) # TODO: doesnt works
+        # asyncio.run(self._async_client.aclose()) # TODO: doesn't work
 
     def _check_context_manager(self):
         if not self._in_context_manager:
