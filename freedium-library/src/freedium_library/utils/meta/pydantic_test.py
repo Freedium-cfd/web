@@ -14,6 +14,13 @@ class SampleConfig(BaseConfig):
     another_value: int = 42
 
 
+class SampleConfigPrefix(BaseConfig):
+    model_config = BaseSettingsConfigDict(env_prefix="SAMPLE_")
+
+    test_value: str
+    another_value: int = 42
+
+
 class NestedConfig(BaseConfig):
     model_config = BaseSettingsConfigDict()
 
@@ -122,3 +129,21 @@ def test_nested_config_env(monkeypatch: MonkeyPatch) -> None:
     assert config.nested.test_value == "inner"
     assert config.nested.another_value == 789
     assert config.list_value == [4, 5, 6]
+
+
+def test_prefixed_config_env_vars(monkeypatch: MonkeyPatch) -> None:
+    monkeypatch.setenv("SAMPLE_TEST_VALUE", "prefixed")
+    monkeypatch.setenv("SAMPLE_ANOTHER_VALUE", "789")
+    config = SampleConfigPrefix()
+    assert config.test_value == "prefixed"
+    assert config.another_value == 789
+
+
+def test_prefixed_config_env_file(env_file: Path, monkeypatch: MonkeyPatch) -> None:
+    env_content = """SAMPLE_TEST_VALUE=from_file
+SAMPLE_ANOTHER_VALUE=321"""
+    env_file.write_text(env_content)
+    monkeypatch.chdir(env_file.parent)
+    config = SampleConfigPrefix()
+    assert config.test_value == "from_file"
+    assert config.another_value == 321
