@@ -1,6 +1,5 @@
 import warnings
-from dataclasses import dataclass
-from typing import Any, Dict, Literal, Optional
+from typing import Any, Dict, Optional
 
 from httpx import (
     AsyncClient,
@@ -11,39 +10,13 @@ from httpx import (
     Timeout,
 )
 
-
-@dataclass
-class RequestProxyConfig:
-    type: Literal["http", "https", "socks5"]
-    host: str
-    port: int
-    username: Optional[str] = None
-    password: Optional[str] = None
-
-    @property
-    def url(self) -> str:
-        type = self.type.replace(
-            "https", "http"
-        )  # See: https://www.python-httpx.org/advanced/proxies/
-
-        proxy_url = f"{type}://"
-        if self.username and self.password:
-            proxy_url += f"{self.username}:{self.password}@"
-
-        proxy_url += f"{self.host}:{self.port}"
-        return proxy_url
-
-
-@dataclass
-class RequestConfig:
-    timeout: int = 6
-    retries: int = 3
-    proxy: Optional[RequestProxyConfig] = None
-    # backoff_factor: float = 0.1 # not possible. Default value: 0.5. https://github.com/encode/httpx/discussions/1895
+from .config import RequestConfig
 
 
 # https://github.com/encode/httpx/discussions/1748
 class Request:
+    __slots__ = ("config", "_in_context_manager")
+
     def __init__(self, config: Optional[RequestConfig] = None):
         self.config = config or RequestConfig()
         self._in_context_manager = False

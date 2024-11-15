@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING
 
 from dependency_injector.wiring import Provide
 
@@ -27,7 +27,6 @@ class MediumService(BaseService):
         self.request = request
         self.api_service = api_service
         self.path_validator = path_validator
-        _content: Optional[str] = None
 
     def _is_valid(self, path: str) -> bool:
         return self.path_validator.is_valid(path)
