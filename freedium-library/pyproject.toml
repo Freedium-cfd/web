@@ -12,12 +12,18 @@ dependencies = [
     "pendulum>=3.0.0",
     "ujson>=5.10.0",
     "httpx[socks]>=0.27.2",
+    "asyncclick>=8.1.7.2",
 ]
 requires-python = "==3.12.*"
 readme = "README.md"
 license = {text = "MIT"}
 
 
+[project.optional-dependencies]
+api = [
+    "slowapi>=0.1.9",
+    "fastapi[standard]>=0.115.5",
+]
 [tool.pdm]
 distribution = false
 
