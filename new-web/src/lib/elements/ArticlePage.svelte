@@ -1,10 +1,10 @@
 <script>
 	import Header from '$lib/elements/Header.svelte';
-	import SvelteMarkdown from 'svelte-markdown';
 	import { formatDate } from '$lib/utils/dateFormatter';
 	import { onMount } from 'svelte';
 	import Icon from '@iconify/svelte';
 	import ImageZoom from '$lib/elements/ImageZoom.svelte';
+	import Skeleton from '$lib/components/ui/skeleton/skeleton.svelte';
 
 	let data = {
 		title: 'UploadThing is 5x Faster',
@@ -14,45 +14,7 @@
 			role: 'CEO @ Ping Labs',
 			avatar: 'https://picsum.photos/seed/post1/400/300'
 		},
-		postImage: 'https://picsum.photos/seed/postimage/1200/600', // This can now be undefined or null
-		content: `
-## V7 Is Here!
-
-This release has been an absurd amount of work. So proud of the team and what we've built. Huge thanks to [Julius](#) and [Mark](#) for making this happen.
-
-It is so, so hard to not go straight into the nerdy details, but the whole point of UploadThing is that you don't need to know ANY of those details. With that in mind, here's what's relevant for most of y'all:
-
-- UploadThing is now *way* faster
-- Uploads can be paused and resumed seamlessly (huge for users on bad internet connections)
-- More details...
-
-## Revolutionary Features
-
-We've completely overhauled our backend infrastructure to bring you unparalleled performance. Our new distributed processing system can handle millions of concurrent uploads without breaking a sweat.
-
-### AI-Powered Optimization
-
-UploadThing now leverages cutting-edge machine learning algorithms to optimize your uploads in real-time. Whether you're uploading images, videos, or documents, our AI will automatically adjust compression and encoding settings to give you the best possible quality at the smallest file size.
-
-## Security Enhancements
-
-We've implemented state-of-the-art encryption protocols to ensure your data remains safe and secure throughout the entire upload process. Our new zero-knowledge architecture means that even we can't access your files without your explicit permission.
-
-### Compliance and Regulations
-
-UploadThing is now fully compliant with GDPR, CCPA, and other major data protection regulations worldwide. We've also obtained ISO 27001 certification, demonstrating our commitment to information security management.
-
-## Future Roadmap
-
-We're not stopping here. Our team is already hard at work on the next big update. Here's a sneak peek of what's coming:
-
-- Quantum-resistant encryption for future-proof security
-- Integration with major cloud storage providers for seamless file management
-- Advanced analytics dashboard for enterprise users
-- Support for emerging file formats and codecs
-
-Stay tuned for more exciting updates as we continue to revolutionize the world of file uploads!
-    `,
+		postImage: 'https://picsum.photos/seed/postimage/1200/600', // This can now be undefined or null,
 		tableOfContents: [
 			{ id: 'v7-is-here', title: 'V7 Is Here!' },
 			{ id: 'benchmarks', title: 'Benchmarks' },
@@ -62,11 +24,17 @@ Stay tuned for more exciting updates as we continue to revolutionize the world o
 		]
 	};
 	let contentLoaded = false;
+	let compiledContent = '';
 
-	onMount(() => {
-		setTimeout(() => {
+	onMount(async () => {
+		try {
+			const transformed = await import('../test/blog01.md');
+			compiledContent = transformed.default;
 			contentLoaded = true;
-		}, 500);
+		} catch (error) {
+			console.error('Error compiling markdown:', error);
+			contentLoaded = true;
+		}
 	});
 </script>
 
@@ -89,76 +57,244 @@ Stay tuned for more exciting updates as we continue to revolutionize the world o
 	</nav>
 
 	<div class="lg:flex lg:space-x-8">
-		<article class="flex-grow overflow-hidden bg-white rounded-lg shadow-lg">
-			{#if data.postImage}
-				<ImageZoom
-					src={data.postImage}
-					alt="Post cover image"
-					class="object-cover w-full h-auto max-h-96"
-				/>
-			{/if}
-			<header class="p-6 bg-gray-50">
-				<p class="mb-2 text-gray-600">{formatDate(data.date)}</p>
-				<h1 class="mb-4 text-4xl font-bold text-gray-900">{data.title}</h1>
-				<div class="flex items-center">
-					<img src={data.author.avatar} alt="" class="w-12 h-12 mr-4 rounded-full" />
-					<div>
-						<p class="font-semibold text-gray-900">{data.author.name}</p>
-						<p class="text-gray-600">{data.author.role}</p>
+		<article class="flex-grow overflow-hidden bg-white rounded-lg shadow-lg dark:bg-zinc-900">
+			{#if !contentLoaded}
+				<Skeleton class="w-full h-96" />
+				<div class="p-6 bg-gray-50 dark:bg-zinc-800">
+					<Skeleton class="w-32 h-4 mb-2" />
+					<Skeleton class="w-full h-10 mb-4" />
+					<div class="flex items-center">
+						<Skeleton class="w-12 h-12 mr-4 rounded-full" />
+						<div class="space-y-2">
+							<Skeleton class="w-40 h-4" />
+							<Skeleton class="w-32 h-4" />
+						</div>
 					</div>
 				</div>
-			</header>
-
-			<div class="p-6 {data.postImage ? '' : 'pt-0'}">
-				<div class="prose max-w-none">
-					{#if contentLoaded}
-						<SvelteMarkdown source={data.content} />
-					{:else}
-						<p>Loading content...</p>
-					{/if}
+				<div class="p-6">
+					<div class="space-y-4">
+						<Skeleton class="w-full h-4" />
+						<Skeleton class="w-full h-4" />
+						<Skeleton class="w-3/4 h-4" />
+					</div>
 				</div>
-			</div>
+			{:else}
+				{#if data.postImage}
+					<ImageZoom
+						src={data.postImage}
+						alt="Post cover image"
+						class="object-cover w-full h-auto max-h-96"
+					/>
+				{/if}
+				<header class="p-6 bg-gray-50 dark:bg-zinc-800">
+					<p class="mb-2 text-gray-600 dark:text-gray-400">{formatDate(data.date)}</p>
+					<h1 class="mb-4 text-4xl font-bold text-gray-900 dark:text-white">{data.title}</h1>
+					<div class="flex items-center">
+						<img src={data.author.avatar} alt="" class="w-12 h-12 mr-4 rounded-full" />
+						<div>
+							<p class="font-semibold text-gray-900 dark:text-white">{data.author.name}</p>
+							<p class="text-gray-600 dark:text-gray-400">{data.author.role}</p>
+						</div>
+					</div>
+				</header>
+
+				<div class="p-6 {data.postImage ? '' : 'pt-0'} dark:text-gray-300">
+					<div class="prose max-w-none">
+						{#if contentLoaded}
+							{#if compiledContent}
+								<svelte:component this={compiledContent} />
+							{:else}
+								<p>Error loading content</p>
+							{/if}
+						{:else}
+							<p>Loading content...</p>
+						{/if}
+					</div>
+				</div>
+			{/if}
 		</article>
 
 		<aside class="order-first mt-7 lg:mt-0 lg:min-w-80 lg:order-none">
-			<nav
-				aria-labelledby="toc-heading"
-				class="w-full p-4 bg-white rounded-lg shadow-lg lg:sticky lg:top-36"
-			>
-				<h2 id="toc-heading" class="mb-4 text-xl font-semibold text-gray-900">Contents</h2>
-				{#if data.tableOfContents && data.tableOfContents.length > 0}
-					<ul class="space-y-2">
-						{#each data.tableOfContents as item}
-							<li>
-								<a href={`#${item.id}`} class="transition-colors text-zinc-800 hover:text-zinc-900">
-									{item.title}
-								</a>
-							</li>
-						{/each}
-					</ul>
-				{:else}
-					<p>No table of contents available</p>
-				{/if}
-			</nav>
+			{#if !contentLoaded}
+				<div class="w-full p-4 bg-white rounded-lg shadow-lg dark:bg-zinc-900">
+					<Skeleton class="w-32 h-6 mb-4" />
+					<div class="space-y-2">
+						<Skeleton class="w-full h-4" />
+						<Skeleton class="w-full h-4" />
+						<Skeleton class="w-3/4 h-4" />
+					</div>
+				</div>
+			{:else}
+				<nav
+					aria-labelledby="toc-heading"
+					class="w-full p-4 bg-white rounded-lg shadow-lg dark:bg-zinc-900 lg:sticky lg:top-36"
+				>
+					<h2 id="toc-heading" class="mb-4 text-xl font-semibold text-gray-900 dark:text-white">
+						Contents
+					</h2>
+					{#if data.tableOfContents && data.tableOfContents.length > 0}
+						<ul class="space-y-2">
+							{#each data.tableOfContents as item}
+								<li>
+									<a
+										href={`#${item.id}`}
+										class="transition-colors text-zinc-800 hover:text-zinc-900 dark:text-gray-300 dark:hover:text-white"
+									>
+										{item.title}
+									</a>
+								</li>
+							{/each}
+						</ul>
+					{:else}
+						<p class="dark:text-gray-300">No table of contents available</p>
+					{/if}
+				</nav>
+			{/if}
 		</aside>
 	</div>
 </main>
 
 <style lang="postcss">
-	:global(h2) {
-		@apply font-bold font-sans break-normal text-gray-900 dark:text-gray-100 md:text-2xl;
+	/* Headings */
+	:global(.prose h1) {
+		@apply text-4xl font-bold text-gray-900 dark:text-gray-100 mt-12 mb-6;
 	}
 
-	:global(*:not(:first-child) + h2) {
-		@apply pt-12;
+	:global(.prose h2) {
+		@apply text-3xl font-bold text-gray-900 dark:text-gray-100 mt-12 mb-4;
 	}
 
+	:global(.prose h3) {
+		@apply text-2xl font-bold text-gray-900 dark:text-gray-100 mt-8 mb-3;
+	}
+
+	:global(.prose h4) {
+		@apply text-xl font-bold text-gray-900 dark:text-gray-100 mt-6 mb-2;
+	}
+
+	:global(.prose h5) {
+		@apply text-lg font-bold text-gray-900 dark:text-gray-100 mt-4 mb-2;
+	}
+
+	:global(.prose h6) {
+		@apply text-base font-bold text-gray-900 dark:text-gray-100 mt-4 mb-2;
+	}
+
+	/* Paragraphs and spacing */
 	:global(.prose p) {
-		@apply leading-8 mt-7;
+		@apply text-gray-700 dark:text-gray-300 leading-7 mt-4;
 	}
 
-	:global(.prose h3 + p),
-	:global(.prose h4 + p) {
-		@apply mt-3;
+	:global(.prose > *:first-child) {
+		@apply mt-0;
+	}
+
+	/* Lists */
+	:global(.prose ul) {
+		@apply list-disc list-outside ml-6 mt-4 space-y-2;
+	}
+
+	:global(.prose ol) {
+		@apply list-decimal list-outside ml-6 mt-4 space-y-2;
+	}
+
+	:global(.prose li) {
+		@apply text-gray-700 dark:text-gray-300 leading-7;
+	}
+
+	/* Blockquotes */
+	:global(.prose blockquote) {
+		@apply border-l-4 border-gray-200 dark:border-gray-700 pl-4 italic my-6;
+	}
+
+	/* Code blocks */
+	:global(.prose pre) {
+		@apply rounded-lg p-4 my-6 overflow-x-auto;
+	}
+
+	:global(.prose code) {
+		@apply px-1.5 py-0.5 rounded text-sm font-mono;
+	}
+
+	:global(.prose pre code) {
+		@apply bg-transparent p-0 text-sm leading-relaxed;
+	}
+
+	/* Tables */
+	:global(.prose table) {
+		@apply w-full border-collapse my-6;
+	}
+
+	:global(.prose th) {
+		@apply border border-gray-300 dark:border-gray-700 px-4 py-2 bg-gray-100 dark:bg-zinc-800 text-left;
+	}
+
+	:global(.prose td) {
+		@apply border border-gray-300 dark:border-gray-700 px-4 py-2;
+	}
+
+	/* Links */
+	:global(.prose a) {
+		@apply text-primary hover:text-primary/90 underline decoration-primary/30 hover:decoration-primary/50;
+	}
+
+	/* Horizontal rule */
+	:global(.prose hr) {
+		@apply border-gray-200 dark:border-gray-700 my-8;
+	}
+
+	/* Images */
+	:global(.prose img) {
+		@apply rounded-lg my-6 mx-auto;
+	}
+
+	/* Inline elements */
+	:global(.prose strong) {
+		@apply font-bold text-gray-900 dark:text-gray-100;
+	}
+
+	:global(.prose em) {
+		@apply italic;
+	}
+
+	:global(.prose del) {
+		@apply line-through;
+	}
+
+	/* Definition lists */
+	:global(.prose dl) {
+		@apply mt-4;
+	}
+
+	:global(.prose dt) {
+		@apply font-bold text-gray-900 dark:text-gray-100;
+	}
+
+	:global(.prose dd) {
+		@apply ml-4 mt-2;
+	}
+
+	/* Nested lists spacing */
+	:global(.prose li > ul),
+	:global(.prose li > ol) {
+		@apply mt-2 mb-2;
+	}
+
+	/* Code block filename */
+	:global(.prose .filename) {
+		@apply text-sm text-gray-500 dark:text-gray-400 -mb-2 mt-6;
+	}
+
+	/* Summary blocks */
+	:global(.prose summary) {
+		@apply text-gray-700 dark:text-gray-300 leading-7 cursor-pointer hover:text-gray-900 dark:hover:text-gray-100 select-none;
+	}
+
+	:global(.prose details) {
+		@apply my-4 p-4 rounded-lg bg-gray-50 dark:bg-zinc-800;
+	}
+
+	:global(.prose details[open] summary) {
+		@apply mb-3;
 	}
 </style>

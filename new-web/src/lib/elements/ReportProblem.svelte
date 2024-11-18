@@ -43,7 +43,7 @@
 							possible.
 						</p>
 					</Dialog.Description>
-					<div class="grid grid-cols-1 gap-6 md:grid-cols-2 pt-7">
+					<div class="grid grid-cols-1 gap-2 md:grid-cols-2 pt-7">
 						<div class="flex flex-col items-start gap-2">
 							<Label.Root class="text-sm font-medium">Problem Type</Label.Root>
 							<RadioGroup.Root bind:value={problemType} class="space-y-2">
@@ -111,7 +111,7 @@
 					</Drawer.Description>
 				</Drawer.Header>
 				<div class="px-4">
-					<div class="grid grid-cols-1 gap-6 md:grid-cols-2 pt-7">
+					<div class="grid grid-cols-1 gap-2 md:grid-cols-2 pt-7">
 						<div class="flex flex-col items-start gap-2">
 							<Label.Root class="text-sm font-medium">Problem Type</Label.Root>
 							<RadioGroup.Root bind:value={problemType} class="space-y-2">
