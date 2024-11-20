@@ -1,5 +1,5 @@
 (common) {
-    # tls internal
+    tls internal
     encode gzip
 	header -Server
 
@@ -102,6 +102,12 @@
 
     handle_path /site.webmanifest {
         root * /static/site.webmanifest
+        file_server
+    }
+
+
+    handle_path /tailwindcssv3-freedium-hotfix.js {
+        root * /static/tailwindcssv3-freedium-hotfix.js
         file_server
     }
 
