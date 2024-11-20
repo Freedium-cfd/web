@@ -1,5 +1,4 @@
 (common) {
-    tls internal
     encode gzip
 	header -Server
 
@@ -208,6 +207,20 @@
 
 }
 
+(freedium_web) {
+	reverse_proxy freedium_web:7080 {
+		import header_up
+		import lb_try
+	}
+}
+
+(plausible_web) {
+	reverse_proxy freedium_plausible:8000 {
+		import header_up
+		import lb_try
+	}
+}
+
 (header_up) {
 	header_up Host {host}
     header_up X-Real-IP {remote_host}
@@ -220,20 +233,28 @@
 	lb_try_interval 1s
 }
 
-plausible.freedium.local, :6753 {
+plausible.freedium.local {
+	tls internal
 	import common
 
-	reverse_proxy freedium_plausible:8000 {
-		import header_up
-		import lb_try
-	}
+	import plausible_web
 }
 
-freedium.local, :6752 {
+:6753 {
 	import common
 
-	reverse_proxy freedium_web:7080 {
-		import header_up
-		import lb_try
-	}
+	import plausible_web
+}
+
+freedium.local {
+	tls internal
+	import common
+
+	import freedium_web
+}
+
+:6752 {
+	import common
+
+	import freedium_web
 }
