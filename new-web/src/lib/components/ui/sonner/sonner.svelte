@@ -8,6 +8,7 @@
 
 	if (browser) {
 		window.addEventListener('toast', (event) => {
+			console.log(`toast: ${event.detail.message}`);
 			toast.success(event.detail.message);
 		});
 	}

@@ -45,7 +45,7 @@
 				aria-label="Open search"
 			>
 				<Icon icon="heroicons:magnifying-glass" />
-				<span>Search articles, topics, and more...</span>
+				<span>Search articles...</span>
 			</Button>
 		</div>
 

@@ -3,5 +3,5 @@
 	import { Toaster } from '$lib/components/ui/sonner';
 </script>
 
-<Toaster />
+<Toaster position="top-right" expand={true} />
 <slot />

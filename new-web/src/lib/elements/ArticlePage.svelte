@@ -204,7 +204,7 @@
 
 	/* Blockquotes */
 	:global(.prose blockquote) {
-		@apply border-l-4 border-gray-200 dark:border-gray-700 pl-4 italic my-6;
+		@apply border-l-4 border-gray-300 dark:border-gray-700 pl-4 italic my-6;
 	}
 
 	/* Code blocks */
@@ -212,8 +212,8 @@
 		@apply rounded-lg p-4 my-6 overflow-x-auto;
 	}
 
-	:global(.prose code) {
-		@apply px-1.5 py-0.5 rounded text-sm font-mono;
+	:global(.prose code:not(.shiki code)) {
+		@apply px-1.5 py-0.5 rounded text-sm font-mono bg-gray-200 dark:bg-zinc-700;
 	}
 
 	:global(.prose pre code) {
@@ -236,6 +236,11 @@
 	/* Links */
 	:global(.prose a) {
 		@apply text-primary hover:text-primary/90 underline decoration-primary/30 hover:decoration-primary/50;
+	}
+
+	:global(.prose a::after) {
+		content: "";
+		@apply icon-[heroicons-outline--external-link] inline-block ml-1 w-3.5 h-3.5 align-text-bottom;
 	}
 
 	/* Horizontal rule */
@@ -296,5 +301,24 @@
 
 	:global(.prose details[open] summary) {
 		@apply mb-3;
+	}
+
+	/* Aside blocks */
+	:global(.prose aside) {
+		@apply my-6 p-4 rounded-lg border-l-4 border-primary bg-primary/5;
+	}
+
+	:global(.prose aside p) {
+		@apply m-0;
+	}
+
+	/* Mark blocks */
+	:global(.prose mark) {
+		@apply bg-primary/20 text-primary px-1.5 py-0.5 rounded;
+	}
+
+	/* Keyboard blocks */
+	:global(.prose kbd) {
+		@apply px-2 py-1.5 text-xs font-semibold text-gray-800 bg-gray-100 border border-gray-200 rounded-lg dark:bg-gray-600 dark:text-gray-100 dark:border-gray-500;
 	}
 </style>
