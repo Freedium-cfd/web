@@ -1,5 +1,4 @@
 <script lang="ts">
-	import Icon from '@iconify/svelte';
 	import Lazy from 'svelte-lazy';
 
 	const sizes = ['small', 'medium', 'large'];
@@ -60,7 +59,7 @@
 		<div
 			class="flex flex-wrap items-center p-4 mt-2 space-x-2 text-sm text-gray-500 dark:text-white"
 		>
-			<Icon icon="mage:medium" class="w-4 h-4 mr-1" />
+			<span class="icon-[mage--medium] size-4 mr-1" />
 			{#if collection}
 				<div class="flex items-center">
 					<img

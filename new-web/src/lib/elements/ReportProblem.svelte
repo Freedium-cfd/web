@@ -1,5 +1,4 @@
 <script lang="ts">
-	import Icon from '@iconify/svelte';
 	import { Label, Separator } from 'bits-ui';
 	import { mediaQuery } from 'svelte-legos';
 	import { Textarea } from '$lib/components/ui/textarea/index.js';
@@ -27,7 +26,7 @@
 	<Dialog.Root bind:open>
 		<Dialog.Trigger class={buttonVariants({ variant: 'default' })}>
 			<div class="flex items-center space-x-2 text-white">
-				<Icon icon="heroicons:exclamation-triangle-solid" class="size-5" />
+				<span class="icon-[heroicons--exclamation-triangle-solid] size-5" />
 				<span class="hidden text-sm font-medium lg:block">Report a problem</span>
 			</div>
 		</Dialog.Trigger>
@@ -98,7 +97,7 @@
 	<Drawer.Root bind:open>
 		<Drawer.Trigger class={buttonVariants({ variant: 'default' })}>
 			<div class="flex items-center space-x-2 text-white">
-				<Icon icon="heroicons:exclamation-triangle-solid" class="size-5" />
+				<span class="icon-[heroicons--exclamation-triangle-solid] size-5" />
 				<span class="hidden text-sm font-medium lg:block">Report a problem</span>
 			</div>
 		</Drawer.Trigger>

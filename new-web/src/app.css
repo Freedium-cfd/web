@@ -91,9 +91,9 @@ html {
 }
 
 @layer base {
-	/**
-   * Shiki
-   */
+	/* Shiki */
+	/* --shiki-light: white; */
+	/* --shiki-dark: black; */
 	pre.shiki {
 		counter-reset: line-number;
 	}
@@ -104,14 +104,14 @@ html {
 
 	pre.shiki,
 	pre.shiki span {
-		color: var(--shiki-light) !important;
+		/* color: var(--shiki-light) !important; */
 		background-color: transparent;
 	}
 
-	/* html.dark pre.shiki,
+	html.dark pre.shiki,
 	html.dark pre.shiki span {
 		color: var(--shiki-dark) !important;
-	} */
+	}
 
 	pre.shiki .line {
 		counter-increment: line-number;

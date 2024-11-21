@@ -1,5 +1,4 @@
 <script lang="ts">
-	import Icon from '@iconify/svelte';
 	import { Button } from '$lib/components/ui/button/index.js';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu/index.js';
 	import BookmarkButton from './BookmarkButton.svelte';
@@ -11,7 +10,7 @@
 			builders={[builder]}
 			variant="ghost"
 			class="px-3 text-gray-600 py-7 dark:text-white hover:text-primary dark:hover:text-primary"
-			><Icon icon="mdi:puzzle" class="size-5" /></Button
+			><span class="icon-[mdi--puzzle] size-5" /></Button
 		>
 	</DropdownMenu.Trigger>
 	<DropdownMenu.Content class="w-56 text-zinc-600 dark:text-zinc-300 ">
@@ -28,14 +27,14 @@
 		<DropdownMenu.Separator />
 		<DropdownMenu.Group>
 			<DropdownMenu.Item>
-				<Icon icon="mdi:firefox" class="w-4 h-4 mr-2" />
+				<span class="icon-[mdi--firefox] w-4 h-4 mr-2" />
 				<span>Firefox</span>
-				<Icon icon="heroicons-outline:external-link" class="size-3.5" />
+				<span class="icon-[heroicons-outline--external-link] size-3.5" />
 			</DropdownMenu.Item>
 			<DropdownMenu.Item>
-				<Icon icon="mdi:google-chrome" class="w-4 h-4 mr-2" />
+				<span class="icon-[mdi--google-chrome] w-4 h-4 mr-2" />
 				<span>Chrome</span>
-				<Icon icon="heroicons-outline:external-link" class="size-3.5" />
+				<span class="icon-[heroicons-outline--external-link] size-3.5" />
 			</DropdownMenu.Item>
 		</DropdownMenu.Group>
 		<DropdownMenu.Separator />
@@ -45,9 +44,9 @@
 				href="https://gist.github.com/mathix420/e0604ab0e916622972372711d2829555"
 				target="_blank"
 			>
-				<Icon icon="mdi:script-text" class="w-4 h-4 mr-2" />
+				<span class="icon-[mdi--script-text] w-4 h-4 mr-2" />
 				<span>Userscript - only Medium</span>
-				<Icon icon="heroicons-outline:external-link" class="size-3.5" />
+				<span class="icon-[heroicons-outline--external-link] size-3.5" />
 			</a>
 		</DropdownMenu.Item>
 		<DropdownMenu.Separator />

@@ -5,7 +5,6 @@
 	import ReportProblem from './ReportProblem.svelte';
 	import PayButtons from './PayButtons.svelte';
 	import ExtensionsButton from './ExtensionsButton.svelte';
-	import Icon from '@iconify/svelte';
 	import SearchDialog from './SearchDialog.svelte';
 	import { Menu } from 'lucide-svelte';
 
@@ -44,24 +43,24 @@
 				on:click={toggleSearch}
 				aria-label="Open search"
 			>
-				<Icon icon="heroicons:magnifying-glass" />
+				<span class="icon-[heroicons-outline--magnifying-glass]" />
 				<span>Search articles...</span>
 			</Button>
 		</div>
 
 		<div class="items-center hidden space-x-2 md:flex">
 			<Button class="lg:hidden" variant="ghost" size="icon" on:click={toggleSearch}>
-				<Icon class="size-5" icon="heroicons:magnifying-glass" />
+				<span class="icon-[heroicons-outline--magnifying-glass] size-5" />
 			</Button>
 			<ExtensionsButton />
 			<div class="w-px h-6 bg-zinc-300 dark:bg-zinc-700"></div>
-			<PayButtons name="Ko-fi" url="https://ko-fi.com/zhymabekroman" icon="teenyicons:cup-solid" />
+			<PayButtons name="Ko-fi" url="https://ko-fi.com/zhymabekroman" icon="icon-[teenyicons--cup-solid]" />
 			<PayButtons
 				name="Liberapay"
 				url="https://liberapay.com/ZhymabekRoman/"
-				icon="simple-icons:liberapay"
+				icon="icon-[simple-icons--liberapay]"
 			/>
-			<PayButtons name="Discord" url="discord.gg/dAxCuG9nYM" icon="simple-icons:discord" />
+			<PayButtons name="Discord" url="https://discord.gg/dAxCuG9nYM" icon="icon-[simple-icons--discord]" />
 			<div class="w-px h-6 bg-zinc-300 dark:bg-zinc-700"></div>
 			<ThemeToggle />
 			<ReportProblem />
@@ -69,7 +68,7 @@
 
 		<div class="flex items-center space-x-2 md:hidden">
 			<Button class="lg:hidden" variant="ghost" size="icon" on:click={toggleSearch}>
-				<Icon class="size-5" icon="heroicons:magnifying-glass" />
+				<span class="icon-[heroicons-outline--magnifying-glass] size-5" />
 			</Button>
 			<ThemeToggle />
 			<Button
@@ -95,14 +94,14 @@
 				<PayButtons
 					name="Ko-fi"
 					url="https://ko-fi.com/zhymabekroman"
-					icon="teenyicons:cup-solid"
+					icon="icon-[teenyicons--cup-solid]"
 				/>
 				<PayButtons
 					name="Liberapay"
 					url="https://liberapay.com/ZhymabekRoman/"
-					icon="simple-icons:liberapay"
+					icon="icon-[simple-icons--liberapay]"
 				/>
-				<PayButtons name="Discord" url="discord.gg/dAxCuG9nYM" icon="simple-icons:discord" />
+				<PayButtons name="Discord" url="discord.gg/dAxCuG9nYM" icon="icon-[simple-icons--discord]" />
 				<!-- <ExtensionsButton /> -->
 				<ReportProblem />
 			</div>

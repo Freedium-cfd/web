@@ -1,5 +1,4 @@
 <script lang="ts">
-	import Icon from '@iconify/svelte';
 	import { Button } from '$lib/components/ui/button/index.js';
 	import { browser } from '$app/environment';
 
@@ -32,5 +31,5 @@
 	on:click={handleSwitchDarkMode}
 	variant="ghost"
 >
-	<Icon icon={darkMode ? 'heroicons:moon-solid' : 'heroicons:sun-solid'} class="size-5" />
+	<span class={`${darkMode ? 'icon-[heroicons--moon-solid]' : 'icon-[heroicons--sun-solid]'} size-5`} />
 </Button>

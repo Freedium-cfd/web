@@ -1,5 +1,4 @@
 <script lang="ts">
-	import Icon from '@iconify/svelte';
 	import { Button } from '$lib/components/ui/button/index.js';
 </script>
 
@@ -40,7 +39,7 @@
 				target="_blank"
 				rel="noopener noreferrer"
 			>
-				<Icon class="size-5" icon="simple-icons:github" />
+				<span class="icon-[simple-icons--github] size-5" />
 			</Button>
 			<Button
 				variant="ghost"
@@ -49,7 +48,7 @@
 				target="_blank"
 				rel="noopener noreferrer"
 			>
-				<Icon class="size-5" icon="simple-icons:codeberg" />
+				<span class="icon-[simple-icons--codeberg] size-5" />
 			</Button>
 		</div>
 	</div>

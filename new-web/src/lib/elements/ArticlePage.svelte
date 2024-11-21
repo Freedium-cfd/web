@@ -2,9 +2,9 @@
 	import Header from '$lib/elements/Header.svelte';
 	import { formatDate } from '$lib/utils/dateFormatter';
 	import { onMount } from 'svelte';
-	import Icon from '@iconify/svelte';
 	import ImageZoom from '$lib/elements/ImageZoom.svelte';
 	import Skeleton from '$lib/components/ui/skeleton/skeleton.svelte';
+	import Footer from '$lib/elements/Footer.svelte';
 
 	let data = {
 		title: 'UploadThing is 5x Faster',
@@ -51,7 +51,7 @@
 			href="/"
 			class="flex items-center justify-center transition bg-white rounded-full shadow-md text-primary hover:text-primary/90 group size-8 shadow-zinc-800/5 ring-1 ring-zinc-900/5 dark:border dark:border-zinc-700/50 dark:bg-zinc-800 dark:ring-0 dark:ring-white/10 dark:hover:border-zinc-700 dark:hover:ring-white/20"
 		>
-			<Icon icon="heroicons:arrow-left-20-solid" class="size-6" />
+			<span class="icon-[heroicons--arrow-left-20-solid] size-6" />
 		</a>
 		<a href="/" class="font-bold text-primary hover:text-primary/90"> Original article</a>
 	</nav>
@@ -153,6 +153,8 @@
 		</aside>
 	</div>
 </main>
+
+<Footer />
 
 <style lang="postcss">
 	/* Headings */
