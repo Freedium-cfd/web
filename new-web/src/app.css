@@ -110,14 +110,14 @@ html {
 
 	html.dark pre.shiki,
 	html.dark pre.shiki span {
-		color: var(--shiki-dark) !important;
+		/* color: var(--shiki-dark) !important; */
 	}
 
 	pre.shiki .line {
 		counter-increment: line-number;
 	}
 
-	pre.shiki .line:not(:last-of-type)::before {
+	pre.shiki .line::before {
 		content: counter(line-number);
 		color: hsl(240 5.3% 26.1%);
 		display: inline-block;
@@ -126,7 +126,7 @@ html {
 		width: 2ch;
 	}
 
-	html.dark pre.shiki .line:not(:last-of-type)::before {
+	html.dark pre.shiki .line::before {
 		color: hsl(240 5% 64.9%);
 	}
 
