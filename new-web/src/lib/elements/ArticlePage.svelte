@@ -241,7 +241,7 @@
 	}
 
 	:global(.prose a::after) {
-		content: "";
+		content: '';
 		@apply icon-[heroicons-outline--external-link] inline-block ml-1 w-3.5 h-3.5 align-text-bottom;
 	}
 
@@ -322,5 +322,46 @@
 	/* Keyboard blocks */
 	:global(.prose kbd) {
 		@apply px-2 py-1.5 text-xs font-semibold text-gray-800 bg-gray-100 border border-gray-200 rounded-lg dark:bg-gray-600 dark:text-gray-100 dark:border-gray-500;
+	}
+
+	/* Mixtape embeds */
+	:global(.prose .mixtape-embed) {
+		@apply items-center p-2 overflow-hidden border border-gray-300 mt-7;
+	}
+
+	:global(.prose .mixtape-content) {
+		@apply flex flex-row justify-between p-2 overflow-hidden;
+	}
+
+	:global(.prose .mixtape-text) {
+		@apply flex flex-col justify-center p-2;
+	}
+
+	:global(.prose .mixtape-text h2) {
+		@apply text-base font-bold text-black dark:text-gray-100;
+	}
+
+	:global(.prose .mixtape-description) {
+		@apply block mt-2;
+	}
+
+	:global(.prose .mixtape-description h3) {
+		@apply text-sm text-gray-700;
+	}
+
+	:global(.prose .mixtape-site) {
+		@apply mt-5;
+	}
+
+	:global(.prose .mixtape-site p) {
+		@apply text-xs text-gray-700;
+	}
+
+	:global(.prose .mixtape-image) {
+		@apply relative flex h-40 flex-row w-60;
+	}
+
+	:global(.prose .mixtape-image-inner) {
+		@apply absolute inset-0 bg-center bg-cover;
 	}
 </style>
