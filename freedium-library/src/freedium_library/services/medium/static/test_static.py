@@ -43,12 +43,14 @@ def get_domains_from_file(filepath: str) -> list[str]:
     return domains
 
 
+def get_file_path(filename: str) -> str:
+    return os.path.join(os.path.dirname(os.path.abspath(__file__)), filename)
+
+
 @pytest.mark.integration
 @pytest.mark.parametrize(
     "domain",
-    get_domains_from_file(
-        os.path.join(os.path.dirname(os.path.abspath(__file__)), "medium_domains.txt")
-    ),
+    get_domains_from_file(get_file_path("medium_domains.txt")),
 )
 def test_medium_domain_meta_tag(domain: str):
     logger.info(f"Starting test for domain: {domain}")
@@ -56,3 +58,17 @@ def test_medium_domain_meta_tag(domain: str):
     assert result is not None, f"Failed to check domain {domain}"
     assert result is True, f"Domain {domain} does not have Medium meta tag"
     logger.success(f"Test passed for domain: {domain}")
+
+
+@pytest.mark.integration
+@pytest.mark.parametrize(
+    "domain",
+    get_domains_from_file(get_file_path("non_active_medium_domains.txt")),
+)
+def test_non_active_medium_domain(domain: str):
+    logger.info(f"Starting test for non-active domain: {domain}")
+    result = check_medium_meta_tag(domain)
+    assert (
+        result is False or result is None
+    ), f"Domain {domain} should be non-active but appears to be active"
+    logger.success(f"Test passed for non-active domain: {domain}")
