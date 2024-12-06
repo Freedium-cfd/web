@@ -15,10 +15,10 @@ services:
         condition: service_healthy
       wgcf2:
         condition: service_healthy
-      # dante_1:
-      #   condition: service_started
-      # dante_2:
-      #   condition: service_started
+      wgcf3:
+        condition: service_healthy
+      wgcf4:
+        condition: service_healthy
     networks:
       - freedium_net
     healthcheck:

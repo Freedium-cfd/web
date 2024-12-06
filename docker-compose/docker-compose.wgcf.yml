@@ -119,3 +119,127 @@ services:
       - /etc/localtime:/etc/localtime:ro
     profiles:
       - prod
+
+  wgcf3:
+    image: neilpang/wgcf-docker:latest
+    container_name: wgcf3
+    volumes:
+      - /lib/modules:/lib/modules
+      - /etc/localtime:/etc/localtime:ro
+      - ../wgcf/entry.sh:/entry.sh
+    privileged: true
+    sysctls:
+      net.ipv6.conf.all.disable_ipv6: 0
+    depends_on:
+      wgcf2:
+        condition: service_healthy
+    cap_add:
+      - NET_ADMIN
+    restart: always
+    networks:
+      - freedium_net
+    healthcheck:
+      test: curl -fs https://www.cloudflare.com/cdn-cgi/trace | grep -q -E 'warp=(on|plus)' && exit 0 || exit 1
+      interval: 5s
+      timeout: 2s
+      retries: 10000
+    profiles:
+      - prod
+
+  dante_3:
+    image: shturman/dante:1.4.2
+    container_name: dante_3
+    volumes:
+      - ../wgcf/dante/sockd.conf:/etc/sockd.conf
+      - /etc/localtime:/etc/localtime:ro
+    restart: always
+    environment:
+      - CFGFILE=/etc/sockd.conf
+    network_mode: "service:wgcf3"
+    depends_on:
+      wgcf3:
+        condition: service_healthy
+    profiles:
+      - prod
+
+  wgcf3_healthcare_service:
+    build:
+      context: ../wgcf/wgcf-healthcare
+      dockerfile: Dockerfile
+    environment:
+      - TG_TOKEN=${TELEGRAM_BOT_TOKEN}
+      - TG_CHAT_ID=${TELEGRAM_ADMIN_ID}
+      - CONTAINERS_TO_RESTART=wgcf3,dante_3
+      - PROXY_HOST=wgcf3
+      - PROXY_PORT=1080
+      - SLEEP_DURATION=50
+    restart: always
+    networks:
+      - freedium_net
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /etc/localtime:/etc/localtime:ro
+    profiles:
+      - prod
+
+  wgcf4:
+    image: neilpang/wgcf-docker:latest
+    container_name: wgcf4
+    volumes:
+      - /lib/modules:/lib/modules
+      - /etc/localtime:/etc/localtime:ro
+      - ../wgcf/entry.sh:/entry.sh
+    privileged: true
+    sysctls:
+      net.ipv6.conf.all.disable_ipv6: 0
+    depends_on:
+      wgcf3:
+        condition: service_healthy
+    cap_add:
+      - NET_ADMIN
+    restart: always
+    networks:
+      - freedium_net
+    healthcheck:
+      test: curl -fs https://www.cloudflare.com/cdn-cgi/trace | grep -q -E 'warp=(on|plus)' && exit 0 || exit 1
+      interval: 5s
+      timeout: 2s
+      retries: 10000
+    profiles:
+      - prod
+
+  dante_4:
+    image: shturman/dante:1.4.2
+    container_name: dante_4
+    volumes:
+      - ../wgcf/dante/sockd.conf:/etc/sockd.conf
+      - /etc/localtime:/etc/localtime:ro
+    restart: always
+    environment:
+      - CFGFILE=/etc/sockd.conf
+    network_mode: "service:wgcf4"
+    depends_on:
+      wgcf4:
+        condition: service_healthy
+    profiles:
+      - prod
+
+  wgcf4_healthcare_service:
+    build:
+      context: ../wgcf/wgcf-healthcare
+      dockerfile: Dockerfile
+    environment:
+      - TG_TOKEN=${TELEGRAM_BOT_TOKEN}
+      - TG_CHAT_ID=${TELEGRAM_ADMIN_ID}
+      - CONTAINERS_TO_RESTART=wgcf4,dante_4
+      - PROXY_HOST=wgcf4
+      - PROXY_PORT=1080
+      - SLEEP_DURATION=60
+    restart: always
+    networks:
+      - freedium_net
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /etc/localtime:/etc/localtime:ro
+    profiles:
+      - prod
