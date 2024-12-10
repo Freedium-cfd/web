@@ -143,4 +143,8 @@ html {
 	html.dark pre.shiki .diff.remove {
 		background-color: hsla(0 62.8% 30.6% / 0.7);
 	}
+
+	pre.shiki code {
+		@apply select-text cursor-text focus:outline-none;
+	}
 }
