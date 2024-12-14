@@ -4,4 +4,4 @@ from freedium_library.api.config import APIConfig
 
 
 class APIContainer(containers.DeclarativeContainer):
-    config: APIConfig = providers.Singleton(APIConfig)  # type: ignore
+    config = providers.Singleton(APIConfig)

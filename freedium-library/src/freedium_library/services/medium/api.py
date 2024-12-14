@@ -41,8 +41,8 @@ class MediumApiService:
             "Connection": "Keep-Alive",
         }
 
-        if self.auth_cookies is not None:
-            headers["Cookie"] = self.auth_cookies
+        if self.config.cookies is not None:
+            headers["Cookie"] = self.config.cookies
 
         graphql_data = {
             "operationName": "FullPostQuery",

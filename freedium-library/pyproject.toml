@@ -12,7 +12,8 @@ dependencies = [
     "pendulum>=3.0.0",
     "ujson>=5.10.0",
     "httpx[socks]>=0.27.2",
-    "asyncclick>=8.1.7.2",
+    "pymongo>=4.9.2",
+    "motor>=3.6.0",
 ]
 requires-python = "==3.12.*"
 readme = "README.md"

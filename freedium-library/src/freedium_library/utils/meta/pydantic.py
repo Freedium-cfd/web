@@ -1,5 +1,5 @@
 from functools import partial
-from typing import cast
+from typing import Type, cast
 
 from pydantic_settings import BaseSettings as _BaseSettings
 from pydantic_settings import SettingsConfigDict as _SettingsConfigDict
@@ -8,8 +8,8 @@ from pydantic_settings import SettingsConfigDict as _SettingsConfigDict
 class BaseConfig(_BaseSettings): ...
 
 
-BaseSettingsConfigDict: _SettingsConfigDict = cast(
-    _SettingsConfigDict,
+BaseSettingsConfigDict: Type[_SettingsConfigDict] = cast(
+    Type[_SettingsConfigDict],
     partial(
         _SettingsConfigDict,
         env_file=".env",

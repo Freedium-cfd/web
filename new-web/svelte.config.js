@@ -1,11 +1,12 @@
 import { mdsvex, escapeSvelte } from "mdsvex";
-import rehypeExternalLinks from "rehype-external-links";
 import { createHighlighter } from "shiki";
 import adapter from "@sveltejs/adapter-auto";
 import { toHtml } from "hast-util-to-html";
 import { vitePreprocess } from "@sveltejs/vite-plugin-svelte";
 import { h } from "hastscript";
 import remarkMixtapeEmbed from "./src/lib/utils/remark/mixtape-embed.js";
+import rehypeExternalLinks from "rehype-external-links";
+import rehypeShiki from "@shikijs/rehype";
 
 const readySvg =
 	"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='1em' height='1em' viewBox='0 0 24 24'><path fill='none' stroke='white' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M8.25 7.5V6.108c0-1.135.845-2.098 1.976-2.192q.56-.045 1.124-.08M15.75 18H18a2.25 2.25 0 0 0 2.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48 48 0 0 0-1.123-.08M15.75 18.75v-1.875a3.375 3.375 0 0 0-3.375-3.375h-1.5a1.125 1.125 0 0 1-1.125-1.125v-1.5A3.375 3.375 0 0 0 6.375 7.5H5.25m11.9-3.664A2.25 2.25 0 0 0 15 2.25h-1.5a2.25 2.25 0 0 0-2.15 1.586m5.8 0q.099.316.1.664v.75h-6V4.5q.001-.348.1-.664M6.75 7.5H4.875c-.621 0-1.125.504-1.125 1.125v12c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V16.5a9 9 0 0 0-9-9'/></svg>";
@@ -95,6 +96,7 @@ const mdsvexOptions = {
 	remarkPlugins: [remarkMixtapeEmbed],
 	rehypePlugins: [
 		[rehypeExternalLinks, { target: "_blank", rel: ["nofollow"] }],
+		[rehypeShiki, { theme: "poimandres" }],
 	],
 	highlight: {
 		highlighter: async (code, lang = "text") => {
@@ -134,10 +136,8 @@ const mdsvexOptions = {
 			});
 			const resultHtml = toHtml(result);
 			const buttonHtml = renderCodeCopyButton(code, { toggle: 1200 });
-			const html = escapeSvelte(
-				`<div class="relative">${buttonHtml}${resultHtml}</div>`,
-			);
-			return `{@html \`${html}\` }`;
+			const html = `<div class="relative">${buttonHtml}${resultHtml}</div>`;
+			return html;
 		},
 	},
 };

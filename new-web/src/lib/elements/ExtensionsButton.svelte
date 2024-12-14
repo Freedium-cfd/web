@@ -17,8 +17,8 @@
 		<DropdownMenu.Label>Browser Extensions</DropdownMenu.Label>
 		<DropdownMenu.Item class="text-xs text-gray-600 cursor-default dark:text-gray-500">
 			<span
-				>Note: These solutions are not developed or controlled by the Freedium developers team. Use
-				at your own risk.</span
+				>Note: These solutions are <span class="border-b border-dashed border-zinc-900">not</span> developed or
+				controlled by the Freedium developers team. Use at your own risk.</span
 			>
 		</DropdownMenu.Item>
 		<DropdownMenu.Item class="text-xs text-gray-600 cursor-default dark:text-gray-500">

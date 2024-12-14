@@ -29,7 +29,6 @@
 	id="header"
 	class="sticky top-0 z-20 w-full border-b shadow-sm bg-white/95 backdrop-blur-sm dark:bg-zinc-900/95 border-zinc-200 dark:border-zinc-800"
 >
-	<Advertise />
 	<ProgressLine />
 
 	<div class="container flex items-center justify-between h-16 px-4 mx-auto space-x-2">
@@ -54,13 +53,21 @@
 			</Button>
 			<ExtensionsButton />
 			<div class="w-px h-6 bg-zinc-300 dark:bg-zinc-700"></div>
-			<PayButtons name="Ko-fi" url="https://ko-fi.com/zhymabekroman" icon="icon-[teenyicons--cup-solid]" />
+			<PayButtons
+				name="Ko-fi"
+				url="https://ko-fi.com/zhymabekroman"
+				icon="icon-[teenyicons--cup-solid]"
+			/>
 			<PayButtons
 				name="Liberapay"
 				url="https://liberapay.com/ZhymabekRoman/"
 				icon="icon-[simple-icons--liberapay]"
 			/>
-			<PayButtons name="Discord" url="https://discord.gg/dAxCuG9nYM" icon="icon-[simple-icons--discord]" />
+			<PayButtons
+				name="Discord"
+				url="https://discord.gg/dAxCuG9nYM"
+				icon="icon-[simple-icons--discord]"
+			/>
 			<div class="w-px h-6 bg-zinc-300 dark:bg-zinc-700"></div>
 			<ThemeToggle />
 			<ReportProblem />
@@ -101,12 +108,18 @@
 					url="https://liberapay.com/ZhymabekRoman/"
 					icon="icon-[simple-icons--liberapay]"
 				/>
-				<PayButtons name="Discord" url="discord.gg/dAxCuG9nYM" icon="icon-[simple-icons--discord]" />
+				<PayButtons
+					name="Discord"
+					url="discord.gg/dAxCuG9nYM"
+					icon="icon-[simple-icons--discord]"
+				/>
 				<!-- <ExtensionsButton /> -->
 				<ReportProblem />
 			</div>
 		</div>
 	{/if}
+
+	<Advertise />
 </nav>
 
 <SearchDialog bind:open={isSearchOpen} />

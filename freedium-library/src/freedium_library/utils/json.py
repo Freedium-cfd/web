@@ -128,3 +128,4 @@ class JSON:
 
 
 json_instance = JSON()
+json = json_instance
