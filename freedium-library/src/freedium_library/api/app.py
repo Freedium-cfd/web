@@ -10,17 +10,23 @@ from freedium_library.api.settings import ApplicationSettings
 
 
 def create_application() -> FastAPI:
-    container = APIContainer()
-    container.wire(modules=["freedium_library.api.settings"])
+    api_container = APIContainer()
 
-    settings = ApplicationSettings(container=container)
-    config = container.config()
+    settings = ApplicationSettings(container=api_container)
+    config = api_container.config()
 
     if config.DISABLED_DOCS:
         logger.warning(f"Documentation is disabled: {config.DISABLED_DOCS}")
         settings.disable_docs()
 
-    app = FastAPI(**settings.to_dict(), lifespan=lifespan)  # type: ignore
+    app = FastAPI(
+        title=settings.title,
+        version=settings.version,
+        openapi_url=settings.openapi_url,
+        docs_url=settings.docs_url,
+        redoc_url=settings.redoc_url,
+        lifespan=lifespan,
+    )
 
     register_router(app, settings.prefix_path)
     register_error_handler(app)

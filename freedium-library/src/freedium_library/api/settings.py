@@ -9,14 +9,12 @@ from freedium_library.api.container import APIContainer
 
 
 class ApplicationSettings(BaseModel):
-    title: str = Field(default=f"{__NAME__} API Service")
-    version: str = Field(default=__VERSION__)
+    title: str = Field(default=f"{__NAME__} API Service", frozen=True)
+    version: str = Field(default=__VERSION__, frozen=True)
     prefix_path: str = Field(default="/api")
     openapi_url: Optional[str] = None
     docs_url: Optional[str] = None
     redoc_url: Optional[str] = None
-
-    model_config = {"arbitrary_types_allowed": True}
 
     @inject
     def __init__(
@@ -41,6 +39,3 @@ class ApplicationSettings(BaseModel):
         self.openapi_url = None
         self.docs_url = None
         self.redoc_url = None
-
-    def to_dict(self) -> dict[str, str | None]:
-        return self.model_dump()

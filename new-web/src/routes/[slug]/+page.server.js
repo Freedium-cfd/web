@@ -27,6 +27,16 @@ const CODE_ATTRIBUTES = {
 	"data-ms-editor": "false",
 };
 
+let highlighterInstance = null;
+
+async function getHighlighter() {
+	if (!highlighterInstance) {
+		highlighterInstance = await createHighlighter(HIGHLIGHT_CONFIG);
+		await highlighterInstance.loadLanguage("javascript", "typescript");
+	}
+	return highlighterInstance;
+}
+
 const MOCK_ARTICLE = {
 	title: "UploadThing is 5x Faster",
 	date: "2024-09-13T12:00:00Z",
@@ -75,8 +85,7 @@ function createCodeCopyButton(code, toggleMs = 3000) {
 }
 
 async function createHighlightedCode(code, lang = "text") {
-	const highlighter = await createHighlighter(HIGHLIGHT_CONFIG);
-	await highlighter.loadLanguage("javascript", "typescript");
+	const highlighter = await getHighlighter();
 
 	const lightHtml = highlighter.codeToHtml(code, {
 		lang,
@@ -115,9 +124,36 @@ async function createHighlightedCode(code, lang = "text") {
 	`;
 }
 
+const ErrorCodes = {
+	ARTICLE_NOT_FOUND: "ARTICLE_NOT_FOUND",
+	RENDER_ERROR: "RENDER_ERROR",
+	COMPILE_ERROR: "COMPILE_ERROR",
+	INTERNAL_ERROR: "INTERNAL_ERROR",
+};
+
 export async function load({ params }) {
+	let transformed = null;
 	try {
-		const transformed = await render("medium");
+		transformed = await render("medium");
+	} catch (err) {
+		console.error("Failed to render article:", err);
+	}
+
+	if (!transformed) {
+		return {
+			slug: params.slug,
+			loading: false,
+			content: null,
+			article: null,
+			error: {
+				status: 404,
+				message: "Article not found",
+				code: ErrorCodes.ARTICLE_NOT_FOUND,
+			},
+		};
+	}
+
+	try {
 		const { code } = await compile(transformed.text, {
 			highlight: {
 				highlighter: createHighlightedCode,
@@ -129,21 +165,23 @@ export async function load({ params }) {
 			loading: false,
 			content: code,
 			article: MOCK_ARTICLE,
+			error: null,
 		};
-	} catch (error) {
-		console.error("Failed to load article:", error);
+	} catch (compileError) {
 		return {
 			slug: params.slug,
 			loading: false,
 			content: null,
-			article: {
-				title: "Article Not Found",
-				date: new Date().toISOString(),
-				author: { name: "Unknown", role: "", avatar: "" },
-				postImage: null,
-				tableOfContents: [],
+			article: null,
+			error: {
+				status: 500,
+				message: "Failed to compile article content",
+				code: ErrorCodes.COMPILE_ERROR,
+				details:
+					process.env.NODE_ENV === "development"
+						? compileError.message
+						: undefined,
 			},
-			error: error.message,
 		};
 	}
 }

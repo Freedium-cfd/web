@@ -1,5 +1,8 @@
 import click
 
+from freedium_library.api.config import ServerConfig
+from freedium_library.api.main import start_server
+
 
 @click.command()
 @click.option("--host", default="0.0.0.0", help="Host address to bind to")
@@ -11,6 +14,9 @@ import click
     default=False,
 )
 def cli(host: str, port: int, hot_reload: bool):
-    from freedium_library.api.main import start_server
-
-    start_server(host=host, port=port, reload=hot_reload)
+    server_config = ServerConfig(
+        host=host,
+        port=port,
+        reload=hot_reload,
+    )
+    start_server(server_config=server_config)

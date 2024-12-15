@@ -102,62 +102,66 @@
 			</div>
 		</Drawer.Trigger>
 		<form on:submit|preventDefault={handleSubmit}>
-			<Drawer.Content>
-				<Drawer.Header class="text-left">
-					<Drawer.Title class="text-lg font-semibold tracking-tight">Report a Problem</Drawer.Title>
-					<Drawer.Description class="text-foreground-alt">
-						Please describe the problem you're experiencing. We'll look into it as soon as possible.
-					</Drawer.Description>
-				</Drawer.Header>
-				<div class="px-4">
-					<div class="grid grid-cols-1 gap-2 md:grid-cols-2 pt-7">
-						<div class="flex flex-col items-start gap-2">
-							<Label.Root class="text-sm font-medium">Problem Type</Label.Root>
-							<RadioGroup.Root bind:value={problemType} class="space-y-2">
-								<div class="flex items-center space-x-2">
-									<RadioGroup.Item value="ui_problem" id="ui-problem-mobile" />
-									<Label.Root for="ui-problem-mobile">UI problem</Label.Root>
-								</div>
-								<div class="flex items-center space-x-2">
-									<RadioGroup.Item value="article_not_full" id="article-not-full-mobile" />
-									<Label.Root for="article-not-full-mobile">Article is not full</Label.Root>
-								</div>
-								<div class="flex items-center space-x-2">
-									<RadioGroup.Item value="suggestion" id="suggestion-mobile" />
-									<Label.Root for="suggestion-mobile">Suggestion</Label.Root>
-								</div>
-								<div class="flex items-center space-x-2">
-									<RadioGroup.Item value="vulnerability" id="vulnerability-mobile" />
-									<Label.Root for="vulnerability-mobile">Vulnerability (XSS, etc.)</Label.Root>
-								</div>
-								<div class="flex items-center space-x-2">
-									<RadioGroup.Item value="other" id="other-mobile" />
-									<Label.Root for="other-mobile">Other</Label.Root>
-								</div>
-							</RadioGroup.Root>
+			<Drawer.Content class="max-h-[90dvh] flex flex-col">
+				<div class="flex-1 mb-5 overflow-y-auto">
+					<Drawer.Header class="text-left">
+						<Drawer.Title class="text-lg font-semibold tracking-tight"
+							>Report a Problem</Drawer.Title
+						>
+						<Drawer.Description class="text-foreground-alt">
+							Please describe the problem you're experiencing. We'll look into it as soon as
+							possible.
+						</Drawer.Description>
+					</Drawer.Header>
+					<div class="px-4 space-y-4">
+						<div class="space-y-4">
+							<div class="flex flex-col items-start space-y-2">
+								<Label.Root class="text-sm font-medium">Problem Type</Label.Root>
+								<RadioGroup.Root bind:value={problemType} class="space-y-2">
+									<div class="flex items-center space-x-2">
+										<RadioGroup.Item value="ui_problem" id="ui-problem-mobile" />
+										<Label.Root for="ui-problem-mobile">UI problem</Label.Root>
+									</div>
+									<div class="flex items-center space-x-2">
+										<RadioGroup.Item value="article_not_full" id="article-not-full-mobile" />
+										<Label.Root for="article-not-full-mobile">Article is not full</Label.Root>
+									</div>
+									<div class="flex items-center space-x-2">
+										<RadioGroup.Item value="suggestion" id="suggestion-mobile" />
+										<Label.Root for="suggestion-mobile">Suggestion</Label.Root>
+									</div>
+									<div class="flex items-center space-x-2">
+										<RadioGroup.Item value="vulnerability" id="vulnerability-mobile" />
+										<Label.Root for="vulnerability-mobile">Vulnerability (XSS, etc.)</Label.Root>
+									</div>
+									<div class="flex items-center space-x-2">
+										<RadioGroup.Item value="other" id="other-mobile" />
+										<Label.Root for="other-mobile">Other</Label.Root>
+									</div>
+								</RadioGroup.Root>
+							</div>
+							<div class="flex flex-col items-start space-y-2">
+								<Label.Root for="problemDescription-mobile" class="text-sm font-medium"
+									>Problem Description</Label.Root
+								>
+								<Textarea
+									id="problemDescription-mobile"
+									bind:value={problemDescription}
+									placeholder="Describe the problem you're experiencing..."
+									rows={12}
+								/>
+								<p class="mt-2 text-sm text-foreground-alt">
+									The current opened page will be automatically attached to your report.
+								</p>
+							</div>
 						</div>
-						<div class="flex flex-col items-start gap-1">
-							<Label.Root for="problemDescription-mobile" class="text-sm font-medium"
-								>Problem Description</Label.Root
-							>
-							<Textarea
-								id="problemDescription-mobile"
-								bind:value={problemDescription}
-								placeholder="Describe the problem you're experiencing..."
-								rows={12}
-							/>
-							<p class="mt-2 text-sm text-foreground-alt">
-								The current opened page will be automatically attached to your report.
-							</p>
+
+						<div class="flex justify-center gap-2">
+							<Drawer.Close class={buttonVariants({ variant: 'outline' })}>Cancel</Drawer.Close>
+							<Button type="submit">Submit</Button>
 						</div>
 					</div>
 				</div>
-				<Drawer.Footer class="p-4">
-					<div class="flex justify-end gap-2">
-						<Drawer.Close class={buttonVariants({ variant: 'outline' })}>Cancel</Drawer.Close>
-						<Button type="submit">Submit</Button>
-					</div>
-				</Drawer.Footer>
 			</Drawer.Content>
 		</form>
 	</Drawer.Root>
