@@ -11,12 +11,37 @@
 	import { Button } from '$lib/components/ui/button/index.js';
 
 	let isNavOpen = false;
+	let isSearchOpen = false;
+	let isHeaderVisible = true;
+	let lastScrollY = 0;
+
+	// Handle scroll events
+	function handleScroll() {
+		const currentScrollY = window.scrollY;
+		const documentHeight = document.documentElement.scrollHeight - window.innerHeight;
+		const scrollPercentage = (currentScrollY / documentHeight) * 100;
+
+		if (scrollPercentage > 15) {
+			isHeaderVisible = lastScrollY > currentScrollY;
+		} else {
+			isHeaderVisible = true;
+		}
+
+		lastScrollY = currentScrollY;
+	}
+
+	// Bind scroll event when component mounts
+	import { onMount } from 'svelte';
+
+	onMount(() => {
+		window.addEventListener('scroll', handleScroll, { passive: true });
+		return () => window.removeEventListener('scroll', handleScroll);
+	});
 
 	const toggleNav = () => {
 		isNavOpen = !isNavOpen;
 	};
 
-	let isSearchOpen = false;
 	const toggleSearch = () => {
 		isSearchOpen = !isSearchOpen;
 	};
@@ -27,7 +52,8 @@
 
 <nav
 	id="header"
-	class="sticky top-0 z-20 w-full border-b shadow-sm bg-white/95 backdrop-blur-sm dark:bg-zinc-900/95 border-zinc-200 dark:border-zinc-800"
+	class="sticky top-0 z-20 w-full transition-transform duration-300 border-b shadow-sm bg-white/95 backdrop-blur-sm dark:bg-zinc-900/95 border-zinc-200 dark:border-zinc-800"
+	style="transform: translateY({isHeaderVisible ? '0' : '-100%'})"
 >
 	<ProgressLine />
 
@@ -119,7 +145,12 @@
 		</div>
 	{/if}
 
-	<Advertise />
+	<div
+		class="transition-transform duration-300"
+		style="transform: translateY({isHeaderVisible ? '0' : '-100%'})"
+	>
+		<Advertise />
+	</div>
 </nav>
 
 <SearchDialog bind:open={isSearchOpen} />

@@ -4,6 +4,8 @@
 	import ProgressOverlay from '$lib/elements/ProgressOverlay.svelte';
 </script>
 
-<ProgressOverlay />
-<Toaster position="top-right" expand={true} />
-<slot />
+<div class="transition-all duration-200 ease-in-out">
+	<ProgressOverlay />
+	<Toaster position="top-right" expand={true} />
+	<slot />
+</div>

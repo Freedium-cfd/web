@@ -137,6 +137,19 @@ export async function load({ params }) {
 		transformed = await render("medium");
 	} catch (err) {
 		console.error("Failed to render article:", err);
+		return {
+			slug: params.slug,
+			loading: false,
+			content: null,
+			article: null,
+			error: {
+				status: 500,
+				message: "Failed to render article",
+				code: ErrorCodes.RENDER_ERROR,
+				details:
+					process.env.NODE_ENV === "development" ? err.message : undefined,
+			},
+		};
 	}
 
 	if (!transformed) {
@@ -164,7 +177,7 @@ export async function load({ params }) {
 			slug: params.slug,
 			loading: false,
 			content: code,
-			article: MOCK_ARTICLE,
+			article: transformed.article,
 			error: null,
 		};
 	} catch (compileError) {

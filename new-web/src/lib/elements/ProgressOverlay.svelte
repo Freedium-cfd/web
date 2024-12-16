@@ -3,7 +3,7 @@
 	import { fade } from 'svelte/transition';
 	import { writable } from 'svelte/store';
 
-	const MIN_DURATION = 400;
+	const MIN_DURATION = 200;
 	const isVisible = writable(false);
 
 	$: {

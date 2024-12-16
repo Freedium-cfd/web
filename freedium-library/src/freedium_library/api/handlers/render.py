@@ -148,7 +148,35 @@ console.log('Hello, world!');
 
 
 async def render_page(service_name: str):
-    return JSONResponse(content={"text": TEXT, "service_name": service_name})
+    return JSONResponse(
+        content={
+            "text": TEXT,
+            "service_name": service_name,
+            "article": {
+                "title": "UploadThing is 5x Faster",
+                "date": "2024-09-13T12:00:00Z",
+                "author": {
+                    "name": "Theo Browne",
+                    "role": "CEO @ Ping Labs",
+                    "avatar": "https://picsum.photos/seed/post1/400/300",
+                },
+                "postImage": "https://picsum.photos/seed/postimage/1200/600",
+                "tableOfContents": [
+                    {"id": "v7-is-here", "title": "V7 Is Here!"},
+                    {"id": "benchmarks", "title": "Benchmarks"},
+                    {"id": "the-road-to-v7", "title": "The Road To V7"},
+                    {
+                        "id": "uploadthing-has-served",
+                        "title": "UploadThing Has Served...",
+                    },
+                    {
+                        "id": "and-were-just-getting-started",
+                        "title": "...and we're just getting started",
+                    },
+                ],
+            },
+        }
+    )
 
 
 def register_render_router(router: APIRouter) -> None:

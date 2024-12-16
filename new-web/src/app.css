@@ -2,11 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-body,
-html {
-	scroll-behavior: smooth;
-}
-
 @layer base {
 	:root {
 		--background: 0, 0%, 97%;
@@ -70,6 +65,41 @@ html {
 		--destructive-foreground: 0 0% 98%;
 
 		--ring: 240 4.9% 83.9%;
+	}
+	body,
+	html {
+		scroll-behavior: smooth;
+	}
+
+	html {
+		@apply transition-colors duration-200;
+	}
+
+	html.dark {
+		@apply text-gray-100 bg-gray-900;
+	}
+
+	html:not(.dark) {
+		@apply text-gray-900 bg-white;
+	}
+
+	* {
+		@apply transition-colors duration-200 border-border;
+	}
+
+	html,
+	body,
+	:root {
+		@apply transition-all duration-200;
+	}
+
+	/* Update existing html dark/light modes to include transition */
+	html.dark {
+		@apply text-gray-100 transition-all duration-200 bg-gray-900;
+	}
+
+	html:not(.dark) {
+		@apply text-gray-900 transition-all duration-200 bg-white;
 	}
 }
 
