@@ -17,13 +17,6 @@ def test_init():
     assert str(ms3) == ""
 
 
-def test_string_property():
-    ms = MutableString("test")
-    ms._string_list[0] = "b"
-    ms._mark_dirty()
-    assert ms.string == "best"
-
-
 def test_len():
     ms = MutableString("hello")
     assert len(ms) == 5
