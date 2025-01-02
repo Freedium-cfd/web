@@ -1,10 +1,12 @@
 from dependency_injector import containers, providers
 
+from freedium_library.services.medium.validators import (
+    MediumServicePathValidator,
+)
 from freedium_library.utils.http import Request
 
 from .api import MediumApiService
 from .config import MediumConfig
-from .validators import MediumServicePathValidator
 
 
 class MediumContainer(containers.DeclarativeContainer):

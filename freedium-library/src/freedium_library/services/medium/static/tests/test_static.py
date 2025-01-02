@@ -44,7 +44,7 @@ def get_domains_from_file(filepath: str) -> list[str]:
 
 
 def get_file_path(filename: str) -> str:
-    return os.path.join(os.path.dirname(os.path.abspath(__file__)), filename)
+    return os.path.join(os.path.dirname(os.path.abspath(__file__)), "../", filename)
 
 
 @pytest.mark.integration
