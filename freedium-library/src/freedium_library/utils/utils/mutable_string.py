@@ -32,6 +32,8 @@ class MutableString:
         return self.string.encode(encoding, "surrogatepass")
 
     def insert(self, key: int, value: str) -> "MutableString":
+        if key < 0 or key > len(self._string_list):
+            raise IndexError("string index out of range")
         self._string_list.insert(key, value)
         self._mark_dirty()
         return self
@@ -50,4 +52,7 @@ class MutableString:
         return self.string
 
     def delete(self, start: int, length: int) -> None:
+        if start < 0 or start >= len(self._string_list):
+            raise IndexError("string index out of range")
         del self._string_list[start : start + length]
+        self._mark_dirty()
