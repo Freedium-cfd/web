@@ -21,7 +21,7 @@
 		const documentHeight = document.documentElement.scrollHeight - window.innerHeight;
 		const scrollPercentage = (currentScrollY / documentHeight) * 100;
 
-		if (scrollPercentage > 15) {
+		if (scrollPercentage > 5) {
 			isHeaderVisible = lastScrollY > currentScrollY;
 		} else {
 			isHeaderVisible = true;
