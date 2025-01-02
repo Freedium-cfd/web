@@ -124,6 +124,8 @@ class PositionTracker:
 
 
 class UTFHandler(ABC):
+    __slots__ = ("_string", "_encoding", "_position_tracker")
+
     def __init__(self, string: str, encoding: UTFEncoding):
         logger.debug(
             f"Initializing UTFHandler with string: '{string}' and encoding: {encoding}"
@@ -211,10 +213,6 @@ class UTFHandler(ABC):
 
         logger.debug(f"Final original position: {original_pos}")
         return original_pos
-
-    @property
-    def position_mappings(self) -> List[CharacterMapping]:
-        return self._position_tracker.get()
 
     def insert(self, encoded_position: int, string_to_insert: str) -> None:
         logger.info(
