@@ -22,6 +22,14 @@ class UTFEncoding(Enum):
             UTFEncoding.UTF32: "utf-32-le",
         }[self]
 
+    @property
+    def encoding_unit_size(self) -> int:
+        return {
+            UTFEncoding.UTF8: 1,
+            UTFEncoding.UTF16: 2,
+            UTFEncoding.UTF32: 4,
+        }[self]
+
 
 @dataclass
 class CharacterMapping:
@@ -30,6 +38,7 @@ class CharacterMapping:
     original_encoded_pos: int
     current_pos: int
     encoded_pos: int
+    original_char_length: int
     char_length: int
 
     def shift_positions(self, offset: int, encoded_offset: int) -> None:
@@ -73,16 +82,9 @@ class UTFHandler(ABC):
         logger.trace("Calculating encoded length")
         encoded_bytes = len(self._string.encode(self._encoding.encoding_name))
         logger.trace(f"Encoded bytes: {encoded_bytes}")
-        encoded_len = encoded_bytes // self._get_encoding_unit_size()
+        encoded_len = encoded_bytes // self._encoding.encoding_unit_size
         logger.trace(f"Encoded length: {encoded_len}")
         return encoded_len
-
-    def _get_encoding_unit_size(self) -> int:
-        unit_size = {UTFEncoding.UTF8: 1, UTFEncoding.UTF16: 2, UTFEncoding.UTF32: 4}[
-            self._encoding
-        ]
-        logger.trace(f"Encoding unit size for {self._encoding}: {unit_size}")
-        return unit_size
 
     def _initialize_mappings(self) -> None:
         logger.debug("Starting character mappings initialization")
@@ -93,7 +95,7 @@ class UTFHandler(ABC):
             char = self._string[i]
             char_len = (
                 len(char.encode(self._encoding.encoding_name))
-                // self._get_encoding_unit_size()
+                // self._encoding.encoding_unit_size
             )
             logger.trace(
                 f"Processing char '{char}' at position {i} with encoded length {char_len}"
@@ -115,6 +117,7 @@ class UTFHandler(ABC):
                         current_pos=current_pos,
                         encoded_pos=encoded_pos,
                         char_length=char_len,
+                        original_char_length=len(char),
                         original_encoded_pos=encoded_pos,
                         char=char,
                     )
@@ -154,7 +157,7 @@ class UTFHandler(ABC):
 
         for mapping in self._position_mappings:
             if mapping.encoded_pos < encoded_pos:
-                original_pos -= mapping.char_length - 1
+                original_pos -= mapping.char_length + 1
                 logger.trace(f"Adjusting original position: {original_pos}")
             else:
                 break
@@ -172,64 +175,65 @@ class UTFHandler(ABC):
         logger.trace("Retrieving position mappings")
         return self._position_mappings.copy()
 
-    def insert(self, position: int, string_to_insert: str) -> None:
-        logger.info(f"Inserting '{string_to_insert}' at position {position}")
+    def insert(self, encoded_position: int, string_to_insert: str) -> None:
+        logger.info(
+            f"Inserting '{string_to_insert}' at encoded position {encoded_position}"
+        )
+
         encoding_name = self._encoding.encoding_name
-        encoded_position = self.get_encoded_position(position)
         insert_encoded_len = (
             len(string_to_insert.encode(encoding_name))
-            // self._get_encoding_unit_size()
+            // self._encoding.encoding_unit_size
         )
-        logger.debug(
-            f"Encoded insertion position: {encoded_position}, encoded length: {insert_encoded_len}"
-        )
+        logger.debug(f"Encoded insertion length: {insert_encoded_len}")
 
+        # Find the original position that corresponds to the encoded position
+        original_position = self.get_original_position(encoded_position)
+
+        # Shift existing mappings that are after the insertion point
         for mapping in self._position_mappings:
-            if mapping.original_pos >= position:
-                old_pos = mapping.current_pos
-                old_encoded = mapping.encoded_pos
+            if mapping.encoded_pos >= encoded_position:
                 mapping.shift_positions(len(string_to_insert), insert_encoded_len)
-                logger.trace(
-                    f"Shifted mapping: {old_pos}->{mapping.current_pos}, {old_encoded}->{mapping.encoded_pos}"
-                )
 
-        self._add_new_mappings(string_to_insert, position, encoded_position)
-        self._string.insert(encoded_position, string_to_insert)
+        # Add new mappings for the inserted string
+        self._add_new_mappings(string_to_insert, original_position, encoded_position)
+
+        # Insert the string at the correct position
+        self._string.insert(original_position, string_to_insert)
         logger.debug(f"Insert complete. New string: '{self._string}'")
 
     def _add_new_mappings(
-        self, string_to_insert: str, start_pos: int, start_encoded_pos: int
+        self, string_to_insert: str, original_position: int, encoded_position: int
     ) -> None:
         logger.debug("Adding new mappings for inserted string")
-        logger.trace(
-            f"Start position: {start_pos}, Start encoded position: {start_encoded_pos}"
-        )
-        current_pos = start_pos
-        encoded_pos = start_encoded_pos
+        current_pos = original_position
+        encoded_pos = encoded_position
 
         for char in string_to_insert:
-            char_len = (
+            encoded_char_len = (
                 len(char.encode(self._encoding.encoding_name))
-                // self._get_encoding_unit_size()
+                // self._encoding.encoding_unit_size
             )
-            logger.trace(f"Processing char '{char}' with length {char_len}")
+            logger.trace(f"Processing char '{char}' with length {encoded_char_len}")
 
-            if char_len > 1:
+            if encoded_char_len > 1:
                 logger.debug(f"Found multi-byte character '{char}'")
                 new_mapping = CharacterMapping(
                     original_pos=current_pos,
                     current_pos=current_pos,
                     encoded_pos=encoded_pos,
-                    char_length=char_len,
+                    char_length=encoded_char_len,
+                    original_char_length=len(char),
                     original_encoded_pos=encoded_pos,
                     char=char,
                 )
 
+                # Find the correct position to insert the new mapping
                 insert_idx = next(
                     (
                         i
                         for i, m in enumerate(self._position_mappings)
-                        if m.current_pos > new_mapping.current_pos
+                        if m.encoded_pos > new_mapping.encoded_pos
                     ),
                     len(self._position_mappings),
                 )
@@ -238,7 +242,7 @@ class UTFHandler(ABC):
                 self._position_mappings.insert(insert_idx, new_mapping)
 
             current_pos += 1
-            encoded_pos += char_len
+            encoded_pos += encoded_char_len
 
         logger.debug(f"New position mappings: {self._position_mappings}")
 
