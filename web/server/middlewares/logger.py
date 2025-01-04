@@ -45,7 +45,7 @@ class LoggerMiddleware(BaseHTTPMiddleware):
                     logger.debug(f"\t< {name}: {value}")
 
             try:
-                response = await asyncio.wait_for(call_next(request), timeout=config.REQUEST_TIMEOUT)
+                response = await asyncio.wait_for(call_next(request), timeout=config.TIMEOUT)
             except Exception as ex:
                 exception_class = type(ex)
                 logger.exception(ex)

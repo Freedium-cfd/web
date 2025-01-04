@@ -16,9 +16,9 @@ MORE_LOGS: bool = config("MORE_LOGS", cast=bool, default=False)
 
 DISABLE_EXTERNAL_DOCS: bool = config("DISABLE_EXTERNAL_DOCS", cast=bool, default=True)
 
-TIMEOUT: int = config("TIMEOUT", cast=int, default=8)
-REQUEST_TIMEOUT: int = config("REQUEST_TIMEOUT", cast=int, default=40)
-WORKER_TIMEOUT: int = config("WORKER_TIMEOUT", cast=int, default=120)
+TIMEOUT: int = config("TIMEOUT", cast=int, default=38)
+REQUEST_TIMEOUT: int = config("REQUEST_TIMEOUT", cast=int, default=12)
+WORKER_TIMEOUT: int = config("WORKER_TIMEOUT", cast=int, default=85)
 
 CACHE_LIFE_TIME: int = config("CACHE_LIFE_TIME", cast=int, default=60 * 60 * 5)
 
