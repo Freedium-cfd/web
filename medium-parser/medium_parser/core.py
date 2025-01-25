@@ -361,7 +361,7 @@ class MediumParser:
                 out_paragraphs.append(header_template_rendered)
             elif paragraph["type"] == "IMG":
                 image_template = jinja_env.from_string(
-                    '<div class="mt-7"><img alt="{{ paragraph.metadata.alt }}" class="pt-5 m-auto lazy" role="presentation" data-src="https://miro.medium.com/v2/resize:fit:700/{{ paragraph.metadata.id }}"></div>'
+                    '<div class="mt-7"><img alt="{{ paragraph.metadata.alt }}" class="pt-5 m-auto lazy" role="presentation" referrerpolicy="no-referrer" data-src="https://miro.medium.com/v2/resize:fit:700/{{ paragraph.metadata.id }}"></div>'
                 )
                 image_caption_template = jinja_env.from_string(
                     "<figcaption class='mt-3 text-sm text-center text-gray-500 dark:text-gray-200'>{{ text }}</figcaption>"
@@ -530,7 +530,7 @@ class MediumParser:
             elif paragraph["type"] == "MIXTAPE_EMBED":
                 # TODO: redirect all Medium embeding articles to Fredium
                 embed_template = jinja_env.from_string(
-                    '<div class="items-center p-2 overflow-hidden border border-gray-300 mt-7"><a rel="noopener follow" href="{{ url }}" target="_blank"> <div class="flex flex-row justify-between p-2 overflow-hidden"><div class="flex flex-col justify-center p-2"><h2 class="text-base font-bold text-black dark:text-gray-100">{{ embed_title }}</h2><div class="block mt-2"><h3 class="text-sm text-grey-darker">{{ embed_description }}</h3></div><div class="mt-5"><p class="text-xs text-grey-darker">{{ embed_site }}</p></div></div><div class="relative flex h-40 flew-row w-60"><div class="absolute inset-0 bg-center bg-cover lazy" data-bg="https://miro.medium.com/v2/resize:fit:320/{{ paragraph.mixtapeMetadata.thumbnailImageId }}"></div></div></div> </a></div>'
+                    '<div class="items-center p-2 overflow-hidden border border-gray-300 mt-7"><a rel="noopener follow" href="{{ url }}" target="_blank"> <div class="flex flex-row justify-between p-2 overflow-hidden"><div class="flex flex-col justify-center p-2"><h2 class="text-base font-bold text-black dark:text-gray-100">{{ embed_title }}</h2><div class="block mt-2"><h3 class="text-sm text-grey-darker">{{ embed_description }}</h3></div><div class="mt-5"><p class="text-xs text-grey-darker">{{ embed_site }}</p></div></div><div class="relative flex h-40 flew-row w-60"><div class="absolute inset-0 bg-center bg-cover lazy" referrerpolicy="no-referrer" data-bg="https://miro.medium.com/v2/resize:fit:320/{{ paragraph.mixtapeMetadata.thumbnailImageId }}"></div></div></div> </a></div>'
                 )
                 if paragraph.get("mixtapeMetadata") is not None:
                     url = paragraph["mixtapeMetadata"]["href"]
