@@ -1,18 +1,18 @@
-<div class="p-2 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 w-full">
+<div class="grid w-full grid-cols-1 gap-4 p-2 md:grid-cols-2 lg:grid-cols-3">
     {% for post in post_list %}
         <div class="p-6 bg-white dark:bg-gray-600 rounded-xl">
             <a class="group" href="/{{ post.post_id }}">
-                <div class="max-h-60 min-h-60 m-auto overflow-hidden flex items-center justify-center">
+                <div class="flex items-center justify-center m-auto overflow-hidden max-h-60 min-h-60">
                     {% if post.preview_image_id %}
-                        <img data-src="https://miro.medium.com/v2/resize:fit:700/{{ post.preview_image_id }}"
-                             class="lazy w-full h-auto hover:scale-105 transition transition-all duration-200 ease-in-out">
+                        <img loading="eager" referrerpolicy="no-referrer" src="https://miro.medium.com/v2/resize:fit:700/{{ post.preview_image_id }}"
+                             class="w-full h-auto transition-all transition duration-200 ease-in-out hover:scale-105">
                     </div>
                 {% else %}
-                    <img data-src="https://images.unsplash.com/photo-1636467204130-edf8ee206dce?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80"
-                         class="lazy w-full h-auto hover:scale-105 transition transition-all duration-200 ease-in-out">
+                    <img loading="eager" referrerpolicy="no-referrer" src="https://images.unsplash.com/photo-1636467204130-edf8ee206dce?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80"
+                         class="w-full h-auto transition-all transition duration-200 ease-in-out hover:scale-105">
                 </div>
             {% endif %}
-            <h3 class="mt-6 leading-normal text-gray-800 dark:text-gray-100 group-hover:text-purple-400 font-semibold text-xl lg:text-2xl line-clamp-3 transition translation-all duration-200 ease-in-out">{{ post.title }}</h3>
+            <h3 class="mt-6 text-xl font-semibold leading-normal text-gray-800 transition duration-200 ease-in-out dark:text-gray-100 group-hover:text-purple-400 lg:text-2xl line-clamp-3 translation-all">{{ post.title }}</h3>
         </a>
         <div class="mt-6">
             <div class="flex flex-wrap items-center space-x-2 text-sm text-gray-500 dark:text-white">
@@ -24,7 +24,7 @@
                         <img src="https://miro.medium.com/v2/resize:fill:48:48/{{ post.collection.avatar.id }}"
                              alt="{{ post.collection.name }}"
                              loading="eager"
-                             class="h-4 w-4 rounded-full no-lightense">
+                             class="w-4 h-4 rounded-full no-lightense">
                         <p>{{ post.collection.name }}</p>
                     </a>
                     <span>·</span>
@@ -35,7 +35,7 @@
                 <span class="md:inline dark:text-white">·</span>
                 <span class="text-yellow-500 dark:text-white">Free: {{ post.free_access }}</span>
             </div>
-            <p class="mt-6 leading-normal line-clamp-3 text-gray-600 dark:text-gray-200">{{ post.description }}</p>
+            <p class="mt-6 leading-normal text-gray-600 line-clamp-3 dark:text-gray-200">{{ post.description }}</p>
         </div>
         <a href="/{{ post.post_id }}" class="inline-block mt-6 text-purple-500 hover:text-purple-400">Read More</a>
     </div>

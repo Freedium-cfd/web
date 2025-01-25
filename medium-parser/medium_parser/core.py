@@ -361,7 +361,7 @@ class MediumParser:
                 out_paragraphs.append(header_template_rendered)
             elif paragraph["type"] == "IMG":
                 image_template = jinja_env.from_string(
-                    '<div class="mt-7"><img alt="{{ paragraph.metadata.alt }}" class="pt-5 m-auto" role="presentation" referrerpolicy="no-referrer" src="https://miro.medium.com/v2/resize:fit:700/{{ paragraph.metadata.id }}"></div>'
+                    '<div class="mt-7"><img loading="eager" alt="{{ paragraph.metadata.alt }}" class="pt-5 m-auto" role="presentation" referrerpolicy="no-referrer" src="https://miro.medium.com/v2/resize:fit:700/{{ paragraph.metadata.id }}"></div>'
                 )
                 image_caption_template = jinja_env.from_string(
                     "<figcaption class='mt-3 text-sm text-center text-gray-500 dark:text-gray-200'>{{ text }}</figcaption>"

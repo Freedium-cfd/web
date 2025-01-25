@@ -21,7 +21,7 @@
             <div class="flex items-center p-4 space-x-4">
                 <div class="flex-shrink-0">
                     <a href="https://medium.com/@{{ creator.username }}" target="_blank" title="{{ creator.bio }}" class="relative block">
-                        <img src="https://miro.medium.com/v2/resize:fill:88:88/{{ creator.imageId }}"
+                        <img loading="eager" src="https://miro.medium.com/v2/resize:fill:88:88/{{ creator.imageId }}"
                              alt="{{ creator.name }}"
                              referrerpolicy="no-referrer"
                              class="rounded-full h-11 w-11 no-lightense">
@@ -48,7 +48,7 @@
                            title="{{ collection.shortDescription }}"
                            target="_blank"
                            class="flex items-center space-x-1">
-                            <img src="https://miro.medium.com/v2/resize:fill:48:48/{{ collection.avatar.id }}"
+                            <img loading="eager" src="https://miro.medium.com/v2/resize:fill:48:48/{{ collection.avatar.id }}"
                                  alt="{{ collection.name }}"
                                  referrerpolicy="no-referrer"
                                  class="w-4 h-4 rounded-full no-lightense">
