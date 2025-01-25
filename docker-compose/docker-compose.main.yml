@@ -93,10 +93,10 @@ services:
     profiles:
       - prod
     environment:
-      - "PROXY_LIST=socks5://haproxy-pb:1080"
-    depends_on:
-      haproxy-proxy-balancer:
-        condition: service_healthy
+      - "PROXY_LIST=${PROXY_LIST:-socks5://haproxy-pb:1080}"
+    # depends_on:
+    #   haproxy-proxy-balancer:
+    #     condition: service_healthy
     container_name: freedium_web
     hostname: freedium_web
 
