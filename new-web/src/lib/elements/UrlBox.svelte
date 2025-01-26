@@ -30,7 +30,7 @@
 		<!-- svelte-ignore a11y-autofocus -->
 		<input
 			type="text"
-			placeholder="Enter Medium post link"
+			placeholder="Enterx post link"
 			class="w-full bg-transparent border-zinc-300 focus:outline-none text-primary"
 			autofocus
 			bind:value={url}

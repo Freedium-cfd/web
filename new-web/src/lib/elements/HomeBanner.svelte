@@ -6,7 +6,7 @@
 <div class="container w-full py-20 pt-20 mx-auto break-words">
 	<div class="flex flex-col items-center justify-center h-60">
 		<h1 class="mt-8 text-4xl font-bold text-center text-primary md:max-w-3xl">
-			Freedium: Your paywall breakthrough for Medium!
+			Freedium: Breaking Down the Walls of Knowledge
 		</h1>
 		<UrlBox />
 	</div>

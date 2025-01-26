@@ -64,6 +64,7 @@
 				<div class="flex items-center">
 					<img
 						src="https://miro.medium.com/v2/resize:fill:48:48/{collection.avatarId}"
+						referrerpolicy="no-referrer"
 						alt={collection.name.charAt(0)}
 						loading="eager"
 						class="w-4 h-4 mr-1 rounded-full no-lightense"

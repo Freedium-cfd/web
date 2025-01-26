@@ -62,7 +62,7 @@
 			>Freedium βeta</a
 		>
 
-		<div class="flex-grow max-w-md mx-2">
+		<!-- <div class="flex-grow max-w-md mx-2">
 			<Button
 				class="items-center hidden w-full h-8 gap-2 pl-2 pr-3 text-sm transition bg-white rounded-full ui-not-focus-visible:outline-none text-zinc-500 ring-1 ring-zinc-900/10 hover:ring-zinc-900/20 hover:bg-zinc-50 focus-visible:ring-2 focus-visible:ring-primary lg:flex dark:bg-white/5 dark:text-zinc-400 dark:ring-inset dark:ring-white/10 dark:hover:ring-white/20 dark:hover:bg-white/10"
 				on:click={toggleSearch}
@@ -71,11 +71,11 @@
 				<span class="icon-[heroicons-outline--magnifying-glass]" />
 				<span>Search articles...</span>
 			</Button>
-		</div>
+		</div> -->
 
 		<div class="items-center hidden space-x-2 md:flex">
-			<Button class="lg:hidden" variant="ghost" size="icon" on:click={toggleSearch}>
-				<span class="icon-[heroicons-outline--magnifying-glass] size-5" />
+			<Button variant="ghost" size="icon" on:click={toggleSearch}>
+				<span class="icon-[heroicons--magnifying-glass-16-solid] size-5" />
 			</Button>
 			<ExtensionsButton />
 			<div class="w-px h-6 bg-zinc-300 dark:bg-zinc-700"></div>
@@ -104,6 +104,7 @@
 				<span class="icon-[heroicons-outline--magnifying-glass] size-5" />
 			</Button>
 			<ThemeToggle />
+			<ReportProblem />
 			<Button
 				variant="ghost"
 				size="icon"
@@ -140,17 +141,16 @@
 					icon="icon-[simple-icons--discord]"
 				/>
 				<!-- <ExtensionsButton /> -->
-				<ReportProblem />
 			</div>
 		</div>
 	{/if}
 
-	<div
+	<!-- <div
 		class="transition-transform duration-300"
 		style="transform: translateY({isHeaderVisible ? '0' : '-100%'})"
 	>
 		<Advertise />
-	</div>
+	</div> -->
 </nav>
 
 <SearchDialog bind:open={isSearchOpen} />

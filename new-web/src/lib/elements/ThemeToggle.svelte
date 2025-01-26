@@ -1,35 +1,52 @@
 <script lang="ts">
-	import { Button } from '$lib/components/ui/button/index.js';
+	import { createSwitch } from '@melt-ui/svelte';
 	import { browser } from '$app/environment';
+	import { Moon, Sun } from 'lucide-svelte';
 
-	let darkMode = true;
+	const initialChecked = browser
+		? localStorage.theme === 'dark' ||
+			(!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)
+		: false;
 
-	function handleSwitchDarkMode() {
-		darkMode = !darkMode;
-		localStorage.setItem('theme', darkMode ? 'dark' : 'light');
-		darkMode
+	const {
+		elements: { root, input },
+		states: { checked }
+	} = createSwitch({
+		defaultChecked: initialChecked
+	});
+
+	$: if (browser) {
+		const isDark = $checked;
+		localStorage.setItem('theme', isDark ? 'dark' : 'light');
+		isDark
 			? document.documentElement.classList.add('dark')
 			: document.documentElement.classList.remove('dark');
 	}
 
 	if (browser) {
-		if (
+		const isDark =
 			localStorage.theme === 'dark' ||
-			(!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)
-		) {
-			document.documentElement.classList.add('dark');
-			darkMode = true;
-		} else {
-			document.documentElement.classList.remove('dark');
-			darkMode = false;
-		}
+			(!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches);
+		isDark
+			? document.documentElement.classList.add('dark')
+			: document.documentElement.classList.remove('dark');
 	}
 </script>
 
-<Button
-	class="px-3 text-gray-600 py-7 dark:text-white hover:text-primary dark:hover:text-primary"
-	on:click={handleSwitchDarkMode}
-	variant="ghost"
+<button
+	{...$root}
+	use:root
+	class="relative inline-flex h-[36px] w-[60px] cursor-pointer items-center rounded-full bg-gray-200 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 data-[state=checked]:bg-primary dark:bg-gray-700"
 >
-	<span class={`${darkMode ? 'icon-[heroicons--moon-solid]' : 'icon-[heroicons--sun-solid]'} size-5`} />
-</Button>
+	<span
+		class="pointer-events-none flex h-[30px] w-[30px] items-center justify-center rounded-full bg-white transition-transform duration-200"
+		style:transform={$checked ? 'translateX(24px)' : 'translateX(3px)'}
+	>
+		{#if !$checked}
+			<Sun class="text-gray-600 size-4" />
+		{:else}
+			<Moon class="text-gray-600 size-4" />
+		{/if}
+	</span>
+	<input {...$input} use:input type="checkbox" class="sr-only" />
+</button>

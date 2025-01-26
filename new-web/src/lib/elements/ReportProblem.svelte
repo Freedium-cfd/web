@@ -24,8 +24,8 @@
 
 {#if $isDesktop}
 	<Dialog.Root bind:open>
-		<Dialog.Trigger class={buttonVariants({ variant: 'default' })}>
-			<div class="flex items-center space-x-2 text-white">
+		<Dialog.Trigger class={buttonVariants({ variant: 'ghost' })}>
+			<div class="flex items-center space-x-2 text-primary">
 				<span class="icon-[heroicons--exclamation-triangle-solid] size-5" />
 				<span class="hidden text-sm font-medium lg:block">Report a problem</span>
 			</div>
