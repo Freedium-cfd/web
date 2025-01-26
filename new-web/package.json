@@ -42,6 +42,7 @@
 	},
 	"type": "module",
 	"dependencies": {
+		"@iconify-json/stash": "^1.2.2",
 		"@iconify/svelte": "^4.2.0",
 		"@iconify/tailwind": "^1.2.0",
 		"bits-ui": "^0.21.16",

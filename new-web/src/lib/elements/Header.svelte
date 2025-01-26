@@ -96,7 +96,11 @@
 			/>
 			<div class="w-px h-6 bg-zinc-300 dark:bg-zinc-700"></div>
 			<ThemeToggle />
-			<ReportProblem />
+			<ReportProblem variant="warning" showBadge={true} />
+			<Button>
+				<span class="icon-[stash--article-plus-solid] text-white size-5" />
+				<span class="sr-only">Add article</span>
+			</Button>
 		</div>
 
 		<div class="flex items-center space-x-2 md:hidden">
@@ -104,7 +108,7 @@
 				<span class="icon-[heroicons-outline--magnifying-glass] size-5" />
 			</Button>
 			<ThemeToggle />
-			<ReportProblem />
+			<ReportProblem variant="danger" compact={true} />
 			<Button
 				variant="ghost"
 				size="icon"

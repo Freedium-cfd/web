@@ -156,10 +156,16 @@
 
 				<aside class="w-full mt-7 lg:mt-0 max-w-64" aria-labelledby="toc-heading">
 					<div class="sticky top-12">
-						<Button class="w-full mb-4">
-							<span class="icon-[heroicons--arrow-down-20-solid] size-4 mr-1" />
-							Download as PDF/Markdown
-						</Button>
+						<div class="flex gap-2 mb-4">
+							<Button variant="outline" class="flex-1">
+								<span class="icon-[heroicons--document-arrow-down-20-solid] size-4 mr-1" />
+								PDF
+							</Button>
+							<Button class="flex-1" variant="outline">
+								<span class="icon-[heroicons--document-text-20-solid] size-4 mr-1" />
+								Markdown
+							</Button>
+						</div>
 						<nav class="w-full p-4 bg-white rounded-lg shadow-lg dark:bg-zinc-900">
 							<h2 id="toc-heading" class="mb-4 text-xl font-semibold text-primary">Contents</h2>
 							{#if article.tableOfContents && article.tableOfContents.length > 0}

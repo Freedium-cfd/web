@@ -13,6 +13,10 @@
 	let problemDescription = '';
 	let problemType = 'ui_problem';
 
+	export let variant: 'default' | 'warning' | 'danger' = 'default';
+	export let showBadge = false;
+	export let compact = false;
+
 	const handleSubmit = () => {
 		console.log({ problemType, problemDescription });
 		toast.success(`${problemType} submitted`);
@@ -20,14 +24,35 @@
 		problemType = 'ui_problem';
 		open = false;
 	};
+
+	const getVariantStyles = (variant: string) => {
+		const styles = {
+			default: 'bg-primary hover:bg-primary/90',
+			warning: 'bg-purple-500 hover:bg-purple-600 text-white',
+			danger: 'bg-red-500 hover:bg-red-600 text-white'
+		};
+		return styles[variant] || styles.default;
+	};
 </script>
 
 {#if $isDesktop}
 	<Dialog.Root bind:open>
-		<Dialog.Trigger class={buttonVariants({ variant: 'ghost' })}>
-			<div class="flex items-center space-x-2 text-primary">
+		<Dialog.Trigger
+			class={`${buttonVariants({ variant: 'default' })} ${getVariantStyles(variant)} relative`}
+		>
+			<div class="flex items-center space-x-2">
 				<span class="icon-[heroicons--exclamation-triangle-solid] size-5" />
-				<span class="hidden text-sm font-medium lg:block">Report a problem</span>
+				{#if !compact}
+					<span class="hidden text-sm font-medium lg:block">Report a problem</span>
+				{/if}
+				{#if showBadge}
+					<span class="absolute flex w-3 h-3 -top-1 -right-1">
+						<span
+							class="absolute inline-flex w-full h-full bg-red-400 rounded-full opacity-75 animate-ping"
+						></span>
+						<span class="relative inline-flex w-3 h-3 bg-red-500 rounded-full"></span>
+					</span>
+				{/if}
 			</div>
 		</Dialog.Trigger>
 		<form on:submit|preventDefault={handleSubmit}>
