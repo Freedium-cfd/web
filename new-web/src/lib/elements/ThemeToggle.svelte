@@ -36,7 +36,7 @@
 <button
 	{...$root}
 	use:root
-	class="relative inline-flex h-[36px] w-[60px] cursor-pointer items-center rounded-full bg-gray-200 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 data-[state=checked]:bg-primary dark:bg-gray-700"
+	class="relative inline-flex min-h-[36px] min-w-[60px] cursor-pointer items-center rounded-full bg-gray-200 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 data-[state=checked]:bg-primary dark:bg-gray-700"
 >
 	<span
 		class="pointer-events-none flex h-[30px] w-[30px] items-center justify-center rounded-full bg-white transition-transform duration-200"
