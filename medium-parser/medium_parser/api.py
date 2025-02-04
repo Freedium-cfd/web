@@ -1,13 +1,9 @@
 import random
 from typing import List, Optional
 
-import aiohttp
-import orjson
-from aiohttp_retry import RetryClient
-from aiohttp_socks import ProxyConnector
+from curl_cffi.requests import AsyncSession
 from loguru import logger
 
-from medium_parser import retry_options
 from medium_parser.time import get_unix_ms
 from medium_parser.utils import generate_random_sha256_hash
 
@@ -32,14 +28,10 @@ class MediumApi:
     async def query_post_graphql(self, post_id: str):
         logger.debug(f"Starting request construction for post {post_id}")
 
+        proxy = None
         if self.proxy_list:
             proxy = random.choice(self.proxy_list)
-            connector = ProxyConnector.from_url(proxy)
             logger.debug(f"Using proxy: {proxy}")
-        else:
-            connector = None
-
-        logger.debug(f"Using connector: {connector}")
 
         headers = {
             "X-APOLLO-OPERATION-ID": generate_random_sha256_hash(),
@@ -72,36 +64,35 @@ class MediumApi:
 
         logger.debug("Request started...")
 
-        async with aiohttp.ClientSession(connector=connector) as session:
-            async with RetryClient(
-                client_session=session,
-                raise_for_status=False,
-                retry_options=retry_options,
-            ) as retry_client:
-                async with retry_client.post(
+        try:
+            async with AsyncSession() as session:
+                response = await session.post(
                     "https://medium.com/_/graphql",
                     headers=headers,
                     json=graphql_data,
+                    proxies={"http": proxy, "https": proxy} if proxy else None,
                     timeout=self.timeout,
-                ) as request:
-                    if request.status != 200:
-                        logger.error(
-                            f"Failed to fetch post by ID {post_id} with status code: {request.status}"
-                        )
-                        return None
+                    impersonate="chrome110",
+                )
 
-                    try:
-                        response_data = await request.json(loads=orjson.loads)
-                    except Exception as ex:
-                        logger.debug("Failed to parse response data as JSON")
-                        logger.exception(ex)
-                        exception = ex
+                if response.status_code != 200:
+                    logger.error(
+                        f"Failed to fetch post by ID {post_id} with status code: {response.status_code}, response: {response.text}"
+                    )
+                    return None
+
+                response_data = response.json()
+
+        except Exception as ex:
+            logger.debug("Failed to make request or parse response")
+            logger.exception(ex)
+            exception = ex
 
         logger.debug("Request finished...")
 
         if exception:
             logger.error(
-                f"Exception occured while fetching post {post_id}, so let's just fuck it up"
+                f"Exception occurred while fetching post {post_id}, so let's just fuck it up"
             )
             raise exception
 
