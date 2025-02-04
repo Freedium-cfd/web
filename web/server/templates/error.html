@@ -1,16 +1,19 @@
-<div class="container w-full md:max-w-3xl mx-auto pt-40"></div>
-<div class="container w-full mx-auto pt-20 pb-20 break-words">
+<div class="container w-full pt-40 mx-auto md:max-w-3xl"></div>
+<div class="container w-full pt-20 pb-20 mx-auto break-words">
     <div class="flex flex-col items-center justify-center h-90">
-        <div class="bg-green-500 text-white text-6xl font-bold p-6 rounded-lg shadow-lg">Oppps!</div>
+        <p class="pb-3 text-base font-bold text-green-500 md:text-sm">
+            <a href="{{ url }}#bypass" class="text-sm font-bold text-green-500 no-underline md:text-sm hover:underline ">&lt; Go to the original</a>
+        </p>
+        <div class="p-6 text-6xl font-bold text-white bg-green-500 rounded-lg shadow-lg">Oppps!</div>
         <div class="flex items-center justify-center mt-12">
-            <p class="dark:text-gray-200 text-gray-700 text-lg">{{ error_msg }}</p>
+            <p class="text-lg text-gray-700 dark:text-gray-200">{{ error_msg }}</p>
         </div>
         {% include 'url_box.html' %}
-        <div class="flex md:max-w-2xl items-center justify-center mt-8">
-            <p class="dark:text-gray-200 text-gray-700">We are aware of this error. Please try again later if this was an error on our part, we will fix it as soon as possible.</p>
+        <div class="flex items-center justify-center mt-8 md:max-w-2xl">
+            <p class="text-gray-700 dark:text-gray-200">We are aware of this error. Please try again later if this was an error on our part, we will fix it as soon as possible.</p>
         </div>
         <div class="flex items-center justify-center mt-28">
-            <p class="p-5 bg-black text-white font-mono">Your emergency transponder code: {{ transponder_code }}</p>
+            <p class="p-5 font-mono text-white bg-black">Your emergency transponder code: {{ transponder_code }}</p>
         </div>
     </div>
 </div>
