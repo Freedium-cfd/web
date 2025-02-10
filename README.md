@@ -200,3 +200,6 @@ graph TB
 - [ ] Integrate Grafana/Prometheus to monitor our services
 - [ ] Add more metrics to our services to have ability to monitor it
 - [ ] Make able translate posts to different languages using translatepy library
+
+
+[![Star History Chart](https://api.star-history.com/svg?repos=Freedium-cfd/web&type=Date)](https://star-history.com/#Freedium-cfd/web&Date)
