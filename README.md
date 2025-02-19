@@ -184,22 +184,14 @@ graph TB
     class ext1,ext2,ext3 external
 ```
 
-## TODO:
-
-- ~~Integrate library notifiers - https://github.com/liiight/notifiers~~ Use Graphana and Loki instead
-- ~~Do not use 'shturman/dante' image, because it is does not have updates for a long time. (Probably) Use https://hub.docker.com/r/vimagick/dante/~~ Works, don't touch
-
 ## Roadmap
 
-- [ ] Speed up parser logic, port to Cython or rewrite to Golang
-- [ ] Make parse Medium format directly to Markdown, not HTML, in order to make it more universal. This helps to generate RSS feeds, PDF, HTML.
-      OR we need write separate parser for different formats, like PDF, Markdown, etc.
+- [ ] Speed up parser logic
+- [ ] Parse articles directly to Markdown
 - [ ] Add more services than just a Medium
 - [ ] Rewrite frontend to Svelte
-- [ ] Move frontend to Cloudflare Pages
-- [ ] Integrate Grafana/Prometheus to monitor our services
-- [ ] Add more metrics to our services to have ability to monitor it
-- [ ] Make able translate posts to different languages using translatepy library
-
+- [ ] Integrate Grafana/Prometheus/Plausible to monitor our services
+- [ ] Translate posts to different languages using `translatepy` library
+- [ ] AI-powered summary of posts
 
 [![Star History Chart](https://api.star-history.com/svg?repos=Freedium-cfd/web&type=Date)](https://star-history.com/#Freedium-cfd/web&Date)
