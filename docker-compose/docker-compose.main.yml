@@ -7,6 +7,8 @@ x-expose: &expose
   ports:
     - "80:80"
     - "443:443"
+    - "6752:6752"
+    - "6753:6753"
 
 x-freedium_web: &freedium_web
   env_file: ../.env
@@ -65,15 +67,12 @@ services:
         ipv4_address: 177.28.0.5
 
   caddy_freedium:
-    <<: *caddy_freedium
+    <<: [ *caddy_freedium, *expose ]
     container_name: caddy_freedium
     networks:
       freedium_net:
       caddy_freedium_net:
       caddy_net:
-    ports:
-      - "6752:6752"
-      - "6753:6753"
     profiles:
       - prod
       - min

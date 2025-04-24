@@ -59,7 +59,7 @@ To configure your Freedium instance, follow these steps:
    sudo docker network create caddy_net
    ```
 
-4. Change your hosts file:
+4. (Optional) Change your hosts file:
 
    ```
    sudo nano /etc/hosts
@@ -86,7 +86,7 @@ To configure your Freedium instance, follow these steps:
    sudo docker compose --profile local -f ./docker-compose/docker-compose.yml down
    ```
 
-And now you can access local instance of Freedium by opening browser and type `https://freedium.local`. There is would be a warning about insecure connection, because we use self-signed TLS certificate. Ignore it.
+And now you can access local instance of Freedium by opening browser and type `https://freedium.local` or `http://localhost:6752` if you ignored 4th step. There is would be a warning about insecure connection, because we use self-signed TLS certificate. Ignore it.
 
 ### Production run:
 
