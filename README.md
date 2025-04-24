@@ -53,7 +53,7 @@ To configure your Freedium instance, follow these steps:
 
    Open the `.env` file and adjust the values as needed for your setup.
 
-3. (Optional) Set up the Docker network:
+3. Set up the Docker network:
 
    ```
    sudo docker network create caddy_net
