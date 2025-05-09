@@ -5,8 +5,8 @@ x-expose: &expose
     freedium_local_net:
       ipv4_address: 177.28.0.5
   ports:
-    - "80:80"
-    - "443:443"
+    # - "80:80"
+    # - "443:443"
     - "6752:6752"
     - "6753:6753"
 
