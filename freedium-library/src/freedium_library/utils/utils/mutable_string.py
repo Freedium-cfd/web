@@ -1,4 +1,4 @@
-from typing import List, Union
+from typing import List, Union, overload
 
 
 class MutableString:
@@ -31,7 +31,13 @@ class MutableString:
     def __setitem__(self, key: Union[int, slice], value: str) -> None:
         self._string_list[key] = value
 
-    def __getitem__(self, key: int) -> str:
+    @overload
+    def __getitem__(self, key: int) -> str: ...
+
+    @overload
+    def __getitem__(self, key: slice) -> List[str]: ...
+
+    def __getitem__(self, key: Union[int, slice]) -> Union[str, List[str]]:
         return self._string_list[key]
 
     def __str__(self) -> str:

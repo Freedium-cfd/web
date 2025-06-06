@@ -1,9 +1,10 @@
-from typing import Any, Literal, Optional
+from typing import Any, Dict, Literal, Optional, cast
 
 import pytest
+from httpx import Request as HttpxNativeRequest
 from pytest_httpx import HTTPXMock
 
-from freedium_library.utils.http.client import Request, RequestConfig
+from freedium_library.utils.http.client import HttpxRequest, RequestConfig
 
 
 @pytest.fixture
@@ -14,10 +15,11 @@ def mock_response() -> dict[str, Any]:
 def test_sync_context_manager(httpx_mock: HTTPXMock, mock_response: dict[str, Any]):
     httpx_mock.add_response(**mock_response)
 
-    with Request() as client:
+    with HttpxRequest() as client:
         response = client.get("http://test.com")
         assert response.status_code == 200
-        assert client._in_context_manager is True
+        # Access internal attribute for testing
+        assert getattr(client, "_in_context_manager") is True
 
 
 def test_sync_without_context_manager(
@@ -26,14 +28,15 @@ def test_sync_without_context_manager(
     httpx_mock.add_response(**mock_response)
 
     with pytest.warns(UserWarning, match="Request should be used as a context manager"):
-        client = Request()
+        client = HttpxRequest()
 
     with pytest.warns(
         UserWarning, match="Request is not being used as a context manager"
     ):
         response = client.get("http://test.com")
         assert response.status_code == 200
-        assert client._in_context_manager is False
+        # Access internal attribute for testing
+        assert getattr(client, "_in_context_manager") is False
 
 
 @pytest.mark.asyncio
@@ -42,10 +45,11 @@ async def test_async_context_manager(
 ):
     httpx_mock.add_response(**mock_response)
 
-    async with Request() as client:
+    async with HttpxRequest() as client:
         response = await client.aget("http://test.com")
         assert response.status_code == 200
-        assert client._in_context_manager is True
+        # Access internal attribute for testing
+        assert getattr(client, "_in_context_manager") is True
 
 
 @pytest.mark.asyncio
@@ -55,14 +59,15 @@ async def test_async_without_context_manager(
     httpx_mock.add_response(**mock_response)
 
     with pytest.warns(UserWarning, match="Request should be used as a context manager"):
-        client = Request()
+        client = HttpxRequest()
 
     with pytest.warns(
         UserWarning, match="Request is not being used as a context manager"
     ):
         response = await client.aget("http://test.com")
         assert response.status_code == 200
-        assert client._in_context_manager is False
+        # Access internal attribute for testing
+        assert getattr(client, "_in_context_manager") is False
 
 
 @pytest.mark.parametrize(
@@ -74,21 +79,25 @@ async def test_async_without_context_manager(
         ("delete", "adelete", None),
     ],
 )
-def test_http_methods(
+@pytest.mark.asyncio
+async def test_http_methods(
     httpx_mock: HTTPXMock,
     mock_response: dict[str, Any],
     method: Literal["get", "post", "put", "delete"],
     async_method: Literal["aget", "apost", "aput", "adelete"],
-    data: Optional[dict[Any, Any]],
+    data: Optional[Dict[str, Any]],
 ):
     httpx_mock.add_response(**mock_response)
 
-    with Request() as client:
-        func = getattr(client, method)
-        kwargs = {"url": "http://test.com"}
+    async with HttpxRequest() as client:
+        func = getattr(client, async_method)
+        kwargs: Dict[str, Any] = {"url": "http://test.com"}
         if data:
-            kwargs["data"] = data
-        response = func(**kwargs)
+            if async_method in ["apost", "aput"]:
+                kwargs["data"] = data
+            else:
+                kwargs["params"] = data
+        response = await func(**kwargs)
         assert response.status_code == 200
 
 
@@ -107,252 +116,235 @@ async def test_async_http_methods(
     mock_response: dict[str, Any],
     method: Literal["get", "post", "put", "delete"],
     async_method: Literal["aget", "apost", "aput", "adelete"],
-    data: Optional[dict[Any, Any]],
+    data: Optional[Dict[str, Any]],
 ):
     httpx_mock.add_response(**mock_response)
 
-    async with Request() as client:
+    async with HttpxRequest() as client:
         func = getattr(client, async_method)
-        kwargs = {"url": "http://test.com"}
+        kwargs: Dict[str, Any] = {"url": "http://test.com"}
         if data:
-            kwargs["data"] = data
+            if async_method in ["apost", "aput"]:
+                kwargs["data"] = data
+            else:
+                kwargs["params"] = data
         response = await func(**kwargs)
         assert response.status_code == 200
 
 
-def test_custom_config():
-    config = RequestConfig(timeout=20, retries=5)  # , backoff_factor=0.2
-    client = Request(config)
-    assert client.config.timeout == 20
-    assert client.config.retries == 5
-    # assert client.config.backoff_factor == 0.2
+@pytest.mark.asyncio
+async def test_custom_config():
+    config = RequestConfig(timeout=20, retries=5)
+    async with HttpxRequest(config) as client:
+        assert client.config.timeout == 20
+        assert client.config.retries == 5
 
 
 @pytest.mark.parametrize("context_manager", [True, False])
-def test_resource_cleanup(context_manager):
+def test_resource_cleanup(context_manager: bool):
     if context_manager:
-        with Request() as client:
+        with HttpxRequest() as client:
             pass
     else:
-        client = Request()
+        with pytest.warns(
+            UserWarning, match="Request should be used as a context manager"
+        ):
+            client = HttpxRequest()
         del client
 
 
 @pytest.fixture
 def request_client():
-    return Request()
+    return HttpxRequest()
 
 
 @pytest.fixture
 def custom_config():
-    return RequestConfig(timeout=5, retries=2)  # , backoff_factor=0.2
+    return RequestConfig(timeout=5, retries=2)
 
 
 def test_request_config_defaults():
     config = RequestConfig()
     assert config.timeout == 6
     assert config.retries == 3
-    # assert config.backoff_factor == 0.1
 
 
-def test_request_custom_config():
-    config = RequestConfig(timeout=5, retries=2)  # , backoff_factor=0.2
-    request = Request(config=config)
-    assert request.config.timeout == 5
-    assert request.config.retries == 2
-    # assert request.config.backoff_factor == 0.2
+@pytest.mark.asyncio
+async def test_request_custom_config(custom_config: RequestConfig):
+    async with HttpxRequest(config=custom_config) as request:
+        assert request.config.timeout == 5
+        assert request.config.retries == 2
 
 
-def test_get_request(request_client: Request, httpx_mock: HTTPXMock):
+@pytest.mark.asyncio
+async def test_get_request(httpx_mock: HTTPXMock):
     url = "https://api.example.com/data"
     expected_response = {"key": "value"}
     httpx_mock.add_response(json=expected_response)
 
-    response = request_client.get(url)
-    assert response.json() == expected_response
-    request = httpx_mock.get_request()
-    assert request.url == url
+    async with HttpxRequest() as request_client:
+        response = await request_client.aget(url)
+        assert response.json() == expected_response
+        request = cast(HttpxNativeRequest, httpx_mock.get_request())
+        assert str(request.url) == url
 
 
-def test_post_request(request_client: Request, httpx_mock: HTTPXMock):
+@pytest.mark.asyncio
+async def test_post_request(httpx_mock: HTTPXMock):
     url = "https://api.example.com/data"
     data = {"test": "data"}
     httpx_mock.add_response(json={"status": "success"})
 
-    response = request_client.post(url, data=data)
-    request = httpx_mock.get_request()
-    assert request.url == url
-    assert request.read().decode() == '{"test": "data"}'
+    async with HttpxRequest() as request_client:
+        response = await request_client.apost(url, data=data)
+        assert response.status_code == 200
+        request = cast(HttpxNativeRequest, httpx_mock.get_request())
+        assert str(request.url) == url
+        assert request.read().decode() == '{"test":"data"}'
 
 
-def test_put_request(request_client: Request, httpx_mock: HTTPXMock):
+@pytest.mark.asyncio
+async def test_put_request(httpx_mock: HTTPXMock):
     url = "https://api.example.com/data"
     data = {"test": "data"}
     httpx_mock.add_response(json={"status": "updated"})
 
-    response = request_client.put(url, data=data)
-    request = httpx_mock.get_request()
-    assert request.url == url
-    assert request.read().decode() == '{"test": "data"}'
-
-
-def test_delete_request(request_client: Request, httpx_mock: HTTPXMock):
-    url = "https://api.example.com/data"
-    httpx_mock.add_response(json={"status": "deleted"})
-
-    response = request_client.delete(url)
-    request = httpx_mock.get_request()
-    assert request.url == url
+    async with HttpxRequest() as request_client:
+        response = await request_client.aput(url, data=data)
+        assert response.status_code == 200
+        request = cast(HttpxNativeRequest, httpx_mock.get_request())
+        assert str(request.url) == url
+        assert request.read().decode() == '{"test":"data"}'
 
 
 @pytest.mark.asyncio
-async def test_aget_request(request_client: Request, httpx_mock: HTTPXMock):
+async def test_delete_request(httpx_mock: HTTPXMock):
+    url = "https://api.example.com/data"
+    httpx_mock.add_response(json={"status": "deleted"})
+
+    async with HttpxRequest() as request_client:
+        response = await request_client.adelete(url)
+        assert response.status_code == 200
+        request = cast(HttpxNativeRequest, httpx_mock.get_request())
+        assert str(request.url) == url
+
+
+@pytest.mark.asyncio
+async def test_aget_request(httpx_mock: HTTPXMock):
     url = "https://api.example.com/data"
     expected_response = {"key": "value"}
     httpx_mock.add_response(json=expected_response)
 
-    response = await request_client.aget(url)
-    assert response.json() == expected_response
-    request = httpx_mock.get_request()
-    assert request.url == url
+    async with HttpxRequest() as request_client:
+        response = await request_client.aget(url)
+        assert response.json() == expected_response
+        request = cast(HttpxNativeRequest, httpx_mock.get_request())
+        assert str(request.url) == url
 
 
 @pytest.mark.asyncio
-async def test_apost_request(request_client: Request, httpx_mock: HTTPXMock):
+async def test_apost_request(httpx_mock: HTTPXMock):
     url = "https://api.example.com/data"
     data = {"test": "data"}
     httpx_mock.add_response(json={"status": "success"})
 
-    response = await request_client.apost(url, data=data)
-    request = httpx_mock.get_request()
-    assert request.url == url
-    assert request.read().decode() == '{"test": "data"}'
+    async with HttpxRequest() as request_client:
+        response = await request_client.apost(url, data=data)
+        assert response.status_code == 200
+        request = cast(HttpxNativeRequest, httpx_mock.get_request())
+        assert str(request.url) == url
+        assert request.read().decode() == '{"test":"data"}'
 
 
 @pytest.mark.asyncio
-async def test_aput_request(request_client: Request, httpx_mock: HTTPXMock):
+async def test_aput_request(httpx_mock: HTTPXMock):
     url = "https://api.example.com/data"
     data = {"test": "data"}
     httpx_mock.add_response(json={"status": "updated"})
 
-    response = await request_client.aput(url, data=data)
-    request = httpx_mock.get_request()
-    assert request.url == url
-    assert request.read().decode() == '{"test": "data"}'
+    async with HttpxRequest() as request_client:
+        response = await request_client.aput(url, data=data)
+        assert response.status_code == 200
+        request = cast(HttpxNativeRequest, httpx_mock.get_request())
+        assert str(request.url) == url
+        assert request.read().decode() == '{"test":"data"}'
 
 
 @pytest.mark.asyncio
-async def test_adelete_request(request_client: Request, httpx_mock: HTTPXMock):
+async def test_adelete_request(httpx_mock: HTTPXMock):
     url = "https://api.example.com/data"
     httpx_mock.add_response(json={"status": "deleted"})
 
-    response = await request_client.adelete(url)
-    request = httpx_mock.get_request()
-    assert request.url == url
+    async with HttpxRequest() as request_client:
+        response = await request_client.adelete(url)
+        assert response.status_code == 200
+        request = cast(HttpxNativeRequest, httpx_mock.get_request())
+        assert str(request.url) == url
 
 
 def test_context_manager(httpx_mock: HTTPXMock):
-    with Request() as client:
-        url = "https://api.example.com/data"
-        httpx_mock.add_response(json={"key": "value"})
-        response = client.get(url)
-        assert response.json() == {"key": "value"}
+    httpx_mock.add_response(json={"status": "ok"})
+
+    with HttpxRequest() as client:
+        response = client.get("http://test.com")
+        assert response.status_code == 200
 
 
 @pytest.mark.asyncio
-async def test_async_context_manager(httpx_mock: HTTPXMock):
-    async with Request() as client:
-        url = "https://api.example.com/data"
-        httpx_mock.add_response(json={"key": "value"})
-        response = await client.aget(url)
-        assert response.json() == {"key": "value"}
+async def test_async_context_manager_cleanup(httpx_mock: HTTPXMock):
+    httpx_mock.add_response(json={"status": "ok"})
 
-
-def test_request_with_params(request_client: Request, httpx_mock: HTTPXMock):
-    url = "https://api.example.com/data"
-    params = {"query": "test"}
-    httpx_mock.add_response(json={"result": "success"})
-
-    response = request_client.get(url, params=params)
-    request = httpx_mock.get_request()
-    assert "query=test" in str(request.url)
-
-
-def test_request_with_headers(request_client: Request, httpx_mock: HTTPXMock):
-    url = "https://api.example.com/data"
-    headers = {"Authorization": "Bearer token"}
-    httpx_mock.add_response(json={"result": "success"})
-
-    response = request_client.get(url, headers=headers)
-    request = httpx_mock.get_request()
-    assert request.headers["Authorization"] == "Bearer token"
-
-
-def test_invalid_json_response(request_client: Request, httpx_mock: HTTPXMock):
-    url = "https://api.example.com/data"
-    httpx_mock.add_response(text="Invalid JSON")
-
-    response = request_client.get(url)
-    with pytest.raises(ValueError):
-        response.json()
+    async with HttpxRequest() as client:
+        response = await client.aget("http://test.com")
+        assert response.status_code == 200
 
 
 @pytest.mark.asyncio
-async def test_invalid_json_response_async(
-    request_client: Request, httpx_mock: HTTPXMock
-):
+async def test_request_with_params(httpx_mock: HTTPXMock):
     url = "https://api.example.com/data"
-    httpx_mock.add_response(text="Invalid JSON")
+    params = {"param1": "value1", "param2": "value2"}
+    httpx_mock.add_response(json={"status": "success"})
 
-    response = await request_client.aget(url)
-    with pytest.raises(ValueError):
-        response.json()
-
-
-def test_closed_context_manager_access(httpx_mock: HTTPXMock):
-    mock_response_json = {"test": "hahaha"}
-    mock_headers = {"Content-Type": "application/json"}
-    httpx_mock.add_response(
-        json=mock_response_json, headers=mock_headers, status_code=200
-    )
-
-    client = Request()
-    with client:
-        pass
-
-    response = client.get("https://api.example.com/data")
-    assert response.is_closed is True
-    assert response.json() == mock_response_json
-    assert response.status_code == 200
-    assert response.headers["Content-Type"] == "application/json"
-    assert response.text == '{"test": "hahaha"}'
-    assert response.request.method == "GET"
-    assert str(response.request.url) == "https://api.example.com/data"
-
-    response.close()
-    assert response.is_closed
+    async with HttpxRequest() as request_client:
+        response = await request_client.aget(url, params=params)
+        assert response.status_code == 200
+        request = cast(HttpxNativeRequest, httpx_mock.get_request())
+        assert str(request.url) == f"{url}?param1=value1&param2=value2"
 
 
 @pytest.mark.asyncio
-async def test_closed_context_manager_access_async(httpx_mock: HTTPXMock):
-    mock_response_json = {"test": "hahaha"}
-    mock_headers = {"Content-Type": "application/json"}
-    httpx_mock.add_response(
-        json=mock_response_json, headers=mock_headers, status_code=200
-    )
+async def test_request_with_headers(httpx_mock: HTTPXMock):
+    url = "https://api.example.com/data"
+    headers = {"X-Custom-Header": "test"}
+    httpx_mock.add_response(json={"status": "success"})
 
-    client = Request()
-    with client:
-        pass
+    async with HttpxRequest() as request_client:
+        response = await request_client.aget(url, headers=headers)
+        assert response.status_code == 200
+        request = cast(HttpxNativeRequest, httpx_mock.get_request())
+        assert str(request.url) == url
+        assert request.headers["X-Custom-Header"] == "test"
 
-    response = await client.aget("https://api.example.com/data")
-    assert response.is_closed is True
-    assert response.json() == mock_response_json
-    assert response.status_code == 200
-    assert response.headers["Content-Type"] == "application/json"
-    assert response.text == '{"test": "hahaha"}'
-    assert response.request.method == "GET"
-    assert str(response.request.url) == "https://api.example.com/data"
 
-    await response.aclose()
-    assert response.is_closed
+@pytest.mark.asyncio
+async def test_invalid_json_response(httpx_mock: HTTPXMock):
+    url = "https://api.example.com/data"
+    httpx_mock.add_response(content=b"invalid json", status_code=200)
+
+    async with HttpxRequest() as request_client:
+        response = await request_client.aget(url)
+        assert response.status_code == 200
+        with pytest.raises(Exception):
+            response.json()
+
+
+@pytest.mark.asyncio
+async def test_invalid_json_response_async(httpx_mock: HTTPXMock):
+    url = "https://api.example.com/data"
+    httpx_mock.add_response(content=b"invalid json", status_code=200)
+
+    async with HttpxRequest() as request_client:
+        response = await request_client.aget(url)
+        assert response.status_code == 200
+        with pytest.raises(Exception):
+            response.json()

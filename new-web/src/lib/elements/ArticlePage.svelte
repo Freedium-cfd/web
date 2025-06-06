@@ -52,7 +52,7 @@
 					<p class="text-gray-600 dark:text-gray-400">
 						{getErrorMessage(error)}
 					</p>
-					{#if error.details && process.env.NODE_ENV === 'development'}
+					{#if error.details && import.meta.env.DEV}
 						<pre class="p-4 mt-4 overflow-auto text-sm bg-gray-100 dark:bg-zinc-800">
 					{error.details}
 				</pre>

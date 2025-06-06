@@ -13,7 +13,7 @@ from freedium_library.container import Container
 from freedium_library.utils.http import URLProcessor
 
 if TYPE_CHECKING:
-    from freedium_library.utils.http import Request
+    from freedium_library.utils.http import HttpxRequest
 
     from .api import MediumApiService
 
@@ -45,7 +45,7 @@ class _MediumServiceURLValidator:
         self,
         api_service: MediumApiService,
         hash_validator: _MediumServiceHashesValidator,
-        request: Request = Provide[Container.request],
+        request: HttpxRequest = Provide[Container.request],
     ):
         self.api_service = api_service
         self.request = request

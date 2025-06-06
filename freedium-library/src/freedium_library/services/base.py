@@ -9,11 +9,11 @@ from loguru import logger
 from freedium_library.container import Container
 
 if TYPE_CHECKING:
-    from freedium_library.utils.http import Request
+    from freedium_library.utils.http import HttpxRequest
 
 
 class BaseService(ABC):
-    def __init__(self, request: Request = Provide[Container.request]):
+    def __init__(self, request: HttpxRequest = Provide[Container.request]):
         self.request = request
 
     def _prepare(self):
@@ -60,11 +60,11 @@ class BaseService(ABC):
         pass
 
     @abstractmethod
-    async def _asearch(self, keywords: list[str]) -> list[dict]:
+    async def _asearch(self, keywords: list[str]) -> list[dict[str, str]]:
         pass
 
     @abstractmethod
-    def _search(self, keywords: list[str]) -> list[dict]:
+    def _search(self, keywords: list[str]) -> list[dict[str, str]]:
         pass
 
     def __str__(self) -> str:

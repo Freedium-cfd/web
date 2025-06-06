@@ -8,7 +8,7 @@ from freedium_library.services.medium.validators import (
     _MediumServiceHashesValidator,  # type: ignore
     _MediumServiceURLValidator,  # type: ignore
 )
-from freedium_library.utils.http import Request
+from freedium_library.utils.http import HttpxRequest
 
 
 @pytest.fixture
@@ -114,20 +114,19 @@ async def test_resolve_medium_url_with_real_short_link(
     assert "rsci.app.link/vYe3nWA8wBb" in mock_request.aget.call_args[0][0]
 
 
-@pytest.mark.integration
 @pytest.mark.asyncio
 async def test_resolve_medium_url_with_real_short_link_integration() -> None:
-    request = Request()
-    config = MediumConfig()
-    api_service = MediumApiService(request=request, config=config)
-    hash_validator = _MediumServiceHashesValidator()
-    url_validator = _MediumServiceURLValidator(api_service, hash_validator, request)
+    async with HttpxRequest() as request:
+        config = MediumConfig()
+        api_service = MediumApiService(request=request, config=config)
+        hash_validator = _MediumServiceHashesValidator()
+        url_validator = _MediumServiceURLValidator(api_service, hash_validator, request)
 
-    result = await url_validator.resolve_medium_url(
-        "https://link.medium.com/vYe3nWA8wBb"
-    )
+        result = await url_validator.resolve_medium_url(
+            "https://link.medium.com/vYe3nWA8wBb"
+        )
 
-    assert result == "77ae792a1a43"
+        assert result == "77ae792a1a43"
 
 
 @pytest.mark.asyncio

@@ -31,7 +31,7 @@ class ApplicationSettings(BaseModel):
             prefix_path=prefix_path,
             openapi_url=f"{prefix_path}/openapi.json",
             docs_url=f"{prefix_path}/docs",
-            redoc_url=f"{prefix_path}/redoc",
+            redoc_url=f"{prefix_path}/redocs",
             **data,
         )
 

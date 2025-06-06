@@ -1,7 +1,7 @@
 from abc import ABC
 from dataclasses import dataclass
 from enum import Enum, auto
-from typing import List, Optional
+from typing import List, Optional, Union, overload
 
 from loguru import logger
 
@@ -53,9 +53,11 @@ class CharacterMapping:
                 f"Invalid negative position: original_pos={self.original_pos}, current_pos={self.current_pos}"
             )
             raise ValueError("Positions cannot be negative")
-        if self.char_length < 1:
-            logger.error(f"Invalid character length: {self.char_length}")
-            raise ValueError("Character length must be positive")
+        if self.char_length < 1 or self.original_char_length < 1:
+            logger.error(
+                f"Invalid character lengths: {self.char_length} (current), {self.original_char_length} (original)"
+            )
+            raise ValueError("Character lengths must be positive")
         logger.trace("CharacterMapping validation successful")
 
     def shift_positions(self, offset: int, encoded_offset: int) -> None:
@@ -185,7 +187,7 @@ class UTFHandler(ABC):
         current_pos = 0
         encoded_pos = 0
 
-        for i, char in enumerate(self._string):
+        for i, char in enumerate(str(self._string)):
             logger.trace(f"Processing character '{char}' at position {i}")
             encoded_bytes = char.encode(self._encoding.name)
             char_len = len(encoded_bytes) // self._encoding.unit_size
@@ -356,29 +358,29 @@ class UTFHandler(ABC):
         )
         logger.trace(f"Updated string contents: '{self._string}'")
 
-    def get_string_slice(self, start: int, end: int) -> List[str]:
+    def get_string_slice(self, start: int, end: int) -> str:
         logger.debug(f"Getting string slice from {start} to {end}")
-        result = list(self._string[start:end])
+        result = str(self._string)[start:end]
         logger.trace(f"Slice result: {result}")
         return result
 
-    def __getitem__(self, key: int) -> str:
-        logger.debug(f"Getting character at index {key}")
-        result = "".join(self._string[key])
-        logger.trace(f"Retrieved character: '{result}'")
+    @overload
+    def __getitem__(self, key: int) -> str: ...
+
+    @overload
+    def __getitem__(self, key: slice) -> str: ...
+
+    def __getitem__(self, key: Union[int, slice]) -> str:
+        logger.debug(f"Getting item for key {key}")
+        item = self._string[key]
+        if isinstance(item, list):
+            result = "".join(item)
+        else:
+            result = str(item)
+        logger.trace(f"Retrieved: '{result}'")
         return result
 
     def __str__(self) -> str:
-        logger.debug("Converting to string representation")
-        result = str(self._string)
-        logger.trace(f"String representation: '{result}'")
-        return result
-
-    def __repr__(self) -> str:
-        logger.debug("Getting detailed string representation")
-        result = f"{self.__class__.__name__}(string='{self.__str__()}', encoding={self._encoding.name})"
-        logger.trace(f"Detailed representation: {result}")
-        return result
         logger.debug("Converting to string representation")
         result = str(self._string)
         logger.trace(f"String representation: '{result}'")

@@ -8,13 +8,13 @@ from freedium_library.utils import JSON, HashLib
 
 if TYPE_CHECKING:
     from freedium_library.services.medium.config import MediumConfig
-    from freedium_library.utils.http import Request
+    from freedium_library.utils.http import HttpxRequest
 
 
 class MediumApiService:
     def __init__(
         self,
-        request: Request,
+        request: HttpxRequest,
         config: MediumConfig,
     ):
         self.request = request
