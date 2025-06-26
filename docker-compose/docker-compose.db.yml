@@ -6,6 +6,8 @@ services:
       memlock: -1
     networks:
       - freedium_net
+    profiles:
+      - prod
     volumes:
       - freedium_dragonflydata:/data
     healthcheck:
