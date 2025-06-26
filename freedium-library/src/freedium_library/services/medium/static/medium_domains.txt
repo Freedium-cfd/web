@@ -6,7 +6,6 @@ drlee.io
 generativeai.pub
 towardsdev.com
 infosecwriteups.com
-towardsdatascience.com
 thetaoist.online
 devopsquare.com
 bettermarketing.pub
@@ -29,5 +28,4 @@ blog.stackademic.com
 ai.gopubby.com
 blog.devops.dev
 levelup.gitconnected.com
-betterhumans.coach.me
 ai.plainenglish.io

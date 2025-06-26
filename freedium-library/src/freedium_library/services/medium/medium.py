@@ -14,13 +14,13 @@ from .models import MediumPostDataResponse
 from .validators import MediumServicePathValidator
 
 if TYPE_CHECKING:
-    from freedium_library.utils.http import Request
+    from freedium_library.utils.http import HttpxRequest
 
 
 class MediumService(BaseService):
     def __init__(
         self,
-        request: Request = Provide[Container.request],
+        request: HttpxRequest = Provide[Container.request],
         api_service: MediumApiService = Provide[MediumContainer.api_service],
         path_validator: MediumServicePathValidator = Provide[MediumContainer.validator],
     ):

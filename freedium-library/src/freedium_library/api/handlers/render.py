@@ -1,5 +1,4 @@
-from functools import partial
-
+from enum import Enum
 from fastapi import APIRouter
 from fastapi.responses import JSONResponse
 
@@ -147,11 +146,16 @@ console.log('Hello, world!');
 """
 
 
-async def render_page(service_name: str):
+class ServiceName(str, Enum):
+    MEDIUM = "medium"
+    TWITTER = "twitter"
+
+
+async def render_page(service_name: ServiceName):
     return JSONResponse(
         content={
             "text": TEXT,
-            "service_name": service_name,
+            "service_name": service_name.value,
             "article": {
                 "title": "UploadThing is 5x Faster",
                 "date": "2024-09-13T12:00:00Z",
@@ -182,13 +186,18 @@ async def render_page(service_name: str):
 def register_render_router(router: APIRouter) -> None:
     render_router = APIRouter(prefix="/services")
 
-    for service_name in ["medium", "twitter"]:
+    async def render_service_page(service_name: ServiceName):
+        return await render_page(service_name)
+
+    for method in ["GET", "HEAD"]:
         render_router.add_api_route(
-            path=f"/{service_name}/render",
-            endpoint=partial(render_page, service_name),
-            summary=f"Render {service_name} page",
-            description=f"Render {service_name} page",
-            methods=["GET", "HEAD"],
+            "/{service_name}/render",
+            endpoint=render_service_page,
+            methods=[method],
+            summary="Render service page",
+            description="Render service page",
+            operation_id=f"render_page_{method}",
+            tags=["render"],
         )
 
     router.include_router(render_router)

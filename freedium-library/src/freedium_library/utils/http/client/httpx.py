@@ -1,5 +1,6 @@
 import warnings
-from typing import Any, Dict, Optional
+from types import TracebackType
+from typing import Any, Dict, Optional, Type
 
 from httpx import (
     AsyncClient,
@@ -10,11 +11,14 @@ from httpx import (
     Timeout,
 )
 
+from .abstract import AbstractRequest
 from .config import RequestConfig
+from .httpx_response import HttpxResponse
+from .response import AbstractResponse
 
 
 # https://github.com/encode/httpx/discussions/1748
-class Request:
+class HttpxRequest(AbstractRequest):
     __slots__ = ("config", "_in_context_manager")
 
     def __init__(self, config: Optional[RequestConfig] = None):
@@ -38,7 +42,7 @@ class Request:
     def _client(self) -> Client:
         return Client(
             transport=self._transport,
-            proxies=self.proxy_url,
+            proxy=self.proxy_url,
         )
 
     @property
@@ -49,7 +53,7 @@ class Request:
     def _async_client(self) -> AsyncClient:
         return AsyncClient(
             transport=self._async_transport,
-            proxies=self.proxy_url,
+            proxy=self.proxy_url,
         )
 
     @property
@@ -57,18 +61,28 @@ class Request:
         timeout = Timeout(timeout=self.config.timeout)
         return timeout
 
-    def __enter__(self):
+    def __enter__(self) -> "HttpxRequest":
         self._in_context_manager = True
         return self
 
-    def __exit__(self, exc_type, exc_val, exc_tb):
+    def __exit__(
+        self,
+        exc_type: Optional[Type[BaseException]],
+        exc_val: Optional[BaseException],
+        exc_tb: Optional[TracebackType],
+    ) -> None:
         self._client.close()
 
-    async def __aenter__(self):
+    async def __aenter__(self) -> "HttpxRequest":
         self._in_context_manager = True
         return self
 
-    async def __aexit__(self, exc_type, exc_val, exc_tb):
+    async def __aexit__(
+        self,
+        exc_type: Optional[Type[BaseException]],
+        exc_val: Optional[BaseException],
+        exc_tb: Optional[TracebackType],
+    ) -> None:
         await self._async_client.aclose()
 
     def __del__(self):
@@ -89,15 +103,16 @@ class Request:
         params: Optional[Dict[str, Any]] = None,
         headers: Optional[Dict[str, str]] = None,
         follow_redirects: bool = True,
-    ) -> Response:
+    ) -> AbstractResponse:
         self._check_context_manager()
-        return self._client.get(
+        response = self._client.get(
             url,
             params=params,
             headers=headers,
             follow_redirects=follow_redirects,
             timeout=self._timeout_client,
         )
+        return HttpxResponse(response)
 
     def post(
         self,
@@ -105,15 +120,16 @@ class Request:
         data: Optional[Dict[str, Any]] = None,
         headers: Optional[Dict[str, str]] = None,
         follow_redirects: bool = True,
-    ) -> Response:
+    ) -> AbstractResponse:
         self._check_context_manager()
-        return self._client.post(
+        response = self._client.post(
             url,
             json=data,
             headers=headers,
             follow_redirects=follow_redirects,
             timeout=self._timeout_client,
         )
+        return HttpxResponse(response)
 
     def put(
         self,
@@ -121,29 +137,31 @@ class Request:
         data: Optional[Dict[str, Any]] = None,
         headers: Optional[Dict[str, str]] = None,
         follow_redirects: bool = True,
-    ) -> Response:
+    ) -> AbstractResponse:
         self._check_context_manager()
-        return self._client.put(
+        response = self._client.put(
             url,
             json=data,
             headers=headers,
             follow_redirects=follow_redirects,
             timeout=self._timeout_client,
         )
+        return HttpxResponse(response)
 
     def delete(
         self,
         url: str,
         headers: Optional[Dict[str, str]] = None,
         follow_redirects: bool = True,
-    ) -> Response:
+    ) -> AbstractResponse:
         self._check_context_manager()
-        return self._client.delete(
+        response = self._client.delete(
             url,
             headers=headers,
             follow_redirects=follow_redirects,
             timeout=self._timeout_client,
         )
+        return HttpxResponse(response)
 
     async def aget(
         self,
@@ -151,15 +169,16 @@ class Request:
         params: Optional[Dict[str, Any]] = None,
         headers: Optional[Dict[str, str]] = None,
         follow_redirects: bool = True,
-    ) -> Response:
+    ) -> AbstractResponse:
         self._check_context_manager()
-        return await self._async_client.get(
+        response = await self._async_client.get(
             url,
             params=params,
             headers=headers,
             follow_redirects=follow_redirects,
             timeout=self._timeout_client,
         )
+        return HttpxResponse(response)
 
     async def apost(
         self,
@@ -167,15 +186,16 @@ class Request:
         data: Optional[Dict[str, Any]] = None,
         headers: Optional[Dict[str, str]] = None,
         follow_redirects: bool = True,
-    ) -> Response:
+    ) -> AbstractResponse:
         self._check_context_manager()
-        return await self._async_client.post(
+        response = await self._async_client.post(
             url,
             json=data,
             headers=headers,
             follow_redirects=follow_redirects,
             timeout=self._timeout_client,
         )
+        return HttpxResponse(response)
 
     async def aput(
         self,
@@ -183,26 +203,28 @@ class Request:
         data: Optional[Dict[str, Any]] = None,
         headers: Optional[Dict[str, str]] = None,
         follow_redirects: bool = True,
-    ) -> Response:
+    ) -> AbstractResponse:
         self._check_context_manager()
-        return await self._async_client.put(
+        response = await self._async_client.put(
             url,
             json=data,
             headers=headers,
             follow_redirects=follow_redirects,
             timeout=self._timeout_client,
         )
+        return HttpxResponse(response)
 
     async def adelete(
         self,
         url: str,
         headers: Optional[Dict[str, str]] = None,
         follow_redirects: bool = True,
-    ) -> Response:
+    ) -> AbstractResponse:
         self._check_context_manager()
-        return await self._async_client.delete(
+        response = await self._async_client.delete(
             url,
             headers=headers,
             follow_redirects=follow_redirects,
             timeout=self._timeout_client,
         )
+        return HttpxResponse(response)

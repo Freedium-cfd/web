@@ -6,14 +6,18 @@ authors = [
     {name = "ZhymabekRoman", email = "robanokssamit@yandex.ru"},
 ]
 dependencies = [
-    "litestar>=2.12.1",
     "deprecation>=2.1.0",
-    "orjson>=3.10.11",
-    "pendulum>=3.0.0",
+    "orjson>=3.10.18",
+    "pendulum>=3.1.0",
     "ujson>=5.10.0",
-    "httpx[socks]>=0.27.2",
-    "pymongo>=4.9.2",
-    "motor>=3.6.0",
+    "httpx[socks]>=0.28.1",
+    "pymongo>=4.13.0",
+    "motor>=3.7.1",
+    "dependency-injector>=4.47.1",
+    "loguru>=0.7.3",
+    "pydantic-settings>=2.9.1",
+    "curl-cffi>=0.11.2",
+    "bs4>=0.0.2",
 ]
 requires-python = "==3.12.*"
 readme = "README.md"
@@ -23,17 +27,20 @@ license = {text = "MIT"}
 [project.optional-dependencies]
 api = [
     "slowapi>=0.1.9",
-    "fastapi[standard]>=0.115.5",
+    "fastapi[standard]>=0.115.12",
 ]
 [tool.pdm]
 distribution = false
 
-[tool.pdm.dev-dependencies]
+
+[dependency-groups]
 dev = [
-    "pytest-asyncio>=0.24.0",
-    "pytest-httpx>=0.33.0",
-    "pytest-xdist[psutil]>=3.6.1",
-    "orjson>=3.10.11",
+    "pytest-asyncio>=1.0.0",
+    "pytest-httpx>=0.35.0",
+    "pytest-xdist[psutil]>=3.7.0",
+    "orjson>=3.10.18",
     "pytest-integration>=0.2.3",
-    "pre-commit>=4.0.1",
+    "pre-commit>=4.2.0",
+    "freezegun>=1.5.2",
+    "pytest-cov>=6.1.1",
 ]
