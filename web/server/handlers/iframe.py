@@ -40,9 +40,5 @@ def patch_iframe_content(content: str) -> str:
     )
 
     soup = BeautifulSoup(content, "html.parser")
-    iframe_resizer_script = BeautifulSoup(
-        '<script src="https://cdn.jsdelivr.net/npm/@iframe-resizer/child"></script>', "html.parser"
-    ).script
-    soup.head.append(iframe_resizer_script)
 
     return soup.prettify()

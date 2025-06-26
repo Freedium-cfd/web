@@ -26,11 +26,58 @@
     <meta name="theme-color" content="#ffffff">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/default.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/@iframe-resizer/parent"></script>
     <!-- <script src="https://cdn.jsdelivr.net/npm/vanilla-lazyload@17.8.4/dist/lazyload.min.js"></script> -->
     <script src="https://cdn.jsdelivr.net/npm/lightense-images@1.0.17/dist/lightense.min.js"></script>
 
-    <script>iframeResize({ license: 'GPLv3' })</script>
+    <script>
+        window._resizeIframe = function (obj) {
+            const logMessage = `Received _resizeIframe call: iframe=${obj.iframe ? obj.iframe.id : 'unknown'}, height=${obj.height}`;
+            if (obj.iframe) {
+                obj.iframe.height = obj.height;
+            }
+            console.log(obj.iframe)
+            console.log(logMessage);
+        };
+    </script>
+
+    <script>
+        window.addEventListener('message', function (event) {
+            console.log('Event data:', JSON.stringify(event.data))
+            if (typeof event.data === 'string') {
+                let parsedData = JSON.parse(event.data);
+                console.log('Event data type:', typeof parsedData)
+                if (parsedData && parsedData.method === 'iframe.resize' && parsedData.context === 'iframe.resize') {
+                    console.log('Resizing iframe - Source:', parsedData.src, 'Height:', parsedData.height, 'Method:', parsedData.method)
+                    const iframes = document.querySelectorAll('iframe');
+                    for (let iframe of iframes) {
+                        if (iframe.src === parsedData.src) {
+                            console.log('Setting iframe height to:', parsedData.height)
+                            console.log(iframe)
+                            iframe.height = parsedData.height;
+                            break;
+                        }
+                    }
+                }
+            }
+        });
+    </script>
+
+    <style>
+        .responsive-object {
+            position: relative;
+            height: 0;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+
+        .responsive-object iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+    </style>
 </head>
 <div class="fixed bottom-4 left-4 hidden" style="z-index: 999999;">
     <button id="openProblemModal"
@@ -69,13 +116,17 @@
             Dear Freedium users,
             </br>
             </br>
-            We've updated our donation options to provide you with more ways to support our mission. Your contributions are invaluable in helping us maintain and improve Freedium, ensuring we can continue to provide unrestricted access to quality content.
+            We've updated our donation options to provide you with more ways to support our mission. Your contributions
+            are invaluable in helping us maintain and improve Freedium, ensuring we can continue to provide unrestricted
+            access to quality content.
             </br>
             </br>
-            We now offer multiple platforms for donations, including Patreon, Ko-fi, and Liberapay. Each option allows you to support us in the way that's most convenient for you.
+            We now offer multiple platforms for donations, including Patreon, Ko-fi, and Liberapay. Each option allows
+            you to support us in the way that's most convenient for you.
             </br>
             </br>
-            Your support, no matter the platform or amount, makes a significant difference. It allows us to cover our operational costs and invest in enhancing Freedium's features and reliability.
+            Your support, no matter the platform or amount, makes a significant difference. It allows us to cover our
+            operational costs and invest in enhancing Freedium's features and reliability.
             </br>
             </br>
             Thank you for being a part of the Freedium community and for your continued support.

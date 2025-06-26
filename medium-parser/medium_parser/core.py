@@ -218,6 +218,7 @@ class MediumParser:
         preview_image_id: str,
         highlights: list,
         tags: list,
+        post_data: dict,
     ) -> tuple[list, str, str]:
         paragraphs = content["bodyModel"]["paragraphs"]
         tags_list = [tag["displayTitle"] for tag in tags]
@@ -604,14 +605,75 @@ class MediumParser:
                 )
                 out_paragraphs.append(embed_template_rendered)
             elif paragraph["type"] == "IFRAME":
-                iframe_template = jinja_env.from_string(
-                    '<div class="mt-7"><iframe class="w-full" src="{{ host_address }}/render_iframe/{{ iframe_id }}" referrerpolicy="no-referrer" allowfullscreen="" frameborder="0" scrolling="no"></iframe></div>'
-                )
-                iframe_template_rendered = iframe_template.render(
-                    host_address=self.host_address,
-                    iframe_id=paragraph["iframe"]["mediaResource"]["id"],
-                )
-                out_paragraphs.append(iframe_template_rendered)
+                logger.debug(f"Processing IFRAME paragraph")
+                
+                # First check if we have direct mediaResource in the iframe
+                media_resource = paragraph.get("iframe", {}).get("mediaResource", {})
+                
+                # If mediaResource is just a reference, look it up in post_data
+                media_resource_ref = paragraph.get("iframe", {}).get("mediaResource", {}).get("__ref")
+                if media_resource_ref and not media_resource.get("id") and not media_resource.get("iframeSrc"):
+                    logger.debug(f"Found media resource reference: {media_resource_ref}")
+                    data_payload = post_data.get("data", {})
+                    if media_resource_ref in data_payload:
+                        media_resource = data_payload[media_resource_ref]
+                        logger.debug(f"Found media resource for ref: {media_resource_ref}")
+                    else:
+                        logger.warning(f"Could not find media resource for ref: {media_resource_ref}")
+
+                # Get iframe source from mediaResource
+                iframe_src_val = media_resource.get("iframeSrc")
+                iframe_id = media_resource.get("id")
+                
+                # Determine the source URL for the iframe
+                src = iframe_src_val
+                if not src and iframe_id:
+                    logger.debug(f"Using fallback iframe URL with ID: {iframe_id}")
+                    src = f"{self.host_address}/render_iframe/{iframe_id}"
+
+                if not src:
+                    logger.warning("No iframe source found, skipping iframe")
+                    current_pos += 1
+                    continue
+
+                # Get iframe dimensions
+                iframe_width = media_resource.get("iframeWidth")
+                iframe_height = media_resource.get("iframeHeight")
+                
+                # If dimensions are available in paragraph.iframe directly, use those
+                if not iframe_width and paragraph.get("iframe", {}).get("iframeWidth"):
+                    iframe_width = paragraph["iframe"]["iframeWidth"]
+                if not iframe_height and paragraph.get("iframe", {}).get("iframeHeight"):
+                    iframe_height = paragraph["iframe"]["iframeHeight"]
+                
+                logger.debug(f"Iframe dimensions: {iframe_width}x{iframe_height}")
+
+                # Render with aspect ratio if we have valid dimensions
+                if iframe_width and iframe_height and iframe_width > 0:
+                    ratio = (iframe_height / iframe_width) * 100
+                    iframe_template = jinja_env.from_string(
+                        """<div class="mt-7"><div>
+    <iframe class="w-full" src="{{ src }}" referrerpolicy="no-referrer" width="{{ iframe_width }}" height="{{ iframe_height }}" allowfullscreen="" frameborder="0" scrolling="no"></iframe>
+</div></div>"""
+                    )
+                    iframe_template_rendered = iframe_template.render(
+                        src=src,
+                        ratio=f"{ratio:.4f}",
+                        iframe_width=iframe_width or "100%",
+                        iframe_height=iframe_height or "100%",
+                    )
+                    out_paragraphs.append(iframe_template_rendered)
+                else:
+                    # Fallback to responsive iframe without aspect ratio
+                    iframe_template = jinja_env.from_string(
+                        '<div class="mt-7"><iframe class="w-full" src="{{ src }}" width="{{ iframe_width }}" height="{{ iframe_height }}" referrerpolicy="no-referrer" allowfullscreen="" frameborder="0" scrolling="no"></iframe></div>'
+                    )
+                    iframe_template_rendered = iframe_template.render(
+                        src=src,
+                        iframe_width=iframe_width or "100%",
+                        iframe_height=iframe_height or "100%",
+                    )
+                    out_paragraphs.append(iframe_template_rendered)
 
             else:
                 logger.error(f"Unknown {paragraph['type']}: {paragraph}")
@@ -702,6 +764,7 @@ class MediumParser:
             post_data["data"]["post"]["previewImage"]["id"],
             post_data["data"]["post"]["highlights"],
             post_data["data"]["post"]["tags"],
+            post_data,
         )
 
         # Await metadata
