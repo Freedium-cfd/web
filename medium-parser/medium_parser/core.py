@@ -405,6 +405,8 @@ class MediumParser:
                         )
             elif paragraph["type"] == "P":
                 css_class = ["leading-8"]
+                if paragraph.get("hasDropCap", False):
+                    css_class.extend(["first-letter:text-7xl", "first-letter:float-left", "first-letter:mr-2", "first-letter:pt-2"])
                 paragraph_template = jinja_env.from_string(
                     '<p class="{{ css_class }}">{{ text }}</p>'
                 )
