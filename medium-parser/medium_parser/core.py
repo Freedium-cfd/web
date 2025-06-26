@@ -406,6 +406,7 @@ class MediumParser:
             elif paragraph["type"] == "P":
                 css_class = ["leading-8"]
                 if paragraph.get("hasDropCap", False):
+                    #  не понятно как логика срабатывает, иногда как-будто две буквы идут в drop cap как здесь - https://medium.com/write-a-catalyst/trumps-gaza-proposal-a-negotiation-tactic-for-real-change-0291df856c77
                     css_class.extend(["first-letter:text-7xl", "first-letter:float-left", "first-letter:mr-2", "first-letter:pt-2"])
                 paragraph_template = jinja_env.from_string(
                     '<p class="{{ css_class }}">{{ text }}</p>'
