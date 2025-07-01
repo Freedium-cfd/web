@@ -21,7 +21,7 @@ More info to read: https://habr.com/ru/articles/769256/
 
 class UTF16Handler:
     def __init__(self, default_bang_char: str = "R"):
-        logger.info(
+        logger.trace(
             f"Initializing UTF16Handler with default_bang_char: {default_bang_char}"
         )
         self._default_bang_char = default_bang_char
@@ -29,7 +29,7 @@ class UTF16Handler:
     def pre_utf_16_bang(
         self, string: str, string_pos_matrix: list
     ) -> tuple[str, list, list[tuple[int, int, int]]]:
-        logger.info("Starting pre_utf_16_bang method")
+        logger.trace("Starting pre_utf_16_bang method")
         utf_16_bang_list: list[tuple[int, int, int]] = []
         string_len_utf_16 = len(string.encode("utf-16-le")) // 2
         logger.debug(f"UTF-16 length of string: {string_len_utf_16}")
@@ -50,12 +50,14 @@ class UTF16Handler:
                 string, string_pos_matrix = self._paste_char(
                     string, string_pos_matrix, new_i + 1, char_present
                 )
-                logger.info(f"Mutation: Inserted '{char_present}' at index {new_i + 1}")
+                logger.trace(
+                    f"Mutation: Inserted '{char_present}' at index {new_i + 1}"
+                )
                 i += 1
                 utf_16_bang_list.append((i, char_len_dif, i))
             i += 1
 
-        logger.info("Finished pre_utf_16_bang method")
+        logger.trace("Finished pre_utf_16_bang method")
         return string, string_pos_matrix, utf_16_bang_list
 
     def post_utf_16_bang(
@@ -64,7 +66,7 @@ class UTF16Handler:
         string_pos_matrix: list,
         utf_16_bang_list: list,
     ):
-        logger.info("Starting post_utf_16_bang method")
+        logger.trace("Starting post_utf_16_bang method")
         string = StringAssignmentMixin(str(string))
         post_transbang = 0
         for bang_pos, char_len, old_pos in utf_16_bang_list:
@@ -76,11 +78,11 @@ class UTF16Handler:
                 char_len,
                 old_pos - post_transbang,
             )
-            logger.info(
+            logger.trace(
                 f"Mutation: Deleted {char_len} character(s) at index {bang_pos - post_transbang}"
             )
             post_transbang += char_len
-        logger.info("Finished post_utf_16_bang method")
+        logger.trace("Finished post_utf_16_bang method")
         return string, string_pos_matrix
 
     def _paste_char(
@@ -96,7 +98,7 @@ class UTF16Handler:
         for matrix_i in range(pos + 1, len(string_pos_matrix)):
             string_pos_matrix[matrix_i] += char_len
         string.insert(pos, char)
-        logger.info(f"Mutation: Inserted '{char}' at position {pos}")
+        logger.trace(f"Mutation: Inserted '{char}' at position {pos}")
         return string, string_pos_matrix
 
     def _delete_char(
@@ -111,7 +113,7 @@ class UTF16Handler:
         deleted_char = string[pos : pos + char_len]
         string.pop(pos)
         string_pos_matrix.pop(old_pos)
-        logger.info(f"Mutation: Deleted '{deleted_char}' at position {pos}")
+        logger.trace(f"Mutation: Deleted '{deleted_char}' at position {pos}")
         for matrix_i in range(pos, len(string_pos_matrix)):
             if isinstance(string_pos_matrix[matrix_i], int):
                 string_pos_matrix[matrix_i] -= char_len
@@ -131,9 +133,9 @@ class TemplateRenderer:
         utf_16_bang_list: list,
         templates: list,
     ):
-        logger.info("Starting render_templates method")
+        logger.trace("Starting render_templates method")
         if not templates:
-            logger.info("No templates to render")
+            logger.trace("No templates to render")
             return string, string_pos_matrix, utf_16_bang_list
 
         templates = reversed(templates)
@@ -172,7 +174,7 @@ class TemplateRenderer:
                 new_start=new_start,
                 new_end=new_end,
             )
-            logger.info(
+            logger.trace(
                 f"Mutation: Replaced '{old_text}' with '{context_text}' in range {new_start}:{new_end}"
             )
 
@@ -182,7 +184,7 @@ class TemplateRenderer:
                 string_pos_matrix, utf_16_bang_list, start, end, prefix_len, suffix_len
             )
 
-        logger.info("Finished render_templates method")
+        logger.trace("Finished render_templates method")
         return updated_text, string_pos_matrix, utf_16_bang_list
 
     def _get_prefix_len(self, template_raw: Template, inner_char: str = "{"):
@@ -217,7 +219,7 @@ class TemplateRenderer:
                     utf_16_bang[1],
                     utf_16_bang[2],
                 )
-        logger.info(f"Mutation: Updated positions for template in range {start}:{end}")
+        logger.trace(f"Mutation: Updated positions for template in range {start}:{end}")
 
 
 class StringReplacer:
@@ -228,9 +230,9 @@ class StringReplacer:
         utf_16_bang_list: list,
         replaces: list,
     ):
-        logger.info("Starting render_replaces method")
+        logger.trace("Starting render_replaces method")
         if not replaces:
-            logger.info("No replacements to perform")
+            logger.trace("No replacements to perform")
             return string, string_pos_matrix, utf_16_bang_list
 
         string = StringAssignmentMixin(str(string))
@@ -249,7 +251,7 @@ class StringReplacer:
 
             old_text = string[new_start:new_end]
             string[new_start:new_end] = replace_with
-            logger.info(
+            logger.trace(
                 f"Mutation: Replaced '{old_text}' with '{replace_with}' in range {new_start}:{new_end}"
             )
             self._update_positions(
@@ -262,7 +264,7 @@ class StringReplacer:
                 new_end,
             )
 
-        logger.info("Finished render_replaces method")
+        logger.trace("Finished render_replaces method")
         return string, string_pos_matrix, utf_16_bang_list
 
     def _update_positions(
@@ -305,7 +307,7 @@ class StringReplacer:
                     utf_16_bang[1],
                     utf_16_bang[2],
                 )
-        logger.info(
+        logger.trace(
             f"Mutation: Updated positions for replacement in range {start}:{end}"
         )
 
@@ -317,7 +319,7 @@ class RLStringHelper:
         quote_html_type: list[str] = ["full"],
         _default_bang_char: str = "R",
     ):
-        logger.info("Initializing RLStringHelper")
+        logger.trace("Initializing RLStringHelper")
         self.string: str = quote_symbol(string)
         self.templates: list[tuple[tuple[int, int], Template]] = []
         self.quote_replaces: list[tuple[tuple[int, int], str]] = []
@@ -328,21 +330,21 @@ class RLStringHelper:
         self.string_replacer = StringReplacer()
 
     def set_template(self, start: int, end: int, template: str | Template):
-        logger.info(f"Setting template for range {start}:{end}")
+        logger.trace(f"Setting template for range {start}:{end}")
         if not isinstance(template, Template):
             template = jinja_env.from_string(template)
         self.templates.append(((start, end), template))
-        logger.info(f"Mutation: Added template for range {start}:{end}")
+        logger.trace(f"Mutation: Added template for range {start}:{end}")
 
     def set_replace(self, start: int, end: int, replace_with: str):
-        logger.info(f"Setting replacement for range {start}:{end}")
+        logger.trace(f"Setting replacement for range {start}:{end}")
         self.replaces.append(((start, end), replace_with))
-        logger.info(
+        logger.trace(
             f"Mutation: Added replacement '{replace_with}' for range {start}:{end}"
         )
 
     def __str__(self):
-        logger.info("Converting RLStringHelper to string")
+        logger.trace("Converting RLStringHelper to string")
         string = StringAssignmentMixin(self.string)
 
         string_pos_matrix = list(range(len(string)))
@@ -351,16 +353,16 @@ class RLStringHelper:
         )
 
         if self.quote_html_type:
-            logger.info("Applying HTML quoting")
+            logger.trace("Applying HTML quoting")
             self.quote_replaces = list(
                 quote_html(str(updated_text), self.quote_html_type)
             )
-            logger.info(
+            logger.trace(
                 f"Mutation: Added {len(self.quote_replaces)} HTML quote replacements"
             )
 
         if not self.templates and not self.replaces and not self.quote_replaces:
-            logger.info("No modifications needed, returning original string")
+            logger.trace("No modifications needed, returning original string")
             return self.string
 
         updated_text, string_pos_matrix, utf_16_bang_list = (
@@ -379,16 +381,16 @@ class RLStringHelper:
         updated_text, string_pos_matrix = self.utf16_handler.post_utf_16_bang(
             updated_text, string_pos_matrix, utf_16_bang_list
         )
-        logger.info("Finished string conversion")
+        logger.trace("Finished string conversion")
         return str(updated_text)
 
     def get_text(self):
-        logger.info("Getting text from RLStringHelper")
+        logger.trace("Getting text from RLStringHelper")
         return self.__str__()
 
 
 def split_overlapping_ranges(markups):
-    logger.info("Starting split_overlapping_ranges")
+    logger.trace("Starting split_overlapping_ranges")
     new_markups = process_and_optimize_intervals(
         *[
             Interval(markup["start"], markup["end"], markup["type"], markup["template"])
