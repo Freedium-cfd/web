@@ -111,53 +111,59 @@
 
 <div class="notification-container fixed top-5 p-2 max-h-[95vh] overflow-y-auto hidden" style="z-index: 999999;">
     <div class="p-5 text-center bg-white border border-gray-300 rounded-md shadow-sm dark:bg-gray-800">
-        <p class="pb-5 text-2xl text-black dark:text-white">Support Freedium</p>
+        <p class="pb-5 text-2xl text-black dark:text-white">Important Notice: DMCA Resolution</p>
         <p class="pb-3 text-black dark:text-white">
             Dear Freedium users,
             </br>
             </br>
-            We've updated our donation options to provide you with more ways to support our mission. Your contributions
-            are invaluable in helping us maintain and improve Freedium, ensuring we can continue to provide unrestricted
-            access to quality content.
+            We recently experienced downtime due to a trademark infringement complaint filed by Bolster Inc. on behalf of Canva.
+            The complaint alleged that Freedium was using Canva's registered logos and trademarks without authorization.
             </br>
             </br>
-            We now offer multiple platforms for donations, including Patreon, Ko-fi, and Liberapay. Each option allows
-            you to support us in the way that's most convenient for you.
+            <strong>Important Clarification:</strong>
+            </br>
+            • Freedium has never used, displayed, or claimed affiliation with Canva's logos or trademarks
+            </br>
+            • Freedium is an independent platform dedicated to breaking Medium's paywall
+            </br>
+            • We have no connection whatsoever with Canva or any of its services
             </br>
             </br>
-            Your support, no matter the platform or amount, makes a significant difference. It allows us to cover our
-            operational costs and invest in enhancing Freedium's features and reliability.
+            The complaint was forwarded through Cloudflare to our hosting provider, which caused temporary service disruption.
+            After investigation and clarification that no infringement occurred, normal service has been restored.
             </br>
             </br>
-            Thank you for being a part of the Freedium community and for your continued support.
+            We apologize for any inconvenience this may have caused and appreciate your understanding.
+            Freedium continues to operate as an independent service focused on providing free access to quality content.
             </br>
             </br>
-            Choose Your Preferred Donation Platform:
+            Thank you for your continued support of our mission to keep knowledge free and accessible.
+            </br>
+            </br>
+            <strong>Your support helps us maintain this service:</strong>
         </p>
-        <a href="https://patreon.com/Freedium" rel="noreferrer" target="_blank" title="Patreon">
-            <button
-                class="px-2 py-1 mx-1 mt-2 font-semibold text-white bg-red-400 rounded hover:bg-red-500">Patreon</button>
-        </a>
-        <a href="https://ko-fi.com/zhymabekroman" rel="noreferrer" target="_blank" title="Ko-fi">
-            <button
-                class="px-2 py-1 mx-1 mt-2 font-semibold text-white bg-blue-400 rounded hover:bg-blue-500">Ko-fi</button>
-        </a>
-        <a href="https://liberapay.com/ZhymabekRoman/" rel="noreferrer" target="_blank" title="Liberapay">
-            <button
-                class="px-2 py-1 mx-1 mt-2 font-semibold text-white bg-yellow-400 rounded hover:bg-yellow-500">Liberapay</button>
-        </a>
-        <button
-            class="px-2 py-1 mx-1 mt-2 font-semibold text-gray-800 bg-gray-300 rounded hover:bg-gray-400 close-button">Close</button>
-        <a href="https://codeberg.org/Freedium-cfd/web" rel="noreferrer" target="_blank" title="Codeberg">
-            <button class="px-2 py-1 mx-1 mt-2 font-semibold text-white bg-blue-800 rounded hover:bg-blue-900">
-                Source code - Codeberg
+        <div class="mt-4 space-x-2">
+            <a href="https://patreon.com/Freedium" rel="noreferrer" target="_blank" title="Patreon">
+                <button class="px-3 py-2 font-semibold text-white bg-red-500 rounded hover:bg-red-600 transition-colors">
+                    Patreon
+                </button>
+            </a>
+            <a href="https://ko-fi.com/zhymabekroman" rel="noreferrer" target="_blank" title="Ko-fi">
+                <button class="px-3 py-2 font-semibold text-white bg-blue-500 rounded hover:bg-blue-600 transition-colors">
+                    Ko-fi
+                </button>
+            </a>
+            <a href="https://liberapay.com/ZhymabekRoman/" rel="noreferrer" target="_blank" title="Liberapay">
+                <button class="px-3 py-2 font-semibold text-white bg-yellow-500 rounded hover:bg-yellow-600 transition-colors">
+                    Liberapay
+                </button>
+            </a>
+        </div>
+        <div class="mt-3">
+            <button class="px-4 py-2 font-semibold text-white bg-gray-600 rounded hover:bg-gray-700 transition-colors close-button">
+                Close
             </button>
-        </a>
-        <a href="https://github.com/Freedium-cfd/web" rel="noreferrer" target="_blank" title="GitHub">
-            <button class="px-2 py-1 mx-1 mt-2 font-semibold text-white bg-gray-700 rounded hover:bg-gray-600">
-                Source code - GitHub
-            </button>
-        </a>
+        </div>
     </div>
 </div>
 
@@ -443,7 +449,7 @@
     document.addEventListener('DOMContentLoaded', () => {
         const notificationContainer = document.querySelector('.notification-container');
         const closeButton = document.querySelector('.close-button');
-        const notificationFlagString = "showNotification-kdjfn32"
+        const notificationFlagString = "showNotification-dmca-canva-2024"
         const body = document.querySelector('body');
 
         function showNotification() {
