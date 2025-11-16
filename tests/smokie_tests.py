@@ -23,7 +23,7 @@ url_for_test = {
     "https://www.freedium.cfd/c81e00f6320d",
 }
 
-blacklist_url = {"51e23c5a2aac", "e65e737baa29"}
+blacklist_url = {"51e23c5a2aac", "e65e737baa29", "70e83061e535"}
 
 
 def main():
