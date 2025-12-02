@@ -72,7 +72,8 @@ class MediumApi:
                     json=graphql_data,
                     proxies={"http": proxy, "https": proxy} if proxy else None,
                     timeout=self.timeout,
-                    impersonate="chrome110",
+                    impersonate="chrome136",
+                    http_version="v3"
                 )
 
                 if response.status_code != 200:
@@ -82,8 +83,8 @@ class MediumApi:
                     return None
 
                 response_data = response.json()
-                with open("/app/web/sidufh.json", "wb") as file:
-                    file.write(response.content)
+                # with open("/app/web/sidufh.json", "wb") as file:
+                #     file.write(response.content)
 
         except Exception as ex:
             logger.debug("Failed to make request or parse response")

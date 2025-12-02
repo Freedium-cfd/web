@@ -36,7 +36,7 @@ async def main():
     with open("query_result.json", "w") as f:
         json.dump(query_result, f, indent=2)
 
-    result = await dl.render_as_html("a079819bb465")
+    result = await dl.render_as_html("fe43c0cc6b89")
 
     with open("medium.html", "w") as f:
         template = jinja2_env.get_template("example_base_template.html")

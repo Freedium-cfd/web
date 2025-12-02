@@ -1,2 +1,2 @@
 loguru==0.6.0
-curl_cffi==0.7.4
+curl_cffi==0.13.0
