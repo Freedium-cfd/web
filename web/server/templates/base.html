@@ -109,38 +109,12 @@
     </button>
 </div>
 
-<div class="notification-container fixed top-5 p-2 max-h-[95vh] overflow-y-auto hidden" style="z-index: 999999;">
-    <div class="p-5 text-center bg-white border border-gray-300 rounded-md shadow-sm dark:bg-gray-800">
-        <p class="pb-5 text-2xl text-black dark:text-white">Important Notice: DMCA Resolution</p>
+
+<div class="storage-notification-container fixed top-5 right-5 p-2 max-h-[95vh] overflow-y-auto hidden" style="z-index: 999999;">
+    <div class="p-4 text-center bg-white border border-gray-300 rounded-md shadow-sm dark:bg-gray-800">
+        <p class="pb-2 text-xl text-black dark:text-white font-semibold">Milestone: 20GB Reached</p>
         <p class="pb-3 text-black dark:text-white">
-            Dear Freedium users,
-            </br>
-            </br>
-            We recently experienced downtime due to a trademark infringement complaint filed by Bolster Inc. on behalf of Canva.
-            The complaint alleged that Freedium was using Canva's registered logos and trademarks without authorization.
-            </br>
-            </br>
-            <strong>Important Clarification:</strong>
-            </br>
-            • Freedium has never used, displayed, or claimed affiliation with Canva's logos or trademarks
-            </br>
-            • Freedium is an independent platform dedicated to breaking Medium's paywall
-            </br>
-            • We have no connection whatsoever with Canva or any of its services
-            </br>
-            </br>
-            The complaint was forwarded through Cloudflare to our hosting provider, which caused temporary service disruption.
-            After investigation and clarification that no infringement occurred, normal service has been restored.
-            </br>
-            </br>
-            We apologize for any inconvenience this may have caused and appreciate your understanding.
-            Freedium continues to operate as an independent service focused on providing free access to quality content.
-            </br>
-            </br>
-            Thank you for your continued support of our mission to keep knowledge free and accessible.
-            </br>
-            </br>
-            <strong>Your support helps us maintain this service:</strong>
+            We’ve reached 20GB of stored data — thank you for helping us grow!
         </p>
         <div class="mt-4 space-x-2">
             <a href="https://patreon.com/Freedium" rel="noreferrer" target="_blank" title="Patreon">
@@ -160,7 +134,7 @@
             </a>
         </div>
         <div class="mt-3">
-            <button class="px-4 py-2 font-semibold text-white bg-gray-600 rounded hover:bg-gray-700 transition-colors close-button">
+            <button class="px-4 py-2 font-semibold text-white bg-gray-600 rounded hover:bg-gray-700 transition-colors storage-close-button">
                 Close
             </button>
         </div>
@@ -447,29 +421,30 @@
 </script>
 <script>
     document.addEventListener('DOMContentLoaded', () => {
-        const notificationContainer = document.querySelector('.notification-container');
-        const closeButton = document.querySelector('.close-button');
-        const notificationFlagString = "showNotification-dmca-canva-2024"
-        const body = document.querySelector('body');
 
-        function showNotification() {
-            if (!localStorage.getItem(notificationFlagString)) {
-                notificationContainer.style.display = 'block';
-                body.classList.add('!overflow-hidden');
+        // Storage notification
+        const storageNotificationContainer = document.querySelector('.storage-notification-container');
+        const storageCloseButton = storageNotificationContainer ? storageNotificationContainer.querySelector('.storage-close-button') : null;
+        const storageFlagString = "showNotification-storage-20gb-2025";
+
+        function showStorageNotification() {
+            if (storageNotificationContainer && !localStorage.getItem(storageFlagString)) {
+                storageNotificationContainer.style.display = 'block';
             }
         }
 
-        function hideNotification() {
-            localStorage.setItem(notificationFlagString, 'false');
-            notificationContainer.style.display = 'none';
-            body.classList.remove('!overflow-hidden');
+        function hideStorageNotification() {
+            if (!storageNotificationContainer) return;
+            localStorage.setItem(storageFlagString, 'false');
+            storageNotificationContainer.style.display = 'none';
         }
 
-        closeButton.addEventListener('click', () => {
-            hideNotification();
-        });
+        if (storageCloseButton) {
+            storageCloseButton.addEventListener('click', hideStorageNotification);
+        }
 
-        // showNotification();
+        // Show the storage notification by default
+        showStorageNotification();
     });
 </script>
 </body>
