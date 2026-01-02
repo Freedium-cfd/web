@@ -10,13 +10,16 @@
 </script>
 
 <DropdownMenu.Root>
-	<DropdownMenu.Trigger asChild let:builder>
-		<Button
-			builders={[builder]}
-			variant="ghost"
-			class="px-3 text-gray-600 py-7 dark:text-white hover:text-primary dark:hover:text-primary"
-			><MdiPuzzle class="size-5" /></Button
-		>
+	<DropdownMenu.Trigger>
+		{#snippet child({ props })}
+			<Button
+				{...props}
+				variant="ghost"
+				class="px-3 text-gray-600 py-7 dark:text-white hover:text-primary dark:hover:text-primary"
+			>
+				<MdiPuzzle class="size-5" />
+			</Button>
+		{/snippet}
 	</DropdownMenu.Trigger>
 	<DropdownMenu.Content class="w-56 text-zinc-600 dark:text-zinc-300 ">
 		<DropdownMenu.Label>Browser Extensions</DropdownMenu.Label>

@@ -3,14 +3,14 @@
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu/index.js';
 	import * as Dialog from '$lib/components/ui/dialog';
 	import * as Drawer from '$lib/components/ui/drawer';
-	import { mediaQuery } from 'svelte-legos';
+	import { mediaQuery } from '$lib/hooks/media-query';
 	import CodeBlock from './CodeBlock.svelte';
 	import copy from 'copy-to-clipboard';
 	import { toast } from 'svelte-sonner';
 	import MdiBookmark from '~icons/mdi/bookmark';
 	import MdiContentCopy from '~icons/mdi/content-copy';
 
-	let open = false;
+	let open = $state(false);
 	const isDesktop = mediaQuery('(min-width: 768px)');
 
 	function handleCopy(text: string) {
@@ -22,7 +22,7 @@
 {#if $isDesktop}
 	<Dialog.Root bind:open>
 		<Dialog.Trigger class="w-full">
-			<DropdownMenu.Item on:click={($event) => $event.preventDefault()}>
+			<DropdownMenu.Item onclick={(e: MouseEvent) => e.preventDefault()}>
 				<MdiBookmark class="size-4 mr-2" />
 				<span>Bookmark</span>
 			</DropdownMenu.Item>
@@ -53,7 +53,7 @@
 								variant="outline"
 								size="icon"
 								class="ml-2"
-								on:click={() =>
+								onclick={() =>
 									handleCopy(
 										`javascript:window.location="https://freedium.cfd/"+encodeURIComponent(window.location)"`
 									)}
@@ -75,7 +75,7 @@
 								variant="outline"
 								size="icon"
 								class="ml-2"
-								on:click={() =>
+								onclick={() =>
 									handleCopy(
 										`javascript:(function(){window.open("https://freedium.cfd/"+encodeURIComponent(window.location))})();`
 									)}
@@ -101,7 +101,7 @@
 {:else}
 	<Drawer.Root bind:open>
 		<Drawer.Trigger class="w-full">
-			<DropdownMenu.Item on:click={($event) => $event.preventDefault()}>
+			<DropdownMenu.Item onclick={(e: MouseEvent) => e.preventDefault()}>
 				<MdiBookmark class="w-4 h-4 mr-2" />
 				<span>Bookmark</span>
 			</DropdownMenu.Item>
@@ -130,7 +130,7 @@
 								variant="outline"
 								size="icon"
 								class="ml-2"
-								on:click={() =>
+								onclick={() =>
 									handleCopy(
 										`javascript:window.location="https://freedium.cfd/"+encodeURIComponent(window.location)"`
 									)}
@@ -152,7 +152,7 @@
 								variant="outline"
 								size="icon"
 								class="ml-2"
-								on:click={() =>
+								onclick={() =>
 									handleCopy(
 										`javascript:(function(){window.open("https://freedium.cfd/"+encodeURIComponent(window.location))})();`
 									)}

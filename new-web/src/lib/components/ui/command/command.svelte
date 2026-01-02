@@ -1,22 +1,28 @@
 <script lang="ts">
-	import { Command as CommandPrimitive } from "cmdk-sv";
 	import { cn } from "$lib/utils.js";
+	import { Command as CommandPrimitive } from "bits-ui";
 
-	type $$Props = CommandPrimitive.CommandProps;
+	export type CommandRootApi = CommandPrimitive.Root;
 
-	export let value: $$Props["value"] = undefined;
-
-	let className: string | undefined | null = undefined;
-	export { className as class };
+	let {
+		api = $bindable(null),
+		ref = $bindable(null),
+		value = $bindable(""),
+		class: className,
+		...restProps
+	}: CommandPrimitive.RootProps & {
+		api?: CommandRootApi | null;
+	} = $props();
 </script>
 
 <CommandPrimitive.Root
+	bind:this={api}
+	bind:value
+	bind:ref
+	data-slot="command"
 	class={cn(
 		"bg-popover text-popover-foreground flex h-full w-full flex-col overflow-hidden rounded-md",
 		className
 	)}
-	bind:value
-	{...$$restProps}
->
-	<slot />
-</CommandPrimitive.Root>
+	{...restProps}
+/>

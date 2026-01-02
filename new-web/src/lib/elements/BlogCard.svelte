@@ -1,61 +1,72 @@
 <script lang="ts">
-	import Lazy from 'svelte-lazy';
 	import MageMedium from '~icons/mage/medium';
+	import LazyImage from '$lib/components/LazyImage.svelte';
+	import type { BlogPost, BlogPostSize } from '$lib/types';
 
-	const sizes = ['small', 'medium', 'large'];
+	const sizes: BlogPostSize[] = ['small', 'medium', 'large'];
 
-	export let id: number;
-	export let title: string;
-	export let excerpt: string;
-	export let imageUrl: string;
-	export let bottomImageUrl: string | null = null;
-	export let size: 'small' | 'medium' | 'large' | null = randomSize();
-	export let readingTime: string;
-	export let publishedAt: string;
-	export let collection: { name: string; avatarId: string } | null = null;
-	export let creator: string;
-	export let slug: string;
+	function randomSize(): BlogPostSize {
+		return sizes[Math.floor(Math.random() * sizes.length)];
+	}
 
-	const sizeClasses = {
+	type Props = BlogPost;
+
+	let {
+		id,
+		title,
+		excerpt,
+		imageUrl = '',
+		bottomImageUrl = null,
+		size = randomSize(),
+		readingTime,
+		publishedAt,
+		collection = null,
+		creator,
+		slug
+	}: Props = $props();
+
+	const sizeClasses: Record<string, string> = {
 		small: 'w-full',
 		medium: 'w-full',
 		large: 'w-full',
 		null: 'w-full'
 	};
 
-	const imageClasses = {
-		small: 'h-32',
-		medium: 'h-48',
-		large: 'h-64',
-		null: 'h-32'
+	const imageHeights: Record<string, string> = {
+		small: '128px',
+		medium: '192px',
+		large: '256px',
+		null: '128px'
 	};
-
-	function randomSize(): 'small' | 'medium' | 'large' {
-		return sizes[Math.floor(Math.random() * sizes.length)] as 'small' | 'medium' | 'large';
-	}
 </script>
 
 <a href={`/${slug}`} class="block no-underline">
 	<div
-		class={`border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 rounded-lg shadow-md overflow-hidden ${sizeClasses[size]} transition-transform duration-300 ease-in-out hover:scale-105 mb-4`}
+		class={`border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 rounded-lg shadow-md overflow-hidden ${sizeClasses[size ?? 'null']} transition-transform duration-300 ease-in-out hover:scale-105 mb-4`}
 	>
 		{#if imageUrl}
-			<Lazy height={300}>
-				<img src={imageUrl} alt={title} class={`w-full object-cover ${imageClasses[size]}`} />
-			</Lazy>
+			<LazyImage
+				src={imageUrl}
+				alt={title}
+				class="w-full"
+				width="100%"
+				height={imageHeights[size ?? 'null']}
+				rootMargin="100px"
+			/>
 		{/if}
 		<div class="p-4">
 			<h2 class="mb-2 text-xl font-bold text-zinc-900 dark:text-zinc-100">{title}</h2>
 			<p class="text-gray-600 dark:text-gray-300">{excerpt}</p>
 		</div>
 		{#if bottomImageUrl}
-			<Lazy height={300}>
-				<img
-					src={bottomImageUrl}
-					alt={title}
-					class={`lazy w-full object-cover ${imageClasses[size]}`}
-				/>
-			</Lazy>
+			<LazyImage
+				src={bottomImageUrl}
+				alt={title}
+				class="w-full"
+				width="100%"
+				height={imageHeights[size ?? 'null']}
+				rootMargin="100px"
+			/>
 		{/if}
 		<div
 			class="flex flex-wrap items-center p-4 mt-2 space-x-2 text-sm text-gray-500 dark:text-white"

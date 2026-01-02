@@ -1,9 +1,10 @@
 <script lang="ts">
 	import Header from '$lib/elements/Header.svelte';
-	import Masonry from 'svelte-bricks';
 	import HomeBanner from '$lib/elements/HomeBanner.svelte';
 	import BlogCard from '$lib/elements/BlogCard.svelte';
 	import Footer from '$lib/elements/Footer.svelte';
+	import Masonry from 'svelte-bricks';
+	import type { BlogPost } from '$lib/types';
 
 	const blogPosts = [
 		{
@@ -105,21 +106,21 @@
 		}
 	];
 
-	$: items = blogPosts.map((post, index) => ({ ...post, id: index }));
-
-	let [minColWidth, maxColWidth, gap] = [300, 600, 20];
+	const items: BlogPost[] = blogPosts.map((post, index) => ({ ...post, id: index }));
 </script>
 
-<head>
+<svelte:head>
 	<title>Freedium - Your paywall breakthrough for Medium!</title>
-</head>
+</svelte:head>
 
 <Header />
 <HomeBanner />
 
-<div class="container px-4 py-8 mx-auto">
-	<Masonry {items} {minColWidth} {maxColWidth} {gap} let:item>
-		<BlogCard {...item} />
+<div class="container flex-1 px-4 py-8 mx-auto">
+	<Masonry {items} minColWidth={300} maxColWidth={400} gap={20} animate={true}>
+		{#snippet children({ item }: { item: BlogPost })}
+			<BlogCard {...item} />
+		{/snippet}
 	</Masonry>
 </div>
 

@@ -1,12 +1,14 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 
-	let progress: HTMLElement;
-	let scroll = 0;
+	let progress: HTMLDivElement | undefined = $state();
+	let scroll = $state(0);
 
-	$: if (progress) {
-		progress.style.setProperty('--scroll', scroll + '%');
-	}
+	$effect(() => {
+		if (progress) {
+			progress.style.setProperty('--scroll', scroll + '%');
+		}
+	});
 
 	onMount(() => {
 		const updateScroll = () => {
@@ -30,7 +32,7 @@
 	id="progress"
 	class="top-0 z-20 h-1"
 	style="background:linear-gradient(to right, hsl(var(--primary)) var(--scroll), transparent 0); width: var(--scroll, 0%);"
-/>
+></div>
 
 <style>
 	#progress {

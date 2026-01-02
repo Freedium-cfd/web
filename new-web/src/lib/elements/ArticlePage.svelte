@@ -1,5 +1,4 @@
-<script>
-	import { page } from '$app/stores';
+<script lang="ts">
 	import Header from '$lib/elements/Header.svelte';
 	import { formatDate } from '$lib/utils/dateFormatter';
 	import ImageZoom from '$lib/elements/ImageZoom.svelte';
@@ -10,16 +9,31 @@
 	import HeroiconsArrowLeft20Solid from '~icons/heroicons/arrow-left-20-solid';
 	import HeroiconsDocumentArrowDown20Solid from '~icons/heroicons/document-arrow-down-20-solid';
 	import HeroiconsDocumentText20Solid from '~icons/heroicons/document-text-20-solid';
-	import externalLinkIconUrl from '~icons/heroicons-outline/external-link?url';
+	import HeroiconsOutlineExternalLink from '~icons/heroicons-outline/external-link';
+	import { onMount } from 'svelte';
+	import { initializeCodeCopyButtons } from '$lib/codeCopy';
+	import type { ArticlePageData } from '$lib/types';
 
-	export let data;
+	interface Props {
+		data: ArticlePageData;
+	}
 
-	$: ({ article, content, loading } = data);
-	$: contentLoaded = !loading && !!content;
-	$: error = data.error;
-	$: showSkeleton = !error && !contentLoaded;
+	let { data }: Props = $props();
 
-	function getErrorMessage(error) {
+	let article = $derived(data.article);
+	let content = $derived(data.content);
+	let loading = $derived(data.loading);
+	let error = $derived(data.error);
+	let contentLoaded = $derived(!loading && !!content);
+	let showSkeleton = $derived(!error && !contentLoaded);
+
+	onMount(() => {
+		if (contentLoaded) {
+			initializeCodeCopyButtons();
+		}
+	});
+
+	function getErrorMessage(error: ArticlePageData['error']) {
 		if (!error) return '';
 
 		switch (error.code) {
@@ -32,6 +46,14 @@
 			default:
 				return error.message || 'An unexpected error occurred.';
 		}
+	}
+
+	function goBack() {
+		window.history.back();
+	}
+
+	function reload() {
+		window.location.reload();
 	}
 </script>
 
@@ -70,7 +92,7 @@
 						</a>
 						<button
 							class="inline-block px-4 py-2 border rounded-md border-primary text-primary hover:bg-primary/10"
-							on:click={() => window.location.reload()}
+							onclick={reload}
 						>
 							Try Again
 						</button>
@@ -117,7 +139,7 @@
 						<nav class="flex items-center justify-between gap-2 p-4 text-center">
 							<button
 								class="flex items-center justify-center transition bg-white rounded-full shadow-md text-primary hover:text-primary/90 group size-8 shadow-zinc-800/5 ring-1 ring-zinc-900/5 dark:border dark:border-zinc-700/50 dark:bg-zinc-800 dark:ring-0 dark:ring-white/10 dark:hover:border-zinc-700 dark:hover:ring-white/20"
-								on:click={() => window.history.back()}
+								onclick={goBack}
 							>
 								<HeroiconsArrowLeft20Solid class="size-6" />
 							</button>
@@ -147,7 +169,7 @@
 						</header>
 
 						<div class="p-6 {article.postImage ? '' : 'pt-0'} dark:text-gray-300">
-							<div class="prose max-w-none" style="--external-link-icon: url({externalLinkIconUrl})">
+							<div class="prose max-w-none prose-external-links">
 								{#if content}
 									{@html content}
 								{:else}

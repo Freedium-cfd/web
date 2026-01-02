@@ -1,25 +1,22 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
 	import * as Command from '$lib/components/ui/command/index.js';
 	import { debounce } from 'es-toolkit';
 	import { Skeleton } from '$lib/components/ui/skeleton/index.js';
+	import type { SearchPost } from '$lib/types';
 
-	let value = '';
-	let searchQuery = '';
-	export let open = false;
-	let loading = false;
+	let value = $state('');
+	let searchQuery = $state('');
 
-	type Post = {
-		id: string;
-		title: string;
-		date: Date;
-		excerpt: string;
-		imageUrl: string;
-	};
+	interface Props {
+		open?: boolean;
+	}
 
-	let searchResults: Post[] = [];
+	let { open = $bindable(false) }: Props = $props();
+	let loading = $state(false);
 
-	const mockSearch = async (query: string): Promise<Post[]> => {
+	let searchResults: SearchPost[] = $state([]);
+
+	const mockSearch = async (query: string): Promise<SearchPost[]> => {
 		loading = true;
 
 		await new Promise((resolve) => setTimeout(resolve, 1500)); // Increased delay for demo
@@ -54,20 +51,17 @@
 	const debouncedSearch = debounce(async (query: string) => {
 		const searchResultsData = await mockSearch(query);
 		searchResults = searchResultsData;
-		// if (searchQuery !== '') {
-		// }
 	}, 300);
 
-	$: {
+	$effect(() => {
 		if (searchQuery) {
-			console.log('searchQuery', searchQuery);
 			debouncedSearch(searchQuery);
 		} else {
 			searchResults = [];
 			loading = false;
 			debouncedSearch.cancel();
 		}
-	}
+	});
 
 	function formatDate(date: Date): string {
 		return date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });

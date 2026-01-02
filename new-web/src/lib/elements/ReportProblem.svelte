@@ -1,38 +1,46 @@
 <script lang="ts">
-	import { Label, Separator } from 'bits-ui';
-	import { mediaQuery } from 'svelte-legos';
+	import { Label } from 'bits-ui';
+	import { mediaQuery } from '$lib/hooks/media-query';
 	import { Textarea } from '$lib/components/ui/textarea/index.js';
 	import { Button, buttonVariants } from '$lib/components/ui/button/index.js';
 	import * as Dialog from '$lib/components/ui/dialog';
 	import * as Drawer from '$lib/components/ui/drawer';
-	import * as RadioGroup from '$lib/components/ui/radio-group/index.js';
+	import * as Select from '$lib/components/ui/select/index.js';
 	import { toast } from 'svelte-sonner';
 	import HeroiconsExclamationTriangleSolid from '~icons/heroicons/exclamation-triangle-solid';
+	import type { ReportProblemProps } from '$lib/types';
 
-	let open = false;
+	let { variant = 'default', showBadge = false, compact = false }: ReportProblemProps = $props();
+
+	let open = $state(false);
 	const isDesktop = mediaQuery('(min-width: 768px)');
-	let problemDescription = '';
-	let problemType = 'ui_problem';
+	let problemDescription = $state('');
+	let problemType = $state<{ value: string; label: string }>({ value: 'ui_problem', label: 'UI problem' });
 
-	export let variant: 'default' | 'warning' | 'danger' = 'default';
-	export let showBadge = false;
-	export let compact = false;
+	const problemTypeOptions = [
+		{ value: 'ui_problem', label: 'UI problem' },
+		{ value: 'article_not_full', label: 'Article is not full' },
+		{ value: 'suggestion', label: 'Suggestion' },
+		{ value: 'vulnerability', label: 'Vulnerability (XSS, etc.)' },
+		{ value: 'other', label: 'Other' }
+	];
 
-	const handleSubmit = () => {
-		console.log({ problemType, problemDescription });
-		toast.success(`${problemType} submitted`);
+	const handleSubmit = (e: SubmitEvent) => {
+		e.preventDefault();
+		console.log({ problemType: problemType.value, problemDescription });
+		toast.success(`${problemType.label} submitted`);
 		problemDescription = '';
-		problemType = 'ui_problem';
+		problemType = { value: 'ui_problem', label: 'UI problem' };
 		open = false;
 	};
 
-	const getVariantStyles = (variant: string) => {
-		const styles = {
+	const getVariantStyles = (v: string) => {
+		const styles: Record<string, string> = {
 			default: 'bg-primary hover:bg-primary/90',
 			warning: 'bg-purple-500 hover:bg-purple-600 text-white',
 			danger: 'bg-red-500 hover:bg-red-600 text-white'
 		};
-		return styles[variant] || styles.default;
+		return styles[v] || styles.default;
 	};
 </script>
 
@@ -58,43 +66,29 @@
 				</span>
 			{/if}
 		</Dialog.Trigger>
-		<form on:submit|preventDefault={handleSubmit}>
-			<Dialog.Content class="w-full max-w-[650px] bg-white dark:bg-zinc-900 flex flex-col">
+		<Dialog.Content class="w-full max-w-[650px] bg-white dark:bg-zinc-900 flex flex-col">
+			<form onsubmit={handleSubmit}>
 				<Dialog.Header>
 					<Dialog.Title class="text-lg font-semibold tracking-tight">Report a Problem</Dialog.Title>
 				</Dialog.Header>
 				<div class="flex-1">
 					<Dialog.Description class="text-foreground-alt">
-						<p>
-							Please describe the problem you're experiencing. We'll look into it as soon as
-							possible.
-						</p>
+						Please describe the problem you're experiencing. We'll look into it as soon as
+						possible.
 					</Dialog.Description>
-					<div class="grid grid-cols-1 gap-2 md:grid-cols-2 pt-7">
+					<div class="flex flex-col gap-4 pt-7">
 						<div class="flex flex-col items-start gap-2">
 							<Label.Root class="text-sm font-medium">Problem Type</Label.Root>
-							<RadioGroup.Root bind:value={problemType} class="space-y-2">
-								<div class="flex items-center space-x-2">
-									<RadioGroup.Item value="ui_problem" id="ui-problem" />
-									<Label.Root for="ui-problem">UI problem</Label.Root>
-								</div>
-								<div class="flex items-center space-x-2">
-									<RadioGroup.Item value="article_not_full" id="article-not-full" />
-									<Label.Root for="article-not-full">Article is not full</Label.Root>
-								</div>
-								<div class="flex items-center space-x-2">
-									<RadioGroup.Item value="suggestion" id="suggestion" />
-									<Label.Root for="suggestion">Suggestion</Label.Root>
-								</div>
-								<div class="flex items-center space-x-2">
-									<RadioGroup.Item value="vulnerability" id="vulnerability" />
-									<Label.Root for="vulnerability">Vulnerability (XSS, etc.)</Label.Root>
-								</div>
-								<div class="flex items-center space-x-2">
-									<RadioGroup.Item value="other" id="other" />
-									<Label.Root for="other">Other</Label.Root>
-								</div>
-							</RadioGroup.Root>
+							<Select.Root type="single" bind:value={problemType}>
+								<Select.Trigger class="w-full">
+									{problemType.label}
+								</Select.Trigger>
+								<Select.Content>
+									{#each problemTypeOptions as option}
+										<Select.Item value={option.value} label={option.label} />
+									{/each}
+								</Select.Content>
+							</Select.Root>
 						</div>
 						<div class="flex flex-col items-start gap-1">
 							<Label.Root for="problemDescription" class="text-sm font-medium"
@@ -104,7 +98,7 @@
 								id="problemDescription"
 								bind:value={problemDescription}
 								placeholder="Describe the problem you're experiencing..."
-								rows={12}
+								rows={6}
 							/>
 							<p class="mt-2 text-sm text-foreground-alt">
 								The current opened page will be automatically attached to your report.
@@ -118,8 +112,8 @@
 						<Button type="submit">Submit</Button>
 					</Dialog.Footer>
 				</div>
-			</Dialog.Content>
-		</form>
+			</form>
+		</Dialog.Content>
 	</Dialog.Root>
 {:else}
 	<Drawer.Root bind:open>
@@ -133,8 +127,8 @@
 				</div>
 			{/if}
 		</Drawer.Trigger>
-		<form on:submit|preventDefault={handleSubmit}>
-			<Drawer.Content class="max-h-[90dvh] flex flex-col">
+		<Drawer.Content class="max-h-[90dvh] flex flex-col">
+			<form onsubmit={handleSubmit}>
 				<div class="flex-1 mb-5 overflow-y-auto">
 					<Drawer.Header class="text-left">
 						<Drawer.Title class="text-lg font-semibold tracking-tight"
@@ -149,28 +143,16 @@
 						<div class="space-y-4">
 							<div class="flex flex-col items-start space-y-2">
 								<Label.Root class="text-sm font-medium">Problem Type</Label.Root>
-								<RadioGroup.Root bind:value={problemType} class="space-y-2">
-									<div class="flex items-center space-x-2">
-										<RadioGroup.Item value="ui_problem" id="ui-problem-mobile" />
-										<Label.Root for="ui-problem-mobile">UI problem</Label.Root>
-									</div>
-									<div class="flex items-center space-x-2">
-										<RadioGroup.Item value="article_not_full" id="article-not-full-mobile" />
-										<Label.Root for="article-not-full-mobile">Article is not full</Label.Root>
-									</div>
-									<div class="flex items-center space-x-2">
-										<RadioGroup.Item value="suggestion" id="suggestion-mobile" />
-										<Label.Root for="suggestion-mobile">Suggestion</Label.Root>
-									</div>
-									<div class="flex items-center space-x-2">
-										<RadioGroup.Item value="vulnerability" id="vulnerability-mobile" />
-										<Label.Root for="vulnerability-mobile">Vulnerability (XSS, etc.)</Label.Root>
-									</div>
-									<div class="flex items-center space-x-2">
-										<RadioGroup.Item value="other" id="other-mobile" />
-										<Label.Root for="other-mobile">Other</Label.Root>
-									</div>
-								</RadioGroup.Root>
+								<Select.Root type="single" bind:value={problemType}>
+									<Select.Trigger class="w-full">
+										{problemType.label}
+									</Select.Trigger>
+									<Select.Content>
+										{#each problemTypeOptions as option}
+											<Select.Item value={option.value} label={option.label} />
+										{/each}
+									</Select.Content>
+								</Select.Root>
 							</div>
 							<div class="flex flex-col items-start space-y-2">
 								<Label.Root for="problemDescription-mobile" class="text-sm font-medium"
@@ -194,7 +176,7 @@
 						</div>
 					</div>
 				</div>
-			</Drawer.Content>
-		</form>
+			</form>
+		</Drawer.Content>
 	</Drawer.Root>
 {/if}
