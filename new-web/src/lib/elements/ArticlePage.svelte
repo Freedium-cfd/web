@@ -7,10 +7,13 @@
 	import Footer from '$lib/elements/Footer.svelte';
 	import './ArticlePage.css';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
+	import * as Drawer from '$lib/components/ui/drawer';
+	import { mediaQuery } from '$lib/hooks/media-query';
 	import HeroiconsArrowLeft20Solid from '~icons/heroicons/arrow-left-20-solid';
 	import HeroiconsDocumentArrowDown20Solid from '~icons/heroicons/document-arrow-down-20-solid';
 	import HeroiconsDocumentText20Solid from '~icons/heroicons/document-text-20-solid';
 	import HeroiconsChevronDown20Solid from '~icons/heroicons/chevron-down-20-solid';
+	import HeroiconsBars320Solid from '~icons/heroicons/bars-3-20-solid';
 	import { onMount } from 'svelte';
 	import { initializeCodeCopyButtons } from '$lib/codeCopy';
 	import { initializeLazyIframes } from '$lib/lazyIframe';
@@ -24,10 +27,28 @@
 
 	let article = $derived(data.article);
 	let content = $derived(data.content);
+	let markdown = $derived(data.markdown);
 	let loading = $derived(data.loading);
 	let error = $derived(data.error);
 	let contentLoaded = $derived(!loading && !!content);
 	let showSkeleton = $derived(!error && !contentLoaded);
+
+	const isDesktop = mediaQuery('(min-width: 1024px)');
+	let drawerOpen = $state(false);
+
+	function downloadMarkdown() {
+		if (!markdown || !article) return;
+
+		const blob = new Blob([markdown], { type: 'text/markdown;charset=utf-8' });
+		const url = URL.createObjectURL(blob);
+		const link = document.createElement('a');
+		link.href = url;
+		link.download = `${article.title.replace(/[^a-z0-9]/gi, '-').toLowerCase()}.md`;
+		document.body.appendChild(link);
+		link.click();
+		document.body.removeChild(link);
+		URL.revokeObjectURL(url);
+	}
 
 	onMount(() => {
 		if (contentLoaded) {
@@ -161,51 +182,117 @@
 					</article>
 				</div>
 
-				<aside class="w-full mt-7 lg:mt-0 max-w-64" aria-labelledby="toc-heading">
-					<div class="sticky top-12">
-						<nav class="w-full p-4 bg-white rounded-lg shadow-lg dark:bg-zinc-900">
-							<h2 id="toc-heading" class="mb-4 text-xl font-semibold text-primary">Contents</h2>
-							{#if article.tableOfContents && article.tableOfContents.length > 0}
-								<ul class="space-y-1">
-									{#each article.tableOfContents as item}
-										<li>
-											<a
-												href={`#${item.id}`}
-												class="block px-2 py-1.5 text-sm text-zinc-600 hover:text-zinc-900 dark:text-gray-100 dark:hover:text-white hover:bg-accent rounded-md text-wrap break-words"
+				{#if $isDesktop}
+					<aside class="w-full mt-7 lg:mt-0 max-w-64" aria-labelledby="toc-heading">
+						<div class="sticky top-12">
+							<nav class="w-full p-4 bg-white rounded-lg shadow-lg dark:bg-zinc-900">
+								<h2 id="toc-heading" class="mb-4 text-xl font-semibold text-primary">Contents</h2>
+								{#if article.tableOfContents && article.tableOfContents.length > 0}
+									<ul class="space-y-1">
+										{#each article.tableOfContents as item}
+											<li>
+												<a
+													href={`#${item.id}`}
+													class="block px-2 py-1.5 text-sm text-zinc-600 hover:text-zinc-900 dark:text-gray-100 dark:hover:text-white hover:bg-accent rounded-md text-wrap break-words"
+												>
+													{item.title}
+												</a>
+											</li>
+										{/each}
+									</ul>
+								{:else}
+									<p class="italic text-zinc-600 dark:text-gray-400">
+										No table of contents available
+									</p>
+								{/if}
+							</nav>
+							<div class="mt-4">
+								<DropdownMenu.Root>
+									<DropdownMenu.Trigger>
+										{#snippet child({ props })}
+											<button
+												{...props}
+												class="flex items-center justify-between w-full px-4 py-2 text-sm text-primary bg-gray-50 rounded-lg cursor-pointer select-none dark:bg-zinc-800 hover:bg-gray-100 dark:hover:bg-zinc-700"
 											>
-												{item.title}
-											</a>
-										</li>
-									{/each}
-								</ul>
-							{:else}
-								<p class="italic text-zinc-600 dark:text-gray-400">
-									No table of contents available
-								</p>
-							{/if}
-						</nav>
-						<div class="mt-4">
-							<DropdownMenu.Root>
-								<DropdownMenu.Trigger
-									class="flex items-center justify-between w-full px-4 py-2 text-sm text-primary bg-gray-50 rounded-lg cursor-pointer select-none dark:bg-zinc-800 hover:bg-gray-100 dark:hover:bg-zinc-700"
-								>
-									<span>Download article</span>
-									<HeroiconsChevronDown20Solid class="size-4" />
-								</DropdownMenu.Trigger>
-								<DropdownMenu.Content class="w-56">
-									<DropdownMenu.Item>
-										<HeroiconsDocumentArrowDown20Solid class="size-4 text-red-500" />
-										Download as PDF
-									</DropdownMenu.Item>
-									<DropdownMenu.Item>
-										<HeroiconsDocumentText20Solid class="size-4 text-blue-500" />
-										Download as Markdown
-									</DropdownMenu.Item>
-								</DropdownMenu.Content>
-							</DropdownMenu.Root>
+												<span>Download article</span>
+												<HeroiconsChevronDown20Solid class="size-4" />
+											</button>
+										{/snippet}
+									</DropdownMenu.Trigger>
+									<DropdownMenu.Content class="w-56" side="bottom" align="start">
+										<DropdownMenu.Item>
+											<HeroiconsDocumentArrowDown20Solid class="size-4 text-red-500" />
+											Download as PDF
+										</DropdownMenu.Item>
+										<DropdownMenu.Item onclick={downloadMarkdown}>
+											<HeroiconsDocumentText20Solid class="size-4 text-blue-500" />
+											Download as Markdown
+										</DropdownMenu.Item>
+									</DropdownMenu.Content>
+								</DropdownMenu.Root>
+							</div>
 						</div>
-					</div>
-				</aside>
+					</aside>
+				{:else}
+					<Drawer.Root bind:open={drawerOpen}>
+						<Drawer.Trigger
+							class="fixed z-50 flex items-center justify-center transition shadow-lg bottom-6 right-6 bg-primary text-white rounded-full size-14 hover:bg-primary/90 shadow-zinc-800/20 ring-1 ring-primary/20"
+						>
+							<HeroiconsBars320Solid class="size-6" />
+						</Drawer.Trigger>
+						<Drawer.Content class="max-h-[85dvh] flex flex-col">
+							<Drawer.Header class="text-left">
+								<Drawer.Title class="text-xl font-semibold text-primary">Contents</Drawer.Title>
+							</Drawer.Header>
+							<div class="flex-1 px-4 pb-4 overflow-y-auto">
+								{#if article.tableOfContents && article.tableOfContents.length > 0}
+									<ul class="space-y-1">
+										{#each article.tableOfContents as item}
+											<li>
+												<a
+													href={`#${item.id}`}
+													onclick={() => drawerOpen = false}
+													class="block px-3 py-2.5 text-base text-zinc-600 hover:text-zinc-900 dark:text-gray-100 dark:hover:text-white hover:bg-accent rounded-md text-wrap break-words"
+												>
+													{item.title}
+												</a>
+											</li>
+										{/each}
+									</ul>
+								{:else}
+									<p class="italic text-zinc-600 dark:text-gray-400">
+										No table of contents available
+									</p>
+								{/if}
+								<div class="mt-6">
+									<DropdownMenu.Root>
+										<DropdownMenu.Trigger>
+											{#snippet child({ props })}
+												<button
+													{...props}
+													class="flex items-center justify-between w-full px-4 py-3 text-base text-primary bg-gray-50 rounded-lg cursor-pointer select-none dark:bg-zinc-800 hover:bg-gray-100 dark:hover:bg-zinc-700"
+												>
+													<span>Download article</span>
+													<HeroiconsChevronDown20Solid class="size-5" />
+												</button>
+											{/snippet}
+										</DropdownMenu.Trigger>
+										<DropdownMenu.Content class="w-56" side="bottom" align="start">
+											<DropdownMenu.Item>
+												<HeroiconsDocumentArrowDown20Solid class="size-4 text-red-500" />
+												Download as PDF
+											</DropdownMenu.Item>
+											<DropdownMenu.Item onclick={downloadMarkdown}>
+												<HeroiconsDocumentText20Solid class="size-4 text-blue-500" />
+												Download as Markdown
+											</DropdownMenu.Item>
+										</DropdownMenu.Content>
+									</DropdownMenu.Root>
+								</div>
+							</div>
+						</Drawer.Content>
+					</Drawer.Root>
+				{/if}
 				{/if}
 			{/if}
 		</div>

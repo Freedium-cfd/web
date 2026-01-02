@@ -162,6 +162,7 @@ export const load: PageServerLoad = async ({ params }) => {
 			slug: params.slug,
 			loading: false,
 			content: null,
+			markdown: null,
 			article: null,
 			error: {
 				status: 500,
@@ -177,6 +178,7 @@ export const load: PageServerLoad = async ({ params }) => {
 			slug: params.slug,
 			loading: false,
 			content: null,
+			markdown: null,
 			article: null,
 			error: {
 				status: 404,
@@ -204,6 +206,7 @@ export const load: PageServerLoad = async ({ params }) => {
 			slug: params.slug,
 			loading: false,
 			content: result?.code ?? null,
+			markdown: transformed.text,
 			article: transformed.article,
 			error: null,
 		};
@@ -212,6 +215,7 @@ export const load: PageServerLoad = async ({ params }) => {
 			slug: params.slug,
 			loading: false,
 			content: null,
+			markdown: null,
 			article: null,
 			error: {
 				status: 500,

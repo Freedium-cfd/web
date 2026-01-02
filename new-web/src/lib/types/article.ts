@@ -57,6 +57,7 @@ export interface ArticlePageData {
 	slug: string;
 	loading: boolean;
 	content: string | null;
+	markdown: string | null;
 	article: Article | null;
 	error: ArticleError | null;
 }
