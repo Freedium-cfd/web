@@ -1,9 +1,10 @@
 <script lang="ts">
 	import { Button } from '$lib/components/ui/button/index.js';
+	import type { ComponentType } from 'svelte';
 
 	export let name: string;
 	export let url: string;
-	export let icon: string;
+	export let icon: ComponentType;
 </script>
 
 <Button variant="ghost" class="w-24 px-3 py-7">
@@ -13,7 +14,7 @@
 		target="_blank"
 		rel="noopener noreferrer"
 	>
-		<span class={`${icon} size-5`} />
+		<svelte:component this={icon} class="size-5" />
 		{name}
 	</a>
 </Button>

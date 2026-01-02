@@ -1,5 +1,6 @@
 <script lang="ts">
 	import Lazy from 'svelte-lazy';
+	import MageMedium from '~icons/mage/medium';
 
 	const sizes = ['small', 'medium', 'large'];
 
@@ -59,7 +60,7 @@
 		<div
 			class="flex flex-wrap items-center p-4 mt-2 space-x-2 text-sm text-gray-500 dark:text-white"
 		>
-			<span class="icon-[mage--medium] size-4 mr-1" />
+			<MageMedium class="size-4 mr-1" />
 			{#if collection}
 				<div class="flex items-center">
 					<img

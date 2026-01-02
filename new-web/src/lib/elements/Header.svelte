@@ -7,6 +7,12 @@
 	import ExtensionsButton from './ExtensionsButton.svelte';
 	import SearchDialog from './SearchDialog.svelte';
 	import { Menu } from 'lucide-svelte';
+	import HeroiconsMagnifyingGlass16Solid from '~icons/heroicons/magnifying-glass-16-solid';
+	import HeroiconsOutlineMagnifyingGlass from '~icons/heroicons-outline/magnifying-glass';
+	import StashArticlePlusSolid from '~icons/stash/article-plus-solid';
+	import TeenyiconsCupSolid from '~icons/teenyicons/cup-solid';
+	import SimpleIconsLiberapay from '~icons/simple-icons/liberapay';
+	import SimpleIconsDiscord from '~icons/simple-icons/discord';
 
 	import { Button } from '$lib/components/ui/button/index.js';
 
@@ -68,44 +74,44 @@
 				on:click={toggleSearch}
 				aria-label="Open search"
 			>
-				<span class="icon-[heroicons-outline--magnifying-glass]" />
+				<HeroiconsOutlineMagnifyingGlass />
 				<span>Search articles...</span>
 			</Button>
 		</div> -->
 
 		<div class="items-center hidden space-x-2 md:flex">
 			<Button variant="ghost" size="icon" on:click={toggleSearch}>
-				<span class="icon-[heroicons--magnifying-glass-16-solid] size-5" />
+				<HeroiconsMagnifyingGlass16Solid class="size-5" />
 			</Button>
 			<ExtensionsButton />
 			<div class="w-px h-6 bg-zinc-300 dark:bg-zinc-700"></div>
 			<PayButtons
 				name="Ko-fi"
 				url="https://ko-fi.com/zhymabekroman"
-				icon="icon-[teenyicons--cup-solid]"
+				icon={TeenyiconsCupSolid}
 			/>
 			<PayButtons
 				name="Liberapay"
 				url="https://liberapay.com/ZhymabekRoman/"
-				icon="icon-[simple-icons--liberapay]"
+				icon={SimpleIconsLiberapay}
 			/>
 			<PayButtons
 				name="Discord"
 				url="https://discord.gg/dAxCuG9nYM"
-				icon="icon-[simple-icons--discord]"
+				icon={SimpleIconsDiscord}
 			/>
 			<div class="w-px h-6 bg-zinc-300 dark:bg-zinc-700"></div>
 			<ThemeToggle />
-			<ReportProblem variant="warning" showBadge={true} />
-			<Button>
-				<span class="icon-[stash--article-plus-solid] text-white size-5" />
+			<ReportProblem variant="warning" showBadge={true} compact={true} />
+			<Button size="icon">
+				<StashArticlePlusSolid class="text-white size-5" />
 				<span class="sr-only">Add article</span>
 			</Button>
 		</div>
 
 		<div class="flex items-center space-x-2 md:hidden">
 			<Button class="lg:hidden" variant="ghost" size="icon" on:click={toggleSearch}>
-				<span class="icon-[heroicons-outline--magnifying-glass] size-5" />
+				<HeroiconsOutlineMagnifyingGlass class="size-5" />
 			</Button>
 			<ThemeToggle />
 			<ReportProblem variant="danger" compact={true} />
@@ -132,17 +138,17 @@
 				<PayButtons
 					name="Ko-fi"
 					url="https://ko-fi.com/zhymabekroman"
-					icon="icon-[teenyicons--cup-solid]"
+					icon={TeenyiconsCupSolid}
 				/>
 				<PayButtons
 					name="Liberapay"
 					url="https://liberapay.com/ZhymabekRoman/"
-					icon="icon-[simple-icons--liberapay]"
+					icon={SimpleIconsLiberapay}
 				/>
 				<PayButtons
 					name="Discord"
 					url="discord.gg/dAxCuG9nYM"
-					icon="icon-[simple-icons--discord]"
+					icon={SimpleIconsDiscord}
 				/>
 				<!-- <ExtensionsButton /> -->
 			</div>

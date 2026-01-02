@@ -2,6 +2,11 @@
 	import { Button } from '$lib/components/ui/button/index.js';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu/index.js';
 	import BookmarkButton from './BookmarkButton.svelte';
+	import MdiPuzzle from '~icons/mdi/puzzle';
+	import MdiFirefox from '~icons/mdi/firefox';
+	import HeroiconsOutlineExternalLink from '~icons/heroicons-outline/external-link';
+	import MdiGoogleChrome from '~icons/mdi/google-chrome';
+	import MdiScriptText from '~icons/mdi/script-text';
 </script>
 
 <DropdownMenu.Root>
@@ -10,7 +15,7 @@
 			builders={[builder]}
 			variant="ghost"
 			class="px-3 text-gray-600 py-7 dark:text-white hover:text-primary dark:hover:text-primary"
-			><span class="icon-[mdi--puzzle] size-5" /></Button
+			><MdiPuzzle class="size-5" /></Button
 		>
 	</DropdownMenu.Trigger>
 	<DropdownMenu.Content class="w-56 text-zinc-600 dark:text-zinc-300 ">
@@ -27,14 +32,14 @@
 		<DropdownMenu.Separator />
 		<DropdownMenu.Group>
 			<DropdownMenu.Item>
-				<span class="icon-[mdi--firefox] w-4 h-4 mr-2" />
+				<MdiFirefox class="w-4 h-4 mr-2" />
 				<span>Firefox</span>
-				<span class="icon-[heroicons-outline--external-link] size-3.5" />
+				<HeroiconsOutlineExternalLink class="size-3.5" />
 			</DropdownMenu.Item>
 			<DropdownMenu.Item>
-				<span class="icon-[mdi--google-chrome] w-4 h-4 mr-2" />
+				<MdiGoogleChrome class="w-4 h-4 mr-2" />
 				<span>Chrome</span>
-				<span class="icon-[heroicons-outline--external-link] size-3.5" />
+				<HeroiconsOutlineExternalLink class="size-3.5" />
 			</DropdownMenu.Item>
 		</DropdownMenu.Group>
 		<DropdownMenu.Separator />
@@ -44,9 +49,9 @@
 				href="https://gist.github.com/mathix420/e0604ab0e916622972372711d2829555"
 				target="_blank"
 			>
-				<span class="icon-[mdi--script-text] w-4 h-4 mr-2" />
+				<MdiScriptText class="w-4 h-4 mr-2" />
 				<span>Userscript - only Medium</span>
-				<span class="icon-[heroicons-outline--external-link] size-3.5" />
+				<HeroiconsOutlineExternalLink class="size-3.5" />
 			</a>
 		</DropdownMenu.Item>
 		<DropdownMenu.Separator />

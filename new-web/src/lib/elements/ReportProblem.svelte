@@ -7,6 +7,7 @@
 	import * as Drawer from '$lib/components/ui/drawer';
 	import * as RadioGroup from '$lib/components/ui/radio-group/index.js';
 	import { toast } from 'svelte-sonner';
+	import HeroiconsExclamationTriangleSolid from '~icons/heroicons/exclamation-triangle-solid';
 
 	let open = false;
 	const isDesktop = mediaQuery('(min-width: 768px)');
@@ -38,22 +39,24 @@
 {#if $isDesktop}
 	<Dialog.Root bind:open>
 		<Dialog.Trigger
-			class={`${buttonVariants({ variant: 'default' })} ${getVariantStyles(variant)} relative`}
+			class={`${buttonVariants({ variant: 'default', size: compact ? 'icon' : 'default' })} ${getVariantStyles(variant)} relative`}
 		>
-			<div class="flex items-center space-x-2">
-				<span class="icon-[heroicons--exclamation-triangle-solid] size-5" />
-				{#if !compact}
+			{#if compact}
+				<HeroiconsExclamationTriangleSolid class="size-5" />
+			{:else}
+				<div class="flex items-center space-x-2">
+					<HeroiconsExclamationTriangleSolid class="size-5" />
 					<span class="hidden text-sm font-medium lg:block">Report a problem</span>
-				{/if}
-				{#if showBadge}
-					<span class="absolute flex w-3 h-3 -top-1 -right-1">
-						<span
-							class="absolute inline-flex w-full h-full bg-red-400 rounded-full opacity-75 animate-ping"
-						></span>
-						<span class="relative inline-flex w-3 h-3 bg-red-500 rounded-full"></span>
-					</span>
-				{/if}
-			</div>
+				</div>
+			{/if}
+			{#if showBadge}
+				<span class="absolute flex w-3 h-3 -top-1 -right-1">
+					<span
+						class="absolute inline-flex w-full h-full bg-red-400 rounded-full opacity-75 animate-ping"
+					></span>
+					<span class="relative inline-flex w-3 h-3 bg-red-500 rounded-full"></span>
+				</span>
+			{/if}
 		</Dialog.Trigger>
 		<form on:submit|preventDefault={handleSubmit}>
 			<Dialog.Content class="w-full max-w-[650px] bg-white dark:bg-zinc-900 flex flex-col">
@@ -120,11 +123,15 @@
 	</Dialog.Root>
 {:else}
 	<Drawer.Root bind:open>
-		<Drawer.Trigger class={buttonVariants({ variant: 'default' })}>
-			<div class="flex items-center space-x-2 text-white">
-				<span class="icon-[heroicons--exclamation-triangle-solid] size-5" />
-				<span class="hidden text-sm font-medium lg:block">Report a problem</span>
-			</div>
+		<Drawer.Trigger class={buttonVariants({ variant: 'default', size: compact ? 'icon' : 'default' })}>
+			{#if compact}
+				<HeroiconsExclamationTriangleSolid class="size-5 text-white" />
+			{:else}
+				<div class="flex items-center space-x-2 text-white">
+					<HeroiconsExclamationTriangleSolid class="size-5" />
+					<span class="hidden text-sm font-medium lg:block">Report a problem</span>
+				</div>
+			{/if}
 		</Drawer.Trigger>
 		<form on:submit|preventDefault={handleSubmit}>
 			<Drawer.Content class="max-h-[90dvh] flex flex-col">

@@ -7,6 +7,10 @@
 	import Footer from '$lib/elements/Footer.svelte';
 	import './ArticlePage.css';
 	import Button from '$lib/components/ui/button/button.svelte';
+	import HeroiconsArrowLeft20Solid from '~icons/heroicons/arrow-left-20-solid';
+	import HeroiconsDocumentArrowDown20Solid from '~icons/heroicons/document-arrow-down-20-solid';
+	import HeroiconsDocumentText20Solid from '~icons/heroicons/document-text-20-solid';
+	import externalLinkIconUrl from '~icons/heroicons-outline/external-link?url';
 
 	export let data;
 
@@ -115,7 +119,7 @@
 								class="flex items-center justify-center transition bg-white rounded-full shadow-md text-primary hover:text-primary/90 group size-8 shadow-zinc-800/5 ring-1 ring-zinc-900/5 dark:border dark:border-zinc-700/50 dark:bg-zinc-800 dark:ring-0 dark:ring-white/10 dark:hover:border-zinc-700 dark:hover:ring-white/20"
 								on:click={() => window.history.back()}
 							>
-								<span class="icon-[heroicons--arrow-left-20-solid] size-6" />
+								<HeroiconsArrowLeft20Solid class="size-6" />
 							</button>
 							{#if article?.url}
 								<a href={article.url} class="font-bold text-primary hover:text-primary/90">
@@ -143,7 +147,7 @@
 						</header>
 
 						<div class="p-6 {article.postImage ? '' : 'pt-0'} dark:text-gray-300">
-							<div class="prose max-w-none">
+							<div class="prose max-w-none" style="--external-link-icon: url({externalLinkIconUrl})">
 								{#if content}
 									{@html content}
 								{:else}
@@ -158,11 +162,11 @@
 					<div class="sticky top-12">
 						<div class="flex gap-2 mb-4">
 							<Button variant="outline" class="flex-1">
-								<span class="icon-[heroicons--document-arrow-down-20-solid] size-4 mr-1" />
+								<HeroiconsDocumentArrowDown20Solid class="size-4 mr-1" />
 								PDF
 							</Button>
 							<Button class="flex-1" variant="outline">
-								<span class="icon-[heroicons--document-text-20-solid] size-4 mr-1" />
+								<HeroiconsDocumentText20Solid class="size-4 mr-1" />
 								Markdown
 							</Button>
 						</div>

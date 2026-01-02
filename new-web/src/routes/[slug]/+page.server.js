@@ -3,6 +3,8 @@ import { compile } from "mdsvex";
 import { createHighlighter } from "shiki";
 import { toHtml } from "hast-util-to-html";
 import { h } from "hastscript";
+import clipboardIconRaw from "~icons/heroicons/clipboard-document?raw";
+import clipboardCheckIconRaw from "~icons/heroicons/clipboard-document-check-16-solid?raw";
 
 const HIGHLIGHT_CONFIG = {
 	themes: ["github-light", "github-dark"],
@@ -26,6 +28,17 @@ const CODE_ATTRIBUTES = {
 	autocomplete: "off",
 	"data-ms-editor": "false",
 };
+
+// Convert raw SVG to data URI
+function svgToDataUri(svg) {
+	const encoded = encodeURIComponent(svg)
+		.replace(/'/g, "%27")
+		.replace(/"/g, "%22");
+	return `data:image/svg+xml,${encoded}`;
+}
+
+const clipboardIconDataUri = svgToDataUri(clipboardIconRaw);
+const clipboardCheckIconDataUri = svgToDataUri(clipboardCheckIconRaw);
 
 let highlighterInstance = null;
 
@@ -72,11 +85,13 @@ function createCodeCopyButton(code, toggleMs = 3000) {
 		[
 			h("span", {
 				class:
-					"ready text-white w-full aspect-square bg-no-repeat bg-center bg-cover z-50 block icon-[heroicons--clipboard-document]",
+					"ready text-white w-full aspect-square bg-no-repeat bg-center bg-cover z-50 block",
+				style: `background-image: url("${clipboardIconDataUri}")`,
 			}),
 			h("span", {
 				class:
-					"success w-full text-white aspect-square bg-no-repeat bg-center bg-cover z-50 hidden icon-[heroicons--clipboard-document-check-16-solid]",
+					"success w-full text-white aspect-square bg-no-repeat bg-center bg-cover z-50 hidden",
+				style: `background-image: url("${clipboardCheckIconDataUri}")`,
 			}),
 		],
 	);

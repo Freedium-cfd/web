@@ -1,5 +1,7 @@
 <script lang="ts">
 	import { Button } from '$lib/components/ui/button/index.js';
+	import SimpleIconsGithub from '~icons/simple-icons/github';
+	import SimpleIconsCodeberg from '~icons/simple-icons/codeberg';
 </script>
 
 <footer
@@ -39,7 +41,7 @@
 				target="_blank"
 				rel="noopener noreferrer"
 			>
-				<span class="icon-[simple-icons--github] size-5" />
+				<SimpleIconsGithub class="size-5" />
 			</Button>
 			<Button
 				variant="ghost"
@@ -48,7 +50,7 @@
 				target="_blank"
 				rel="noopener noreferrer"
 			>
-				<span class="icon-[simple-icons--codeberg] size-5" />
+				<SimpleIconsCodeberg class="size-5" />
 			</Button>
 		</div>
 	</div>

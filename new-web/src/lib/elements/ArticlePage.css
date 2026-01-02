@@ -85,7 +85,11 @@
 
 .prose a::after {
 	content: "";
-	@apply icon-[heroicons-outline--external-link] inline-block ml-1 w-3.5 h-3.5 align-text-bottom;
+	@apply inline-block ml-1 w-3.5 h-3.5 align-text-bottom;
+	background-image: var(--external-link-icon);
+	background-repeat: no-repeat;
+	background-position: center;
+	background-size: contain;
 }
 
 /* Horizontal rule */

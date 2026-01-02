@@ -7,6 +7,8 @@
 	import CodeBlock from './CodeBlock.svelte';
 	import copy from 'copy-to-clipboard';
 	import { toast } from 'svelte-sonner';
+	import MdiBookmark from '~icons/mdi/bookmark';
+	import MdiContentCopy from '~icons/mdi/content-copy';
 
 	let open = false;
 	const isDesktop = mediaQuery('(min-width: 768px)');
@@ -21,7 +23,7 @@
 	<Dialog.Root bind:open>
 		<Dialog.Trigger class="w-full">
 			<DropdownMenu.Item on:click={($event) => $event.preventDefault()}>
-				<span class="icon-[mdi--bookmark] size-4 mr-2" />
+				<MdiBookmark class="size-4 mr-2" />
 				<span>Bookmark</span>
 			</DropdownMenu.Item>
 		</Dialog.Trigger>
@@ -56,7 +58,7 @@
 										`javascript:window.location="https://freedium.cfd/"+encodeURIComponent(window.location)"`
 									)}
 							>
-								<span class="icon-[mdi--content-copy] size-4" />
+								<MdiContentCopy class="size-4" />
 							</Button>
 						</div>
 						<p class="mb-2">Create a new bookmark with the following code as the URL:</p>
@@ -78,7 +80,7 @@
 										`javascript:(function(){window.open("https://freedium.cfd/"+encodeURIComponent(window.location))})();`
 									)}
 							>
-								<span class="icon-[mdi--content-copy] w-4 h-4" />
+								<MdiContentCopy class="w-4 h-4" />
 							</Button>
 						</div>
 
@@ -100,7 +102,7 @@
 	<Drawer.Root bind:open>
 		<Drawer.Trigger class="w-full">
 			<DropdownMenu.Item on:click={($event) => $event.preventDefault()}>
-				<span class="icon-[mdi--bookmark] w-4 h-4 mr-2" />
+				<MdiBookmark class="w-4 h-4 mr-2" />
 				<span>Bookmark</span>
 			</DropdownMenu.Item>
 		</Drawer.Trigger>
@@ -133,7 +135,7 @@
 										`javascript:window.location="https://freedium.cfd/"+encodeURIComponent(window.location)"`
 									)}
 							>
-								<span class="icon-[mdi--content-copy] w-4 h-4" />
+								<MdiContentCopy class="w-4 h-4" />
 							</Button>
 						</div>
 						<p class="mb-2">Create a new bookmark with the following code as the URL:</p>
@@ -155,7 +157,7 @@
 										`javascript:(function(){window.open("https://freedium.cfd/"+encodeURIComponent(window.location))})();`
 									)}
 							>
-								<span class="icon-[mdi--content-copy] w-4 h-4" />
+								<MdiContentCopy class="w-4 h-4" />
 							</Button>
 						</div>
 

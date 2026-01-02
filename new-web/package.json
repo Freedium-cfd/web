@@ -12,13 +12,7 @@
 		"format": "prettier --write ."
 	},
 	"devDependencies": {
-		"@iconify-json/heroicons": "^1.2.2",
-		"@iconify-json/heroicons-outline": "^1.2.1",
-		"@iconify-json/mage": "^1.2.2",
-		"@iconify-json/mdi": "^1.2.3",
-		"@iconify-json/simple-icons": "^1.2.37",
-		"@iconify-json/teenyicons": "^1.2.2",
-		"@iconify/tailwind4": "^1.2.0",
+		"@iconify/json": "^2.2.424",
 		"@shikijs/rehype": "^1.29.2",
 		"@sveltejs/adapter-auto": "^3.3.1",
 		"@sveltejs/kit": "^2.21.2",
@@ -38,13 +32,12 @@
 		"tailwind-variants": "^0.2.1",
 		"tailwindcss": "^4.1.18",
 		"typescript": "^5.8.3",
+		"unplugin-icons": "^22.5.0",
 		"vaul-svelte": "^0.3.2",
 		"vite": "^5.4.19"
 	},
 	"type": "module",
 	"dependencies": {
-		"@iconify-json/stash": "^1.2.2",
-		"@iconify/svelte": "^4.2.0",
 		"bits-ui": "^0.21.16",
 		"copy-to-clipboard": "^3.3.3",
 		"es-toolkit": "^1.39.1",
