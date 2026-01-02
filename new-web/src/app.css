@@ -1,6 +1,34 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import 'tailwindcss';
+
+@plugin "@iconify/tailwind4";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --color-border: hsla(var(--border));
+  --color-input: hsla(var(--input));
+  --color-ring: hsla(var(--ring));
+  --color-background: hsla(var(--background));
+  --color-foreground: hsla(var(--foreground));
+  --color-primary: hsla(var(--primary));
+  --color-primary-foreground: hsla(var(--primary-foreground));
+  --color-secondary: hsla(var(--secondary));
+  --color-secondary-foreground: hsla(var(--secondary-foreground));
+  --color-destructive: hsla(var(--destructive));
+  --color-destructive-foreground: hsla(var(--destructive-foreground));
+  --color-muted: hsla(var(--muted));
+  --color-muted-foreground: hsla(var(--muted-foreground));
+  --color-accent: hsla(var(--accent));
+  --color-accent-foreground: hsla(var(--accent-foreground));
+  --color-popover: hsla(var(--popover));
+  --color-popover-foreground: hsla(var(--popover-foreground));
+  --color-card: hsla(var(--card));
+  --color-card-foreground: hsla(var(--card-foreground));
+
+  --radius-lg: var(--radius);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-sm: calc(var(--radius) - 4px);
+}
 
 @layer base {
 	:root {
@@ -118,7 +146,7 @@
 }
 
 .medium-zoom-overlay {
-	@apply !bg-white dark:!bg-zinc-900;
+	@apply bg-white! dark:bg-zinc-900!;
 }
 
 @layer base {

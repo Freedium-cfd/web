@@ -73,7 +73,7 @@
 					</div>
 				</div>
 			{:else if showSkeleton}
-				<div class="flex-grow max-w-[calc(100%-10rem)]">
+				<div class="grow max-w-[calc(100%-10rem)]">
 					<article class="w-full overflow-hidden bg-white rounded-lg shadow-lg dark:bg-zinc-900">
 						<Skeleton class="w-full h-96" />
 						<div class="p-6 bg-gray-50 dark:bg-zinc-800">
@@ -97,7 +97,7 @@
 					</article>
 				</div>
 
-				<aside class="mt-7 lg:mt-0 max-w-72 lg:flex-shrink-0">
+				<aside class="mt-7 lg:mt-0 max-w-72 lg:shrink-0">
 					<div class="w-full p-4 bg-white rounded-lg shadow-lg dark:bg-zinc-900">
 						<Skeleton class="w-32 h-6 mb-4" />
 						<div class="space-y-2">

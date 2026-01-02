@@ -85,7 +85,7 @@
 			{#each Array(3) as _}
 				<div class="flex items-start py-2 m-2">
 					<Skeleton class="w-12 h-12 mr-3 rounded" />
-					<div class="flex flex-col flex-grow">
+					<div class="flex flex-col grow">
 						<Skeleton class="w-3/4 h-5 mb-1" />
 						<Skeleton class="w-1/4 h-4 mb-1" />
 						<Skeleton class="w-full h-4" />
@@ -100,7 +100,7 @@
 						alt={post.title}
 						class="object-cover w-12 h-12 mr-3 rounded"
 					/>
-					<div class="flex flex-col flex-grow">
+					<div class="flex flex-col grow">
 						<span class="font-medium">{post.title}</span>
 						<div class="mt-1 text-sm text-gray-500">{formatDate(post.date)}</div>
 						<div class="mt-1 text-sm">{post.excerpt}</div>
