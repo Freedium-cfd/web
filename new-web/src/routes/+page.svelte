@@ -4,9 +4,9 @@
 	import BlogCard from '$lib/elements/BlogCard.svelte';
 	import Footer from '$lib/elements/Footer.svelte';
 	import Masonry from 'svelte-bricks';
-	import type { BlogPost } from '$lib/types';
+	import type { BlogPost, BlogPostSize } from '$lib/types';
 
-	const blogPosts = [
+	const blogPosts: Omit<BlogPost, 'id'>[] = [
 		{
 			title: '10 Productivity Hacks for Remote Workers',
 			excerpt: 'Boost your efficiency while working from home with these game-changing strategies.',

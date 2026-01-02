@@ -12,4 +12,10 @@ declare global {
 	}
 }
 
+// Type declaration for unplugin-icons raw imports
+declare module '~icons/*?raw' {
+	const src: string;
+	export default src;
+}
+
 export {};

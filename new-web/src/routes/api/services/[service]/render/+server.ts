@@ -1,16 +1,18 @@
 import { json } from "@sveltejs/kit";
 import { compile } from "mdsvex";
+import type { MdsvexCompileOptions } from "mdsvex";
+import type { RequestHandler } from "./$types";
 
-const mdsvexConfig = {
+const mdsvexConfig: MdsvexCompileOptions = {
 	extensions: [".svx", ".md"],
 	smartypants: {
-		dashes: "oldschool",
+		dashes: "oldschool" as const,
 	},
 	remarkPlugins: [],
 	rehypePlugins: [],
 };
 
-export async function GET({ params }) {
+export const GET: RequestHandler = async ({ params }) => {
 	try {
 		const { service } = params;
 
@@ -30,6 +32,6 @@ This is a test article.
 			text: compiled.code,
 		});
 	} catch (error) {
-		return json({ error: error.message }, { status: 500 });
+		return json({ error: (error as Error).message }, { status: 500 });
 	}
-}
+};

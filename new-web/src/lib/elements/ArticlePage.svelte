@@ -1,17 +1,19 @@
 <script lang="ts">
 	import Header from '$lib/elements/Header.svelte';
 	import { formatDate } from '$lib/utils/dateFormatter';
+	import { getErrorMessage } from '$lib/utils/errorFormatter';
 	import ImageZoom from '$lib/elements/ImageZoom.svelte';
 	import Skeleton from '$lib/components/ui/skeleton/skeleton.svelte';
 	import Footer from '$lib/elements/Footer.svelte';
 	import './ArticlePage.css';
-	import Button from '$lib/components/ui/button/button.svelte';
+	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
 	import HeroiconsArrowLeft20Solid from '~icons/heroicons/arrow-left-20-solid';
 	import HeroiconsDocumentArrowDown20Solid from '~icons/heroicons/document-arrow-down-20-solid';
 	import HeroiconsDocumentText20Solid from '~icons/heroicons/document-text-20-solid';
-	import HeroiconsOutlineExternalLink from '~icons/heroicons-outline/external-link';
+	import HeroiconsChevronDown20Solid from '~icons/heroicons/chevron-down-20-solid';
 	import { onMount } from 'svelte';
 	import { initializeCodeCopyButtons } from '$lib/codeCopy';
+	import { initializeLazyIframes } from '$lib/lazyIframe';
 	import type { ArticlePageData } from '$lib/types';
 
 	interface Props {
@@ -30,31 +32,9 @@
 	onMount(() => {
 		if (contentLoaded) {
 			initializeCodeCopyButtons();
+			initializeLazyIframes();
 		}
 	});
-
-	function getErrorMessage(error: ArticlePageData['error']) {
-		if (!error) return '';
-
-		switch (error.code) {
-			case 'ARTICLE_NOT_FOUND':
-				return "We couldn't find the article you're looking for.";
-			case 'RENDER_ERROR':
-				return 'There was a problem preparing this article.';
-			case 'COMPILE_ERROR':
-				return 'There was a problem processing the article content.';
-			default:
-				return error.message || 'An unexpected error occurred.';
-		}
-	}
-
-	function goBack() {
-		window.history.back();
-	}
-
-	function reload() {
-		window.location.reload();
-	}
 </script>
 
 <svelte:head>
@@ -92,7 +72,7 @@
 						</a>
 						<button
 							class="inline-block px-4 py-2 border rounded-md border-primary text-primary hover:bg-primary/10"
-							onclick={reload}
+							onclick={() => window.location.reload()}
 						>
 							Try Again
 						</button>
@@ -134,17 +114,18 @@
 					</div>
 				</aside>
 			{:else}
+				{#if article}
 				<div class="w-full">
 					<article class="overflow-hidden bg-white rounded-lg shadow-lg dark:bg-zinc-900">
-						<nav class="flex items-center justify-between gap-2 p-4 text-center">
+						<nav class="flex items-center gap-2 p-4">
 							<button
 								class="flex items-center justify-center transition bg-white rounded-full shadow-md text-primary hover:text-primary/90 group size-8 shadow-zinc-800/5 ring-1 ring-zinc-900/5 dark:border dark:border-zinc-700/50 dark:bg-zinc-800 dark:ring-0 dark:ring-white/10 dark:hover:border-zinc-700 dark:hover:ring-white/20"
-								onclick={goBack}
+								onclick={() => window.history.back()}
 							>
 								<HeroiconsArrowLeft20Solid class="size-6" />
 							</button>
-							{#if article?.url}
-								<a href={article.url} class="font-bold text-primary hover:text-primary/90">
+							{#if article.url}
+								<a href={article.url} class="ml-auto font-bold text-primary hover:text-primary/90">
 									Original article
 								</a>
 							{/if}
@@ -182,28 +163,18 @@
 
 				<aside class="w-full mt-7 lg:mt-0 max-w-64" aria-labelledby="toc-heading">
 					<div class="sticky top-12">
-						<div class="flex gap-2 mb-4">
-							<Button variant="outline" class="flex-1">
-								<HeroiconsDocumentArrowDown20Solid class="size-4 mr-1" />
-								PDF
-							</Button>
-							<Button class="flex-1" variant="outline">
-								<HeroiconsDocumentText20Solid class="size-4 mr-1" />
-								Markdown
-							</Button>
-						</div>
 						<nav class="w-full p-4 bg-white rounded-lg shadow-lg dark:bg-zinc-900">
 							<h2 id="toc-heading" class="mb-4 text-xl font-semibold text-primary">Contents</h2>
 							{#if article.tableOfContents && article.tableOfContents.length > 0}
 								<ul class="space-y-1">
 									{#each article.tableOfContents as item}
 										<li>
-											<Button
-												variant="ghost"
-												class="justify-start w-full text-zinc-600 hover:text-zinc-600 dark:text-gray-100 dark:hover:text-white"
+											<a
+												href={`#${item.id}`}
+												class="block px-2 py-1.5 text-sm text-zinc-600 hover:text-zinc-900 dark:text-gray-100 dark:hover:text-white hover:bg-accent rounded-md text-wrap break-words"
 											>
-												<a class="" href={`#${item.id}`}>{item.title}</a>
-											</Button>
+												{item.title}
+											</a>
 										</li>
 									{/each}
 								</ul>
@@ -213,8 +184,29 @@
 								</p>
 							{/if}
 						</nav>
+						<div class="mt-4">
+							<DropdownMenu.Root>
+								<DropdownMenu.Trigger
+									class="flex items-center justify-between w-full px-4 py-2 text-sm text-primary bg-gray-50 rounded-lg cursor-pointer select-none dark:bg-zinc-800 hover:bg-gray-100 dark:hover:bg-zinc-700"
+								>
+									<span>Download article</span>
+									<HeroiconsChevronDown20Solid class="size-4" />
+								</DropdownMenu.Trigger>
+								<DropdownMenu.Content class="w-56">
+									<DropdownMenu.Item>
+										<HeroiconsDocumentArrowDown20Solid class="size-4 text-red-500" />
+										Download as PDF
+									</DropdownMenu.Item>
+									<DropdownMenu.Item>
+										<HeroiconsDocumentText20Solid class="size-4 text-blue-500" />
+										Download as Markdown
+									</DropdownMenu.Item>
+								</DropdownMenu.Content>
+							</DropdownMenu.Root>
+						</div>
 					</div>
 				</aside>
+				{/if}
 			{/if}
 		</div>
 	</main>

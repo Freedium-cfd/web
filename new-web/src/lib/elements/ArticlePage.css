@@ -83,15 +83,6 @@
 	@apply underline text-primary hover:text-primary/90 decoration-primary/30 hover:decoration-primary/50;
 }
 
-.prose a::after {
-	content: "";
-	@apply inline-block ml-1 w-3.5 h-3.5 align-text-bottom;
-	background-image: var(--external-link-icon);
-	background-repeat: no-repeat;
-	background-position: center;
-	background-size: contain;
-}
-
 /* Horizontal rule */
 .prose hr {
 	@apply my-8 border-gray-200 dark:border-gray-700;

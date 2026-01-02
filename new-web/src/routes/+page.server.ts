@@ -1,13 +1,14 @@
 import { render } from "@/services";
 import { compile } from "mdsvex";
+import type { PageServerLoad } from "./$types";
 
-export async function load({ params }) {
+export const load: PageServerLoad = async () => {
 	try {
 		const transformed = await render("medium");
-		const { code } = await compile(transformed.text);
+		const result = await compile(transformed.text);
 
 		return {
-			content: code,
+			content: result?.code ?? null,
 			article: {
 				title: "UploadThing is 5x Faster",
 				date: "2024-09-13T12:00:00Z",
@@ -36,4 +37,4 @@ export async function load({ params }) {
 			error: "Failed to load article",
 		};
 	}
-}
+};

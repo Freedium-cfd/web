@@ -1,18 +1,25 @@
 import { visit } from 'unist-util-visit';
+import type { Root, Html, Parent } from 'mdast';
 
 function remarkMixtapeEmbed() {
-	return (tree) => {
-		visit(tree, 'paragraph', (node) => {
-			const text = node.children[0].value;
+	return (tree: Root) => {
+		visit(tree, 'paragraph', (node, index, parent) => {
+			const firstChild = node.children[0];
+			if (!('value' in firstChild)) return;
+			
+			const text = firstChild.value;
+			if (typeof text !== 'string') return;
+			
 			const mixtapeRegex = /\[!\[(.*?)\]\((.*?)\)\]\((.*?)\)\n>(.*?)\n>(.*?)\n/;
 
 			const match = mixtapeRegex.exec(text);
-			if (match) {
-				const [, altText, linkUrl, imageUrl, title, description] = match;
+			if (match && parent && typeof index === 'number') {
+				const [, _altText, linkUrl, imageUrl, title, description] = match;
 				const siteName = new URL(linkUrl).hostname;
 
-				node.type = 'html';
-				node.value = `
+				const htmlNode: Html = {
+					type: 'html',
+					value: `
 					<div class="mixtape-embed">
 						<a href="${linkUrl}" target="_blank" rel="noopener follow">
 							<div class="mixtape-content">
@@ -31,8 +38,9 @@ function remarkMixtapeEmbed() {
 							</div>
 						</a>
 					</div>
-				`;
-				node.children = undefined;
+				`
+				};
+				(parent as Parent).children[index] = htmlNode;
 			}
 		});
 	};

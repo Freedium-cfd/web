@@ -1,4 +1,8 @@
-# V7 Is Here! 🚀
+"""Content constants shared by render handlers."""
+
+from typing import Any, Dict
+
+TEXT = """# V7 Is Here! 🚀
 
 > "The best file upload solution just got even better!" - _Tech Weekly_
 
@@ -130,6 +134,39 @@ _For more information, visit our [documentation](https://docs.uploadthing.com)._
 console.log('Hello, world!');
 ```
 
+```js
+console.log('Hello, world!');
+console.log('Hello, world!');
+console.log('Hello, world!');
+```
+
+<iframe width="560" height="315" src="https://www.youtube.com/embed/wN3PZ_3L9aM" frameborder="0" allowfullscreen></iframe>
+
 [![Why React Hooks are the Future of React Development](https://medium.com/@johndoe/why-react-hooks-are-the-future)](https://miro.medium.com/v2/resize:fit:320/1*abc123.jpg)
 > **Why React Hooks are the Future of React Development**
 > Learn how React Hooks are revolutionizing the way we write components and manage state in React applications. Discover the benefits and best practices.
+"""
+
+ARTICLE_PAYLOAD: Dict[str, Any] = {
+    "title": "UploadThing is 5x Faster",
+    "date": "2024-09-13T12:00:00Z",
+    "author": {
+        "name": "Theo Browne",
+        "role": "CEO @ Ping Labs",
+        "avatar": "https://picsum.photos/seed/post1/400/300",
+    },
+    "postImage": "https://picsum.photos/seed/postimage/1200/600",
+    "tableOfContents": [
+        {"id": "v7-is-here", "title": "V7 Is Here!"},
+        {"id": "benchmarks", "title": "Benchmarks"},
+        {"id": "the-road-to-v7", "title": "The Road To V7"},
+        {
+            "id": "uploadthing-has-served",
+            "title": "UploadThing Has Served...",
+        },
+        {
+            "id": "and-were-just-getting-started",
+            "title": "...and we're just getting started",
+        },
+    ],
+}

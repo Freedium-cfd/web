@@ -15,7 +15,7 @@
 	let open = $state(false);
 	const isDesktop = mediaQuery('(min-width: 768px)');
 	let problemDescription = $state('');
-	let problemType = $state<{ value: string; label: string }>({ value: 'ui_problem', label: 'UI problem' });
+	let problemType = $state('ui_problem');
 
 	const problemTypeOptions = [
 		{ value: 'ui_problem', label: 'UI problem' },
@@ -25,12 +25,16 @@
 		{ value: 'other', label: 'Other' }
 	];
 
+	const getProblemTypeLabel = (value: string) => {
+		return problemTypeOptions.find(opt => opt.value === value)?.label ?? value;
+	};
+
 	const handleSubmit = (e: SubmitEvent) => {
 		e.preventDefault();
-		console.log({ problemType: problemType.value, problemDescription });
-		toast.success(`${problemType.label} submitted`);
+		console.log({ problemType, problemDescription });
+		toast.success(`${getProblemTypeLabel(problemType)} submitted`);
 		problemDescription = '';
-		problemType = { value: 'ui_problem', label: 'UI problem' };
+		problemType = 'ui_problem';
 		open = false;
 	};
 
@@ -81,7 +85,7 @@
 							<Label.Root class="text-sm font-medium">Problem Type</Label.Root>
 							<Select.Root type="single" bind:value={problemType}>
 								<Select.Trigger class="w-full">
-									{problemType.label}
+									{getProblemTypeLabel(problemType)}
 								</Select.Trigger>
 								<Select.Content>
 									{#each problemTypeOptions as option}
@@ -145,7 +149,7 @@
 								<Label.Root class="text-sm font-medium">Problem Type</Label.Root>
 								<Select.Root type="single" bind:value={problemType}>
 									<Select.Trigger class="w-full">
-										{problemType.label}
+										{getProblemTypeLabel(problemType)}
 									</Select.Trigger>
 									<Select.Content>
 										{#each problemTypeOptions as option}
