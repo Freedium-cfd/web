@@ -207,6 +207,18 @@ class MarkupProcessor:
             start = self._utf16_to_python_pos(markup.get("start", 0))
             end = self._utf16_to_python_pos(markup.get("end", 0))
 
+            # Trim leading/trailing whitespace from bold, italic, and code spans
+            # This prevents invalid markdown like **text ** from being generated
+            if markup_type in (MarkupType.STRONG, MarkupType.EM, MarkupType.CODE):
+                text_segment = self._text[start:end]
+                # Count leading whitespace
+                leading_ws = len(text_segment) - len(text_segment.lstrip())
+                # Count trailing whitespace
+                trailing_ws = len(text_segment) - len(text_segment.rstrip())
+                # Adjust positions
+                start += leading_ws
+                end -= trailing_ws
+
             if markup_type == MarkupType.STRONG:
                 span = MarkupSpan(start, end, "**", "**")
                 markup_ranges.append((start, end, markup_type, span))
