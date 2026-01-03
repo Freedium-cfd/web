@@ -203,6 +203,10 @@ class MarkupProcessor:
 
         for markup in markups:
             markup_type = markup.get("type")
+            if not markup_type:
+                # Skip markups without a type
+                continue
+
             # Convert UTF-16 positions to Python positions
             start = self._utf16_to_python_pos(markup.get("start", 0))
             end = self._utf16_to_python_pos(markup.get("end", 0))
@@ -225,15 +229,18 @@ class MarkupProcessor:
                     # All non-alphanumeric (punctuation, whitespace, symbols) - skip
                     continue
 
+            # Now markup_type is guaranteed to be a string
+            markup_type_str: str = str(markup_type)
+
             if markup_type == MarkupType.STRONG:
                 span = MarkupSpan(start, end, "**", "**")
-                markup_ranges.append((start, end, markup_type, span))
+                markup_ranges.append((start, end, markup_type_str, span))
             elif markup_type == MarkupType.EM:
                 span = MarkupSpan(start, end, "_", "_")
-                markup_ranges.append((start, end, markup_type, span))
+                markup_ranges.append((start, end, markup_type_str, span))
             elif markup_type == MarkupType.CODE:
                 span = MarkupSpan(start, end, "`", "`")
-                markup_ranges.append((start, end, markup_type, span))
+                markup_ranges.append((start, end, markup_type_str, span))
             elif markup_type == MarkupType.A:
                 anchor_type = markup.get("anchorType")
                 if anchor_type == AnchorType.LINK:
@@ -241,12 +248,12 @@ class MarkupProcessor:
                     # Unescape markdown special characters in URL
                     href = _unescape_markdown_url(href)
                     span = MarkupSpan(start, end, "[", f"]({href})")
-                    markup_ranges.append((start, end, markup_type, span))
+                    markup_ranges.append((start, end, markup_type_str, span))
                 elif anchor_type == AnchorType.USER:
                     user_id = markup.get("userId", "")
                     url = f"https://medium.com/u/{user_id}"
                     span = MarkupSpan(start, end, "[", f"]({url})")
-                    markup_ranges.append((start, end, markup_type, span))
+                    markup_ranges.append((start, end, markup_type_str, span))
 
         # Second pass: handle overlapping markup priorities
         # Priority order: LINK > CODE > EM/STRONG
@@ -374,17 +381,18 @@ class MediumMarkdownRenderer:
     code blocks, quotes, images, and embeds.
     """
 
-    __slots__ = ("_post_data", "_paragraphs", "_output", "_metadata", "_pos")
+    __slots__ = ("_post_data", "_paragraphs", "_output", "_metadata", "_pos", "_api_service")
 
-    def __init__(self, post_data: GraphQLPost) -> None:
+    def __init__(self, post_data: GraphQLPost, api_service: Any | None = None) -> None:
         self._post_data = post_data
         self._output: list[str] = []
         self._pos = 0
         self._metadata: PostMetadata | None = None
+        self._api_service = api_service
 
         # Extract paragraphs from GraphQL post data
         if post_data.content and post_data.content.bodyModel:
-            self._paragraphs: list[ParagraphDict] = [
+            self._paragraphs: list[ParagraphDict] = [  # type: ignore[misc]
                 p.model_dump(mode="json") if hasattr(p, "model_dump") else p
                 for p in (post_data.content.bodyModel.paragraphs or [])
             ]
@@ -718,21 +726,21 @@ class MediumMarkdownRenderer:
 
             # Adjust each decoration using the position map
             for dec in decorations:
-                old_start = dec['start']
-                old_end = dec['end']
+                old_start: int = dec['start']  # type: ignore[assignment]
+                old_end: int = dec['end']  # type: ignore[assignment]
 
                 # Find the closest mapped positions
-                new_start = pos_map.get(old_start, old_start)
+                new_start: int = pos_map.get(old_start, old_start)  # type: ignore[assignment]
                 # For end, we need to map the position of the last character, then add 1
-                new_end = pos_map.get(old_end - 1, old_end - 1) + 1 if old_end > 0 else 0
+                new_end: int = pos_map.get(old_end - 1, old_end - 1) + 1 if old_end > 0 else 0  # type: ignore[assignment]
 
                 # Clamp to valid range
-                new_start = min(new_start, final_length)
-                new_end = min(new_end, final_length)
+                new_start = min(new_start, final_length)  # type: ignore[arg-type]
+                new_end = min(new_end, final_length)  # type: ignore[arg-type]
 
                 # Only include if still valid
                 if new_start < new_end:
-                    adjusted_decorations.append({
+                    adjusted_decorations.append({  # type: ignore[misc]
                         "start": new_start,
                         "end": new_end,
                         "type": dec['type']
@@ -804,26 +812,86 @@ class MediumMarkdownRenderer:
             self._output.append(f"*{description}*")
         self._output.append("")
 
-    def _render_iframe(self, paragraph: ParagraphDict) -> None:
-        """Render an iframe embed."""
+    async def _render_iframe(self, paragraph: ParagraphDict) -> None:
+        """Render an iframe embed by fetching and embedding the actual HTML content."""
+        logger.debug("Processing IFRAME paragraph")
+        logger.debug(f"Full paragraph data: {paragraph}")
+
         iframe_data = paragraph.get("iframe", {})
+        logger.debug(f"Iframe data: {iframe_data}")
+
+        # First check if we have direct mediaResource in the iframe
         media_resource = iframe_data.get("mediaResource", {})
+        logger.debug(f"Media resource: {media_resource}")
 
-        src = media_resource.get("iframeSrc", "")
-        iframe_id = media_resource.get("id", "")
+        # Get iframe source from mediaResource
+        iframe_src_val = media_resource.get("iframeSrc")
+        iframe_id = media_resource.get("id")
 
-        if not src and iframe_id:
-            # Fallback to a generic embed indicator
+        # Get iframe dimensions
+        iframe_width = media_resource.get("iframeWidth")
+        iframe_height = media_resource.get("iframeHeight")
+
+        # If dimensions are available in paragraph.iframe directly, use those as fallback
+        if not iframe_width and iframe_data.get("iframeWidth"):
+            iframe_width = iframe_data["iframeWidth"]
+        if not iframe_height and iframe_data.get("iframeHeight"):
+            iframe_height = iframe_data["iframeHeight"]
+
+        logger.debug(f"Iframe dimensions: {iframe_width}x{iframe_height}")
+
+        # If we have an API service and an iframe_id, fetch the actual HTML content
+        if self._api_service and iframe_id:
+            logger.debug(f"Fetching iframe content for ID: {iframe_id}")
+            try:
+                iframe_html = await self._api_service.fetch_iframe_content(iframe_id)
+                if iframe_html:
+                    # Apply the same patching logic
+                    patched_html = iframe_html.replace(
+                        "document.domain = document.domain",
+                        'console.log("[FREEDIUM] iframe workaround started")'
+                    )
+
+                    # Escape double quotes for srcdoc attribute
+                    # Note: We need to escape & first, then ", otherwise we'd double-escape
+                    escaped_html = patched_html.replace('&', '&amp;').replace('"', '&quot;')
+
+                    # Build iframe tag with srcdoc
+                    iframe_attrs = ['class="w-full border"']
+                    if iframe_width:
+                        iframe_attrs.append(f'width="{iframe_width}"')
+                    if iframe_height:
+                        iframe_attrs.append(f'height="{iframe_height}"')
+                    iframe_attrs.append('frameborder="0"')
+                    iframe_attrs.append('allowfullscreen')
+                    iframe_attrs.append(f'srcdoc="{escaped_html}"')
+
+                    attrs_str = " ".join(iframe_attrs)
+                    self._output.append(f'<iframe {attrs_str}></iframe>')
+                    self._output.append("")
+                    logger.debug(f"Successfully embedded iframe content for ID: {iframe_id}")
+                    return
+                else:
+                    logger.warning(f"No content received for iframe {iframe_id}")
+            except Exception as e:
+                logger.error(f"Failed to fetch iframe content for ID {iframe_id}: {e}")
+
+        # Fallback: render as link (original behavior)
+        if iframe_src_val:
+            if iframe_width and iframe_height:
+                self._output.append(f"<!-- iframe: {iframe_width}x{iframe_height} -->")
+            self._output.append(f"[Embedded content]({iframe_src_val})")
+        elif iframe_id:
+            if iframe_width and iframe_height:
+                self._output.append(f"<!-- iframe: {iframe_width}x{iframe_height} -->")
             self._output.append(f"[Embedded content: {iframe_id}]")
-        elif src:
-            self._output.append(f"[Embedded content]({src})")
         else:
-            logger.warning("IFRAME missing source, skipping")
+            logger.warning("No iframe source or ID found, skipping iframe")
             return
 
         self._output.append("")
 
-    def _process_paragraph(self, pos: int) -> int:
+    async def _process_paragraph(self, pos: int) -> int:
         """Process a single paragraph. Returns the next position to process."""
         paragraph = self._paragraphs[pos]
         para_type = paragraph.get("type", "")
@@ -862,13 +930,13 @@ class MediumMarkdownRenderer:
         elif para_type == ParagraphType.MIXTAPE_EMBED:
             self._render_mixtape_embed(paragraph)
         elif para_type == ParagraphType.IFRAME:
-            self._render_iframe(paragraph)
+            await self._render_iframe(paragraph)
         else:
             logger.warning(f"Unknown paragraph type: {para_type}")
 
         return pos + 1
 
-    def render(self) -> str:
+    async def render(self) -> str:
         """Render the full post to Markdown."""
         if not self._paragraphs:
             return ""
@@ -879,7 +947,7 @@ class MediumMarkdownRenderer:
         # Process all paragraphs
         self._pos = 0
         while self._pos < len(self._paragraphs):
-            self._pos = self._process_paragraph(self._pos)
+            self._pos = await self._process_paragraph(self._pos)
 
         # Join output and clean up extra blank lines
         result = "\n".join(self._output)
@@ -940,13 +1008,13 @@ class MediumMarkdownRenderer:
 
         return toc
 
-    def render_with_frontmatter(self) -> str:
+    async def render_with_frontmatter(self) -> str:
         """Render the post with YAML frontmatter metadata."""
         if self._metadata is None:
             self._metadata = self._extract_metadata()
 
         meta = self._metadata
-        content = self.render()
+        content = await self.render()
 
         # Build frontmatter
         frontmatter_lines = [

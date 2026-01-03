@@ -59,7 +59,7 @@ class MediumService(BaseService):
         if post_data is None:
             raise InvalidMediumServicePathError(f"Failed to fetch post: {post_id}")
 
-        return self._render_to_markdown(post_data)
+        return await self._render_to_markdown(post_data)
 
     @beartype
     async def arender_with_metadata(self, path: str) -> tuple[str, PostMetadata]:
@@ -79,8 +79,8 @@ class MediumService(BaseService):
         if post_data is None:
             raise InvalidMediumServicePathError(f"Failed to fetch post: {post_id}")
 
-        renderer = MediumMarkdownRenderer(post_data)
-        content = renderer.render()
+        renderer = MediumMarkdownRenderer(post_data, self.api_service)
+        content = await renderer.render()
         return content, renderer.metadata
 
     @beartype
@@ -101,13 +101,55 @@ class MediumService(BaseService):
         if post_data is None:
             raise InvalidMediumServicePathError(f"Failed to fetch post: {post_id}")
 
-        renderer = MediumMarkdownRenderer(post_data)
-        return renderer.render_with_frontmatter()
+        renderer = MediumMarkdownRenderer(post_data, self.api_service)
+        return await renderer.render_with_frontmatter()
 
-    def _render_to_markdown(self, post_data: GraphQLPost) -> str:
+    async def _render_to_markdown(self, post_data: GraphQLPost) -> str:
         """Convert post data to Markdown format."""
-        renderer = MediumMarkdownRenderer(post_data)
-        return renderer.render()
+        renderer = MediumMarkdownRenderer(post_data, self.api_service)
+        return await renderer.render()
+
+    @beartype
+    async def fetch_iframe_content(self, iframe_id: str) -> str:
+        """
+        Fetch and patch iframe content from Medium's media endpoint.
+
+        This method fetches iframe HTML content and applies necessary patches
+        to make it work in the Freedium context.
+
+        Args:
+            iframe_id: The Medium iframe/media ID
+
+        Returns:
+            Patched HTML content ready to be served
+        """
+        logger.debug(f"Fetching iframe content for ID: {iframe_id}")
+        raw_content = await self.api_service.fetch_iframe_content(iframe_id)
+
+        if not raw_content:
+            logger.warning(f"No content received for iframe {iframe_id}")
+            return ""
+
+        return self._patch_iframe_content(raw_content)
+
+    @staticmethod
+    def _patch_iframe_content(content: str) -> str:
+        """
+        Patch iframe content to work in Freedium context.
+
+        Replaces Medium's domain-based security mechanism with a console log
+        to avoid cross-origin issues.
+
+        Args:
+            content: Raw HTML content from Medium
+
+        Returns:
+            Patched HTML content
+        """
+        return content.replace(
+            "document.domain = document.domain",
+            'console.log("[FREEDIUM] iframe workaround started")'
+        )
 
     async def _asearch(self, keywords: list[str]) -> list[dict[str, str]]:
         """Search for Medium posts (not implemented)."""

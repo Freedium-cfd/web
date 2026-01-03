@@ -16,6 +16,47 @@ if TYPE_CHECKING:
     from freedium_library.utils.http import CurlRequest
 
 
+def resolve_graphql_references(data: Any, root_data: dict[str, Any]) -> Any:
+    """
+    Recursively resolve GraphQL __ref references in the data structure.
+
+    Args:
+        data: The data structure to resolve (dict, list, or primitive)
+        root_data: The root GraphQL response data containing all entities
+
+    Returns:
+        The data with all __ref references resolved to actual objects
+    """
+    if isinstance(data, dict):
+        # Check if this is a reference object
+        if "__ref" in data and len(data) == 1:  # type: ignore[arg-type]
+            ref_key: str = data["__ref"]  # type: ignore[assignment]
+            logger.trace(f"Resolving reference: {ref_key}")
+
+            # Look up the reference in root_data
+            if ref_key in root_data:
+                resolved: Any = root_data[ref_key]
+                logger.trace(f"Found referenced object: {ref_key}")
+                # Recursively resolve any references in the resolved object
+                return resolve_graphql_references(resolved, root_data)  # type: ignore[return-value]
+            else:
+                logger.warning(f"Could not find referenced object: {ref_key}")
+                return data  # type: ignore[return-value]
+
+        # Not a reference, recursively process all values
+        result: dict[str, Any] = {k: resolve_graphql_references(v, root_data) for k, v in data.items()}  # type: ignore[misc]
+        return result
+
+    elif isinstance(data, list):
+        # Recursively process list items
+        result_list: list[Any] = [resolve_graphql_references(item, root_data) for item in data]  # type: ignore[misc]
+        return result_list
+
+    else:
+        # Primitive value, return as-is
+        return data
+
+
 class MediumApiService:
     def __init__(
         self,
@@ -55,7 +96,7 @@ class MediumApiService:
         if self.config.cookies is not None:
             headers["Cookie"] = self.config.cookies
 
-        graphql_data = {
+        graphql_data: dict[str, Any] = {
             "operationName": "FullPostQuery",
             "variables": {
                 "postId": post_id,
@@ -108,9 +149,20 @@ class MediumApiService:
             logger.warning(f"Response data is None for post {post_id}")
             return None
 
-        # Parse GraphQL response directly - let Pydantic handle validation
+        # Resolve __ref references in the response data before Pydantic parsing
+        # This ensures mediaResource references in iframes are properly resolved
         try:
-            graphql_post = GraphQLPost.model_validate(response_data["data"]["post"])
+            post_data = response_data["data"]["post"]
+            # Resolve references using the full response_data["data"] as the lookup source
+            resolved_post_data = resolve_graphql_references(post_data, response_data.get("data", {}))
+            logger.debug("Successfully resolved GraphQL references")
+        except Exception as e:
+            logger.warning(f"Failed to resolve GraphQL references: {e}, continuing with unresolved data")
+            resolved_post_data = response_data["data"]["post"]
+
+        # Parse GraphQL response - Pydantic will handle validation
+        try:
+            graphql_post = GraphQLPost.model_validate(resolved_post_data)
             logger.debug(f"Successfully parsed GraphQL post: {graphql_post.id}")
             return graphql_post
         except (KeyError, TypeError) as e:
@@ -127,3 +179,44 @@ class MediumApiService:
         raise RuntimeError(
             "query_post_api is deprecated and no longer supported. Use query_post_graphql instead."
         )
+
+    @beartype
+    async def fetch_iframe_content(self, iframe_id: str) -> str:
+        """
+        Fetch iframe content from Medium's media endpoint.
+
+        Args:
+            iframe_id: The Medium iframe/media ID
+
+        Returns:
+            The HTML content of the iframe
+        """
+        logger.debug(f"Fetching iframe content for ID: {iframe_id}")
+
+        url = f"https://medium.com/media/{iframe_id}"
+        headers = {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
+            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
+            "Accept-Language": "en-US,en;q=0.5",
+        }
+
+        try:
+            async with self.request as request:
+                response = await request.aget(url, headers=headers)
+
+                logger.debug(f"Iframe response status code: {response.status_code}")
+
+                if response.status_code != 200:
+                    logger.error(
+                        f"Failed to fetch iframe {iframe_id}\n"
+                        f"Status code: {response.status_code}\n"
+                        f"Response: {response.text[:500]}"
+                    )
+                    return ""
+
+                return response.text
+
+        except Exception as ex:
+            logger.error(f"Request failed for iframe {iframe_id}: {ex}")
+            logger.exception(ex)
+            return ""

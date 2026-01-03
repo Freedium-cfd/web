@@ -54,7 +54,7 @@
 
 /* Code blocks */
 .prose pre {
-	@apply p-4 my-6 overflow-x-auto rounded-lg;
+	@apply p-4 my-6 overflow-x-auto rounded-lg border;
 }
 
 .prose code:not(.shiki code) {

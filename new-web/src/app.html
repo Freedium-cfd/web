@@ -14,6 +14,49 @@
 				: document.documentElement.classList.remove('dark');
 		</script>
 
+		<!-- Iframe resize communication handlers -->
+		<script>
+			// Legacy resize function for older iframe implementations
+			window._resizeIframe = function (obj) {
+				const logMessage = `Received _resizeIframe call: iframe=${obj.iframe ? obj.iframe.id : 'unknown'}, height=${obj.height}`;
+				if (obj.iframe) {
+					obj.iframe.height = obj.height;
+				}
+				console.log(obj.iframe);
+				console.log(logMessage);
+			};
+
+			// Modern postMessage-based iframe resize handler
+			window.addEventListener('message', function (event) {
+				console.log('Event data:', JSON.stringify(event.data));
+				if (typeof event.data === 'string') {
+					try {
+						let parsedData = JSON.parse(event.data);
+						console.log('Event data type:', typeof parsedData);
+
+						// Handle iframe resize messages
+						if (parsedData && parsedData.method === 'iframe.resize' && parsedData.context === 'iframe.resize') {
+							console.log('Resizing iframe - Source:', parsedData.src, 'Height:', parsedData.height, 'Method:', parsedData.method);
+
+							// Find and resize the matching iframe
+							const iframes = document.querySelectorAll('iframe');
+							for (let iframe of iframes) {
+								if (iframe.src === parsedData.src) {
+									console.log('Setting iframe height to:', parsedData.height);
+									console.log(iframe);
+									iframe.height = parsedData.height;
+									break;
+								}
+							}
+						}
+					} catch (e) {
+						// Ignore non-JSON messages
+						console.debug('Non-JSON message received:', e);
+					}
+				}
+			});
+		</script>
+
 		%sveltekit.head%
 	</head>
 	<body data-sveltekit-preload-data="hover">
