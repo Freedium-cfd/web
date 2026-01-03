@@ -219,6 +219,12 @@ class MarkupProcessor:
                 start += leading_ws
                 end -= trailing_ws
 
+                # Skip markup if after trimming, only punctuation/whitespace remains
+                trimmed_text = self._text[start:end]
+                if trimmed_text and not any(c.isalnum() for c in trimmed_text):
+                    # All non-alphanumeric (punctuation, whitespace, symbols) - skip
+                    continue
+
             if markup_type == MarkupType.STRONG:
                 span = MarkupSpan(start, end, "**", "**")
                 markup_ranges.append((start, end, markup_type, span))
