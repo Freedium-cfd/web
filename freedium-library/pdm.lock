@@ -5,7 +5,7 @@
 groups = ["default", "api", "dev"]
 strategy = ["inherit_metadata"]
 lock_version = "4.5.0"
-content_hash = "sha256:8e8f44f9745b84c33f16714dc879a9ba33fbb782fe6d6a4455092936bf3d6733"
+content_hash = "sha256:f6c7359537b4e744df30d7268f4708d8dc5a6e41528f4e070fa23e5cab216247"
 
 [[metadata.targets]]
 requires_python = "==3.12.*"
@@ -863,6 +863,21 @@ files = [
 ]
 
 [[package]]
+name = "pyright"
+version = "1.1.407"
+requires_python = ">=3.7"
+summary = "Command line wrapper for pyright"
+groups = ["dev"]
+dependencies = [
+    "nodeenv>=1.6.0",
+    "typing-extensions>=4.1",
+]
+files = [
+    {file = "pyright-1.1.407-py3-none-any.whl", hash = "sha256:6dd419f54fcc13f03b52285796d65e639786373f433e243f8b94cf93a7444d21"},
+    {file = "pyright-1.1.407.tar.gz", hash = "sha256:099674dba5c10489832d4a4b2d302636152a9a42d317986c38474c76fe562262"},
+]
+
+[[package]]
 name = "pytest"
 version = "8.3.3"
 requires_python = ">=3.8"
@@ -1145,7 +1160,7 @@ name = "typing-extensions"
 version = "4.12.2"
 requires_python = ">=3.8"
 summary = "Backported and Experimental Type Hints for Python 3.8+"
-groups = ["default", "api"]
+groups = ["default", "api", "dev"]
 files = [
     {file = "typing_extensions-4.12.2-py3-none-any.whl", hash = "sha256:04e5ca0351e0f3f85c6853954072df659d0d13fac324d0072316b67d7794700d"},
     {file = "typing_extensions-4.12.2.tar.gz", hash = "sha256:1a7ead55c7e559dd4dee8856e3a88b41225abfe1ce8df57b7c13915fe121ffb8"},
