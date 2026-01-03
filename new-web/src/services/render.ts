@@ -1,18 +1,31 @@
 import apiFetch from "@/api";
 import type { Article } from "$lib/types";
 
-interface RenderResponse {
-	text: string;
-	article: Article;
+interface RenderRequest {
+	content: string;
+	frontmatter?: boolean;
 }
 
-export async function render(serviceName: string): Promise<RenderResponse> {
-	const response = await apiFetch<RenderResponse>(`/services/${serviceName}/render`);
+interface RenderResponse {
+	markdown: string;
+	service: string;
+}
+
+export async function render(content: string, frontmatter = false): Promise<RenderResponse> {
+	const response = await apiFetch<RenderResponse>("/render", {
+		method: "POST",
+		body: JSON.stringify({
+			content,
+			frontmatter,
+		}),
+		headers: {
+			"Content-Type": "application/json",
+		},
+	});
+
 	if (!response) {
-		throw new Error("Failed to fetch article");
+		throw new Error("Failed to render content");
 	}
-	return {
-		text: response.text,
-		article: response.article,
-	};
+
+	return response;
 }

@@ -49,6 +49,20 @@ const successIcon = createIconHast("clipboard-document-check-solid", {
 	fill: "white",
 });
 
+// Singleton highlighter instance for mdsvex
+let mdsvexHighlighterInstance = null;
+
+async function getMdsvexHighlighter() {
+	if (!mdsvexHighlighterInstance) {
+		mdsvexHighlighterInstance = await createHighlighter({
+			themes: ["poimandres"],
+			langs: ["javascript", "typescript"],
+		});
+		await mdsvexHighlighterInstance.loadLanguage("javascript", "typescript");
+	}
+	return mdsvexHighlighterInstance;
+}
+
 export function renderCodeCopyButton(code, options = {}) {
 	const toggleMs = options.toggle || 3000;
 	const button = h(
@@ -121,11 +135,7 @@ const mdsvexOptions = {
 	],
 	highlight: {
 		highlighter: async (code, lang = "text") => {
-			const highlighter = await createHighlighter({
-				themes: ["poimandres"],
-				langs: ["javascript", "typescript"],
-			});
-			await highlighter.loadLanguage("javascript", "typescript");
+			const highlighter = await getMdsvexHighlighter();
 			const result = highlighter.codeToHast(code, {
 				lang,
 				theme: "poimandres",

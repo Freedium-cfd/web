@@ -1,6 +1,6 @@
 import warnings
 from types import TracebackType
-from typing import Any, Dict, Optional, Type
+from typing import Any, Dict, Literal, Optional, Type
 
 from curl_cffi.requests import Session, AsyncSession
 
@@ -11,13 +11,15 @@ from .response import AbstractResponse
 
 
 class CurlRequest(AbstractRequest):
-    __slots__ = ("config", "_in_context_manager", "_session", "_async_session")
+    __slots__ = ("config", "_in_context_manager", "_session", "_async_session", "_impersonate", "_http_version")
 
     def __init__(self, config: Optional[RequestConfig] = None):
         self.config = config or RequestConfig()
         self._in_context_manager = False
         self._session: Any = None
         self._async_session: Any = None
+        self._impersonate: Literal["chrome136"] = "chrome136"
+        self._http_version: Literal["v3"] = "v3"
         warnings.warn(
             "Request should be used as a context manager using 'with' or 'async with' "
             "to ensure proper resource cleanup",
@@ -26,17 +28,17 @@ class CurlRequest(AbstractRequest):
 
     def _get_session(self) -> Any:
         if not self._session:
-            self._session = Session(impersonate="chrome110")
+            self._session = Session(impersonate=self._impersonate, http_version=self._http_version)
         return self._session
 
     async def _get_async_session(self) -> Any:
         if not self._async_session:
-            self._async_session = AsyncSession(impersonate="chrome110")
+            self._async_session = AsyncSession(impersonate=self._impersonate, http_version=self._http_version)
         return self._async_session
 
     def __enter__(self) -> "CurlRequest":
         self._in_context_manager = True
-        self._session = Session(impersonate="chrome110")
+        self._session = Session(impersonate=self._impersonate, http_version=self._http_version)
         return self
 
     def __exit__(
@@ -51,7 +53,7 @@ class CurlRequest(AbstractRequest):
 
     async def __aenter__(self) -> "CurlRequest":
         self._in_context_manager = True
-        self._async_session = AsyncSession(impersonate="chrome110")
+        self._async_session = AsyncSession(impersonate=self._impersonate, http_version=self._http_version)
         return self
 
     async def __aexit__(

@@ -166,3 +166,5 @@ medium_db_cache.sqlite*
 ban_post_list.db
 
 postgres/
+
+.playwright-mcp/

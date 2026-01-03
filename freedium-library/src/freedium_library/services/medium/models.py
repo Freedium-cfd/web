@@ -258,3 +258,255 @@ class MediumPostApiResponse(BaseModel):
 
 class MediumPostDataResponse(MediumPostApiResponse):
     pass
+
+
+# GraphQL-specific models
+class GraphQLImageMetadata(BaseModel):
+    model_config = ConfigDict(extra="allow")
+
+    __typename: str | None = None
+    id: str | None = None
+    originalWidth: int | None = None
+    originalHeight: int | None = None
+    focusPercentX: float | None = None
+    focusPercentY: float | None = None
+    alt: str | None = None
+
+
+class GraphQLViewerEdge(BaseModel):
+    model_config = ConfigDict(extra="allow")
+
+    id: str | None = None
+    isUser: bool | None = None
+    isFollowing: bool | None = None
+    isBlocking: bool | None = None
+    isMuting: bool | None = None
+    isSubscribed: bool | None = None
+    isEditor: bool | None = None
+    canEditPosts: bool | None = None
+    canEditOwnPosts: bool | None = None
+    clapCount: int | None = None
+
+
+class GraphQLSocialStats(BaseModel):
+    model_config = ConfigDict(extra="allow")
+
+    followingCount: int | None = None
+    followerCount: int | None = None
+
+
+class GraphQLNewsletterV3(BaseModel):
+    model_config = ConfigDict(extra="allow")
+
+    __typename: str | None = None
+    id: str | None = None
+    viewerEdge: GraphQLViewerEdge | None = None
+
+
+class GraphQLCreator(BaseModel):
+    model_config = ConfigDict(extra="allow")
+
+    __typename: str | None = None
+    id: str | None = None
+    imageId: str | None = None
+    username: str | None = None
+    name: str | None = None
+    bio: str | None = None
+    tippingLink: str | None = None
+    viewerEdge: GraphQLViewerEdge | None = None
+    socialStats: GraphQLSocialStats | None = None
+    newsletterV3: GraphQLNewsletterV3 | None = None
+    isFollowing: bool | None = None
+    mediumMemberAt: int | None = None
+    twitterScreenName: str | None = None
+
+
+class GraphQLCollection(BaseModel):
+    model_config = ConfigDict(extra="allow")
+
+    __typename: str | None = None
+    id: str | None = None
+    name: str | None = None
+    slug: str | None = None
+    shortDescription: str | None = None
+    avatar: GraphQLImageMetadata | None = None
+    subscriberCount: int | None = None
+    viewerEdge: GraphQLViewerEdge | None = None
+    newsletterV3: GraphQLNewsletterV3 | None = None
+
+
+class GraphQLMarkup(BaseModel):
+    model_config = ConfigDict(extra="allow")
+
+    __typename: str | None = None
+    name: str | None = None
+    type: str | None = None
+    start: int | None = None
+    end: int | None = None
+    href: str | None = None
+    title: str | None = None
+    rel: str | None = None
+    anchorType: str | None = None
+    userId: str | None = None
+    creatorIds: list[str] | None = None
+
+
+class GraphQLCodeBlockMetadata(BaseModel):
+    model_config = ConfigDict(extra="allow")
+
+    lang: str | None = None
+    mode: str | None = None
+
+
+class GraphQLMediaResource(BaseModel):
+    model_config = ConfigDict(extra="allow")
+
+    __typename: str | None = None
+    id: str | None = None
+    iframeSrc: str | None = None
+    thumbnailUrl: str | None = None
+    iframeHeight: int | None = None
+    iframeWidth: int | None = None
+    title: str | None = None
+
+
+class GraphQLIframe(BaseModel):
+    model_config = ConfigDict(extra="allow")
+
+    __typename: str | None = None
+    iframeHeight: int | None = None
+    iframeWidth: int | None = None
+    mediaResource: GraphQLMediaResource | None = None
+
+
+class GraphQLMixtapeMetadata(BaseModel):
+    model_config = ConfigDict(extra="allow")
+
+    __typename: str | None = None
+    mediaResourceId: str | None = None
+    href: str | None = None
+    thumbnailImageId: str | None = None
+    mediaResource: dict[str, Any] | None = None
+
+
+class GraphQLParagraph(BaseModel):
+    model_config = ConfigDict(extra="allow")
+
+    __typename: str | None = None
+    id: str | None = None
+    name: str | None = None
+    href: str | None = None
+    text: str | None = None
+    iframe: GraphQLIframe | None = None
+    layout: str | None = None
+    markups: list[GraphQLMarkup] | None = None
+    metadata: GraphQLImageMetadata | None = None
+    mixtapeMetadata: GraphQLMixtapeMetadata | None = None
+    type: str | None = None
+    hasDropCap: bool | None = None
+    dropCapImage: GraphQLImageMetadata | None = None
+    codeBlockMetadata: GraphQLCodeBlockMetadata | None = None
+
+
+class GraphQLSection(BaseModel):
+    model_config = ConfigDict(extra="allow")
+
+    __typename: str | None = None
+    name: str | None = None
+    startIndex: int | None = None
+    textLayout: str | None = None
+    imageLayout: str | None = None
+    videoLayout: str | None = None
+    backgroundImage: GraphQLImageMetadata | None = None
+    backgroundVideo: dict[str, Any] | None = None
+
+
+class GraphQLRichText(BaseModel):
+    model_config = ConfigDict(extra="allow")
+
+    __typename: str | None = None
+    sections: list[GraphQLSection] | None = None
+    paragraphs: list[GraphQLParagraph] | None = None
+
+
+class GraphQLContent(BaseModel):
+    model_config = ConfigDict(extra="allow")
+
+    bodyModel: GraphQLRichText | None = None
+    validatedShareKey: str | None = None
+
+
+class GraphQLPreviewContent(BaseModel):
+    model_config = ConfigDict(extra="allow")
+
+    subtitle: str | None = None
+
+
+class GraphQLPreviewImage(BaseModel):
+    model_config = ConfigDict(extra="allow")
+
+    id: str | None = None
+
+
+class GraphQLPostResponses(BaseModel):
+    model_config = ConfigDict(extra="allow")
+
+    count: int | None = None
+
+
+class GraphQLLinkMetadata(BaseModel):
+    model_config = ConfigDict(extra="allow")
+
+    url: str | None = None
+    alts: list[dict[str, str]] | None = None
+
+
+class GraphQLTag(BaseModel):
+    model_config = ConfigDict(extra="allow")
+
+    __typename: str | None = None
+    id: str | None = None
+    normalizedTagSlug: str | None = None
+    displayTitle: str | None = None
+    followerCount: int | None = None
+    postCount: int | None = None
+
+
+class GraphQLPost(BaseModel):
+    """Model for GraphQL post response from Medium API."""
+
+    model_config = ConfigDict(extra="allow")
+
+    __typename: str | None = None
+    id: str | None = None
+    title: str | None = None
+    detectedLanguage: str | None = None
+    mediumUrl: str | None = None
+    latestPublishedVersion: str | None = None
+    firstPublishedAt: int | None = None
+    updatedAt: int | None = None
+    latestPublishedAt: int | None = None
+    allowResponses: bool | None = None
+    isLocked: bool | None = None
+    isProxyPost: bool | None = None
+    isSeries: bool | None = None
+    canonicalUrl: str | None = None
+    visibility: str | None = None
+    readingTime: float | None = None
+    clapCount: int | None = None
+    pinnedByCreatorAt: int | None = None
+    responsesLocked: bool | None = None
+    inResponseToPostResult: dict[str, Any] | None = None
+    inResponseToMediaResource: dict[str, Any] | None = None
+    inResponseToEntityType: str | None = None
+
+    creator: GraphQLCreator | None = None
+    collection: GraphQLCollection | None = None
+    content: GraphQLContent | None = None
+    previewContent: GraphQLPreviewContent | None = None
+    previewImage: GraphQLPreviewImage | None = None
+    viewerEdge: GraphQLViewerEdge | None = None
+    postResponses: GraphQLPostResponses | None = None
+    linkMetadataList: list[GraphQLLinkMetadata] | None = None
+    highlights: list[Any] | None = None
+    tags: list[GraphQLTag] | None = None

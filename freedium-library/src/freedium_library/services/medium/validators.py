@@ -30,14 +30,48 @@ class MediumServicePathValidator:
         )
 
     def is_valid(self, path: str) -> bool:
-        return self.url_validator.is_valid(path) or self.hash_validator.extract_hashes(
-            path
+        return self.url_validator.is_valid(path) or bool(
+            self.hash_validator.extract_hashes(path)
         )
 
     async def ais_valid(self, path: str) -> bool:
-        return await self.url_validator.ais_valid(
-            path
-        ) or await self.hash_validator.extract_hashes(path)
+        url_valid = await self.url_validator.ais_valid(path)
+        return url_valid or bool(self.hash_validator.extract_hashes(path))
+
+    def extract_post_id(self, path: str) -> str | None:
+        """
+        Extract the Medium post ID from a path (URL or direct ID).
+
+        Returns:
+            The post ID if found, None otherwise.
+        """
+        # First try to extract hash directly
+        hashes = self.hash_validator.extract_hashes(path)
+        if hashes:
+            return hashes[-1]  # Return the last match (most specific)
+        return None
+
+    async def aextract_post_id(self, path: str) -> str | None:
+        """
+        Asynchronously extract the Medium post ID from a path (URL or direct ID).
+
+        Returns:
+            The post ID if found, None otherwise.
+        """
+        # Try URL resolution first
+        try:
+            resolved = await self.url_validator.resolve_medium_url(path)
+            if resolved:
+                return resolved
+        except Exception:
+            # Not a URL, will try hash extraction
+            pass
+
+        # Fallback to direct hash extraction
+        hashes = self.hash_validator.extract_hashes(path)
+        if hashes:
+            return hashes[-1]
+        return None
 
 
 class _MediumServiceURLValidator:
@@ -52,6 +86,15 @@ class _MediumServiceURLValidator:
         self.hash_validator = hash_validator
 
     def is_valid(self, url: str | URLProcessor) -> bool: ...
+
+    async def ais_valid(self, url: str) -> bool:
+        """Asynchronously validate if a string is a valid Medium URL."""
+        try:
+            resolved = await self.resolve_medium_url(url)
+            return resolved is not None
+        except Exception:
+            # Not a valid URL, will be checked as a hash later
+            return False
 
     def _get_short_link_request_params(
         self, short_url_id: str

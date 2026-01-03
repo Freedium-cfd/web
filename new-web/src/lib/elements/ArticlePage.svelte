@@ -17,6 +17,7 @@
 	import { onMount } from 'svelte';
 	import { initializeCodeCopyButtons } from '$lib/codeCopy';
 	import { initializeLazyIframes } from '$lib/lazyIframe';
+	import { initializeImageZoom } from '$lib/imageZoom';
 	import type { ArticlePageData } from '$lib/types';
 
 	interface Props {
@@ -54,6 +55,7 @@
 		if (contentLoaded) {
 			initializeCodeCopyButtons();
 			initializeLazyIframes();
+			initializeImageZoom();
 		}
 	});
 </script>
@@ -136,7 +138,7 @@
 				</aside>
 			{:else}
 				{#if article}
-				<div class="w-full">
+				<div class="w-full lg:grow lg:max-w-[calc(100%-18rem)]">
 					<article class="overflow-hidden bg-white rounded-lg shadow-lg dark:bg-zinc-900">
 						<nav class="flex items-center gap-2 p-4">
 							<button
@@ -234,12 +236,13 @@
 						</div>
 					</aside>
 				{:else}
-					<Drawer.Root bind:open={drawerOpen}>
-						<Drawer.Trigger
-							class="fixed z-50 flex items-center justify-center transition shadow-lg bottom-6 right-6 bg-primary text-white rounded-full size-14 hover:bg-primary/90 shadow-zinc-800/20 ring-1 ring-primary/20"
-						>
-							<HeroiconsBars320Solid class="size-6" />
-						</Drawer.Trigger>
+					{#if article.tableOfContents && article.tableOfContents.length > 0}
+						<Drawer.Root bind:open={drawerOpen}>
+							<Drawer.Trigger
+								class="fixed z-50 flex items-center justify-center transition shadow-lg bottom-6 right-6 bg-primary text-white rounded-full size-14 hover:bg-primary/90 shadow-zinc-800/20 ring-1 ring-primary/20"
+							>
+								<HeroiconsBars320Solid class="size-6" />
+							</Drawer.Trigger>
 						<Drawer.Content class="max-h-[85dvh] flex flex-col">
 							<Drawer.Header class="text-left">
 								<Drawer.Title class="text-xl font-semibold text-primary">Contents</Drawer.Title>
@@ -292,6 +295,7 @@
 							</div>
 						</Drawer.Content>
 					</Drawer.Root>
+					{/if}
 				{/if}
 				{/if}
 			{/if}

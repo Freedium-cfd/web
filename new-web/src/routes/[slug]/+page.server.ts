@@ -1,14 +1,19 @@
 import { render } from "@/services";
-import { compile } from "mdsvex";
+import { unified } from "unified";
+import remarkParse from "remark-parse";
+import remarkRehype from "remark-rehype";
+import rehypeStringify from "rehype-stringify";
 import { createHighlighter, type HighlighterGeneric, type BundledLanguage, type BundledTheme } from "shiki";
+import { visit } from "unist-util-visit";
 import { toHtml } from "hast-util-to-html";
 import { h, s } from "hastscript";
-import type { Element } from "hast";
+import type { Element, Root } from "hast";
 import type { PageServerLoad } from "./$types";
 import type { ArticleErrorCode } from "$lib/types";
 import { getIconData, iconToSVG } from "@iconify/utils";
 import heroiconsData from "@iconify/json/json/heroicons.json";
 import rehypeExternalLinks, { type Options as RehypeExternalLinksOptions } from "rehype-external-links";
+import rehypeSlug from "rehype-slug";
 
 // Helper to get icon as HAST SVG node
 function getIconHast(iconName: string, customAttrs: Record<string, string> = {}): Element | null {
@@ -41,7 +46,7 @@ const externalLinkIcon = getIconHast("arrow-top-right-on-square", {
 
 const HIGHLIGHT_CONFIG = {
 	themes: ["github-light", "github-dark"],
-	langs: ["javascript", "typescript"],
+	langs: ["javascript", "typescript", "nginx", "bash", "ruby", "python"],
 };
 
 const CODE_ATTRIBUTES: Record<string, string> = {
@@ -67,7 +72,7 @@ let highlighterInstance: HighlighterGeneric<BundledLanguage, BundledTheme> | nul
 async function getHighlighter(): Promise<HighlighterGeneric<BundledLanguage, BundledTheme>> {
 	if (!highlighterInstance) {
 		highlighterInstance = await createHighlighter(HIGHLIGHT_CONFIG);
-		await highlighterInstance.loadLanguage("javascript", "typescript");
+		await highlighterInstance.loadLanguage("javascript", "typescript", "nginx", "bash", "ruby", "python");
 	}
 	return highlighterInstance;
 }
@@ -145,6 +150,108 @@ async function createHighlightedCode(code: string, lang: string | null = "text")
 	`;
 }
 
+// Rehype plugin for syntax highlighting
+function rehypeHighlight() {
+	return async (tree: Root) => {
+		const highlighter = await getHighlighter();
+		const nodesToReplace: Array<{ node: any; parent: any; index: number; replacement: any }> = [];
+
+		visit(tree, 'element', (node: any, index: number | null | undefined, parent: any) => {
+			if (node.tagName === 'pre') {
+				const codeNode = node.children?.[0];
+				if (codeNode && codeNode.tagName === 'code') {
+					const className = codeNode.properties?.className;
+					const lang = className?.[0]?.replace('language-', '') || 'text';
+					// Remove trailing newline that remark-parse adds to all code blocks
+					const originalText = codeNode.children?.[0]?.value || '';
+					const codeText = originalText.replace(/\n$/, '');
+
+
+					// Check for decorations in code fence meta (e.g., ```lang decorations="[...]")
+					const meta = codeNode.data?.meta || '';
+					let decorations: Array<{ start: number; end: number; properties: any }> = [];
+
+					// Match decorations with escaped quotes - need to find the closing quote
+					const decorationsMatch = meta.match(/decorations="(.+)"$/);
+					if (decorationsMatch) {
+						try {
+							// Unescape the JSON
+							const jsonStr = decorationsMatch[1].replace(/\\"/g, '"');
+							const decoData = JSON.parse(jsonStr);
+							decorations = decoData.map((d: any) => ({
+								// Clamp positions to code length to handle Medium's invalid markup positions
+								start: Math.min(d.start, codeText.length),
+								end: Math.min(d.end, codeText.length),
+								properties: { class: d.type === 'strong' ? 'font-bold' : 'italic' }
+							}))
+							// Filter out invalid decorations where start >= end
+							.filter((d: any) => d.start < d.end);
+						} catch (e) {
+							console.error('Failed to parse decorations:', e);
+						}
+					}
+
+
+					// Generate highlighted HTML with decorations
+					const lightHtml = highlighter.codeToHtml(codeText, {
+						lang,
+						theme: "github-light",
+						decorations,
+						transformers: [
+							{
+								code(transformNode) {
+									transformNode.properties = { ...transformNode.properties, ...CODE_ATTRIBUTES };
+									return transformNode;
+								},
+							},
+						],
+					});
+
+					const darkHtml = highlighter.codeToHtml(codeText, {
+						lang,
+						theme: "github-dark",
+						decorations,
+						transformers: [
+							{
+								code(transformNode) {
+									transformNode.properties = { ...transformNode.properties, ...CODE_ATTRIBUTES };
+									return transformNode;
+								},
+							},
+						],
+					});
+
+					const buttonHtml = createCodeCopyButton(codeText, 1200);
+
+					// Create replacement HTML
+					const wrappedHtml = `
+						<div class="relative">
+							${buttonHtml}
+							<div class="dark:hidden">${lightHtml}</div>
+							<div class="hidden dark:block">${darkHtml}</div>
+						</div>
+					`;
+
+					// Create a raw HTML node
+					const replacement = {
+						type: 'raw',
+						value: wrappedHtml
+					};
+
+					if (parent && typeof index === 'number') {
+						nodesToReplace.push({ node, parent, index, replacement });
+					}
+				}
+			}
+		});
+
+		// Replace nodes
+		for (const { parent, index, replacement } of nodesToReplace) {
+			parent.children[index] = replacement;
+		}
+	};
+}
+
 const ErrorCodes: Record<ArticleErrorCode, ArticleErrorCode> = {
 	ARTICLE_NOT_FOUND: "ARTICLE_NOT_FOUND",
 	RENDER_ERROR: "RENDER_ERROR",
@@ -153,9 +260,10 @@ const ErrorCodes: Record<ArticleErrorCode, ArticleErrorCode> = {
 };
 
 export const load: PageServerLoad = async ({ params }) => {
-	let transformed = null;
+	let renderResult = null;
 	try {
-		transformed = await render("medium");
+		// Request with frontmatter to get metadata
+		renderResult = await render(params.slug, true);
 	} catch (err) {
 		console.error("Failed to render article:", err);
 		return {
@@ -173,7 +281,7 @@ export const load: PageServerLoad = async ({ params }) => {
 		};
 	}
 
-	if (!transformed) {
+	if (!renderResult) {
 		return {
 			slug: params.slug,
 			loading: false,
@@ -188,26 +296,88 @@ export const load: PageServerLoad = async ({ params }) => {
 		};
 	}
 
-	try {
-		const result = await compile(transformed.text, {
-			rehypePlugins: [
-				[rehypeExternalLinks as unknown as import("unified").Plugin, {
-					target: "_blank",
-					rel: ["nofollow"],
-					content: externalLinkIcon,
-				} as import("unified").Settings],
-			],
-			highlight: {
-				highlighter: createHighlightedCode,
+	// Parse frontmatter to extract metadata
+	const frontmatterMatch = renderResult.markdown.match(/^---\n([\s\S]*?)\n---\n([\s\S]*)$/);
+	let article = null;
+	let markdownContent = renderResult.markdown;
+
+	if (frontmatterMatch) {
+		const yamlContent = frontmatterMatch[1];
+		markdownContent = frontmatterMatch[2];
+
+		// Simple YAML parser for our use case
+		const metadata: Record<string, any> = {};
+		const lines = yamlContent.split('\n');
+
+		for (const line of lines) {
+			const match = line.match(/^(\w+):\s*(.+)$/);
+			if (match) {
+				const [, key, value] = match;
+				// Handle quoted strings
+				if (value.startsWith('"') && value.endsWith('"')) {
+					metadata[key] = value.slice(1, -1);
+				}
+				// Handle arrays and objects (JSON format)
+				else if (value.startsWith('[') || value.startsWith('{')) {
+					try {
+						metadata[key] = JSON.parse(value);
+					} catch {
+						metadata[key] = value;
+					}
+				}
+				// Handle numbers
+				else if (!isNaN(Number(value))) {
+					metadata[key] = Number(value);
+				}
+				else {
+					metadata[key] = value;
+				}
+			}
+		}
+
+		// Use table_of_contents from frontmatter
+		let tableOfContents: Array<{ id: string; title: string }> = [];
+
+		if (metadata.table_of_contents && Array.isArray(metadata.table_of_contents)) {
+			tableOfContents = metadata.table_of_contents;
+		}
+
+		article = {
+			title: metadata.title || "Untitled",
+			author: {
+				name: metadata.author || "Unknown",
+				avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(metadata.author || "Unknown")}&background=random`,
+				role: `${metadata.reading_time || 0} min read`,
 			},
-		});
+			date: new Date().toISOString(),
+			postImage: null,
+			url: metadata.url || null,
+			tableOfContents,
+		};
+	}
+
+	try {
+		const processor = unified()
+			.use(remarkParse)
+			.use(remarkRehype, { allowDangerousHtml: true })
+			.use(rehypeSlug)
+			.use(rehypeExternalLinks, {
+				target: "_blank",
+				rel: ["nofollow"],
+				content: externalLinkIcon,
+			})
+			.use(rehypeHighlight)
+			.use(rehypeStringify, { allowDangerousHtml: true });
+
+		const result = await processor.process(markdownContent);
+		const htmlContent = String(result);
 
 		return {
 			slug: params.slug,
 			loading: false,
-			content: result?.code ?? null,
-			markdown: transformed.text,
-			article: transformed.article,
+			content: htmlContent,
+			markdown: markdownContent,
+			article,
 			error: null,
 		};
 	} catch (compileError) {

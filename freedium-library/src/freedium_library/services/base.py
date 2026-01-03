@@ -35,6 +35,11 @@ class BaseService(ABC):
         with logger.contextualize(cls=str(self)):
             return await self._arender(path)
 
+    async def arender_with_frontmatter(self, path: str) -> str:
+        """Asynchronously render with YAML frontmatter. Override in subclasses if supported."""
+        with logger.contextualize(cls=str(self)):
+            return await self._arender(path)
+
     async def asearch(self, keywords: list[str]) -> list[dict[str, str]]:
         with logger.contextualize(cls=str(self)):
             return await self._asearch(keywords)
