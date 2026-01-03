@@ -90,7 +90,7 @@ class CurlRequest(AbstractRequest):
             url,
             params=params,
             headers=headers,
-            follow=follow_redirects,
+            allow_redirects=follow_redirects,
             timeout=self.config.timeout,
         )
         return CurlResponse(response)
@@ -108,7 +108,7 @@ class CurlRequest(AbstractRequest):
             url,
             json=data,
             headers=headers,
-            follow=follow_redirects,
+            allow_redirects=follow_redirects,
             timeout=self.config.timeout,
         )
         return CurlResponse(response)
@@ -126,7 +126,7 @@ class CurlRequest(AbstractRequest):
             url,
             json=data,
             headers=headers,
-            follow=follow_redirects,
+            allow_redirects=follow_redirects,
             timeout=self.config.timeout,
         )
         return CurlResponse(response)
@@ -142,7 +142,7 @@ class CurlRequest(AbstractRequest):
         response = session.delete(
             url,
             headers=headers,
-            follow=follow_redirects,
+            allow_redirects=follow_redirects,
             timeout=self.config.timeout,
         )
         return CurlResponse(response)
@@ -160,7 +160,7 @@ class CurlRequest(AbstractRequest):
             url,
             params=params,
             headers=headers,
-            follow=follow_redirects,
+            allow_redirects=follow_redirects,
             timeout=self.config.timeout,
         )
         return CurlResponse(response)
@@ -178,7 +178,7 @@ class CurlRequest(AbstractRequest):
             url,
             json=data,
             headers=headers,
-            follow=follow_redirects,
+            allow_redirects=follow_redirects,
             timeout=self.config.timeout,
         )
         return CurlResponse(response)
@@ -196,7 +196,7 @@ class CurlRequest(AbstractRequest):
             url,
             json=data,
             headers=headers,
-            follow=follow_redirects,
+            allow_redirects=follow_redirects,
             timeout=self.config.timeout,
         )
         return CurlResponse(response)
@@ -212,7 +212,7 @@ class CurlRequest(AbstractRequest):
         response = await session.delete(
             url,
             headers=headers,
-            follow=follow_redirects,
+            allow_redirects=follow_redirects,
             timeout=self.config.timeout,
         )
         return CurlResponse(response)
