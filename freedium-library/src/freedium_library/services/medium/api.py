@@ -1,87 +1,78 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from loguru import logger
 
-from freedium_library.utils import JSON, HashLib
+from freedium_library.utils import JSON
+
+from .models import MediumPostDataResponse
 
 if TYPE_CHECKING:
     from freedium_library.services.medium.config import MediumConfig
-    from freedium_library.utils.http import HttpxRequest
+    from freedium_library.utils.http import CurlRequest
 
 
 class MediumApiService:
     def __init__(
         self,
-        request: HttpxRequest,
+        request: CurlRequest,
         config: MediumConfig,
     ):
         self.request = request
         self.config = config
 
-    async def query_post_by_id(self, post_id: str):
-        logger.debug("Using graphql implementation")
-        return await self.query_post_graphql(post_id)
+    async def query_post_by_id(
+        self, post_id: str
+    ) -> MediumPostDataResponse | None:
+        logger.debug("Using post api implementation")
+        return await self.query_post_api(post_id)
 
-    async def query_post_graphql(self, post_id: str):
+    async def query_post_graphql(
+        self, post_id: str
+    ) -> MediumPostDataResponse | None:
+        logger.debug("Graphql fetch is deprecated, using post api")
+        return await self.query_post_api(post_id)
+
+    async def query_post_api(
+        self, post_id: str
+    ) -> MediumPostDataResponse | None:
         logger.debug(f"Starting request construction for post {post_id}")
 
         headers = {
-            "X-APOLLO-OPERATION-ID": HashLib.random_sha256(),
-            "X-APOLLO-OPERATION-NAME": "FullPostQuery",
-            "Accept": "multipart/mixed; deferSpec=20220824, application/json, application/json",
+            "Accept": "application/json",
             "Accept-Language": "en-US",
-            "X-Obvious-CID": "android",
-            "X-Xsrf-Token": "1",
-            "X-Client-Date": str(get_unix_ms()),
-            "User-Agent": "AdsBot-Google-Mobile",  # "donkey/4.5.1187420",  # <---- There is Medium version
-            "Cache-Control": "public, max-age=-1",
-            "Content-Type": "application/json",
-            "Connection": "Keep-Alive",
+            "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
         }
 
         if self.config.cookies is not None:
             headers["Cookie"] = self.config.cookies
 
-        graphql_data = {
-            "operationName": "FullPostQuery",
-            "variables": {
-                "postId": post_id,
-                "postMeteringOptions": {},
-            },
-            "query": "query FullPostQuery($postId: ID!, $postMeteringOptions: PostMeteringOptions) { post(id: $postId) { __typename id ...FullPostData } meterPost(postId: $postId, postMeteringOptions: $postMeteringOptions) { __typename ...MeteringInfoData } }  fragment UserFollowData on User { id socialStats { followingCount followerCount } viewerEdge { isFollowing } }  fragment NewsletterData on NewsletterV3 { id viewerEdge { id isSubscribed } }  fragment UserNewsletterData on User { id newsletterV3 { __typename ...NewsletterData } }  fragment ImageMetadataData on ImageMetadata { id originalWidth originalHeight focusPercentX focusPercentY alt }  fragment CollectionFollowData on Collection { id subscriberCount viewerEdge { isFollowing } }  fragment CollectionNewsletterData on Collection { id newsletterV3 { __typename ...NewsletterData } }  fragment BylineData on Post { id readingTime creator { __typename id imageId username name bio tippingLink viewerEdge { isUser } ...UserFollowData ...UserNewsletterData } collection { __typename id name avatar { __typename id ...ImageMetadataData } ...CollectionFollowData ...CollectionNewsletterData } isLocked firstPublishedAt latestPublishedVersion }  fragment ResponseCountData on Post { postResponses { count } }  fragment InResponseToPost on Post { id title creator { name } clapCount responsesCount isLocked }  fragment PostVisibilityData on Post { id collection { viewerEdge { isEditor canEditPosts canEditOwnPosts } } creator { id } isLocked visibility }  fragment PostMenuData on Post { id title creator { __typename ...UserFollowData } collection { __typename ...CollectionFollowData } }  fragment PostMetaData on Post { __typename id title visibility ...ResponseCountData clapCount viewerEdge { clapCount } detectedLanguage mediumUrl readingTime updatedAt isLocked allowResponses isProxyPost latestPublishedVersion isSeries firstPublishedAt previewImage { id } inResponseToPostResult { __typename ...InResponseToPost } inResponseToMediaResource { mediumQuote { startOffset endOffset paragraphs { text type markups { type start end anchorType } } } } inResponseToEntityType canonicalUrl collection { id slug name shortDescription avatar { __typename id ...ImageMetadataData } viewerEdge { isFollowing isEditor canEditPosts canEditOwnPosts isMuting } } creator { id isFollowing name bio imageId mediumMemberAt twitterScreenName viewerEdge { isBlocking isMuting isUser } } previewContent { subtitle } pinnedByCreatorAt ...PostVisibilityData ...PostMenuData }  fragment LinkMetadataList on Post { linkMetadataList { url alts { type url } } }  fragment MediaResourceData on MediaResource { id iframeSrc thumbnailUrl }  fragment IframeData on Iframe { iframeHeight iframeWidth mediaResource { __typename ...MediaResourceData } }  fragment MarkupData on Markup { name type start end href title rel type anchorType userId creatorIds }  fragment CatalogSummaryData on Catalog { id name description type visibility predefined responsesLocked creator { id name username imageId bio viewerEdge { isUser } } createdAt version itemsLastInsertedAt postItemsCount }  fragment CatalogPreviewData on Catalog { __typename ...CatalogSummaryData id itemsConnection(pagingOptions: { limit: 10 } ) { items { entity { __typename ... on Post { id previewImage { id } } } } paging { count } } }  fragment MixtapeMetadataData on MixtapeMetadata { mediaResourceId href thumbnailImageId mediaResource { mediumCatalog { __typename ...CatalogPreviewData } } }  fragment ParagraphData on Paragraph { id name href text iframe { __typename ...IframeData } layout markups { __typename ...MarkupData } metadata { __typename ...ImageMetadataData } mixtapeMetadata { __typename ...MixtapeMetadataData } type hasDropCap dropCapImage { __typename ...ImageMetadataData } codeBlockMetadata { lang mode } }  fragment QuoteData on Quote { id postId userId startOffset endOffset paragraphs { __typename id ...ParagraphData } quoteType }  fragment HighlightsData on Post { id highlights { __typename ...QuoteData } }  fragment PostFooterCountData on Post { __typename id clapCount viewerEdge { clapCount } ...ResponseCountData responsesLocked mediumUrl title collection { id viewerEdge { isMuting isFollowing } } creator { id viewerEdge { isMuting isFollowing } } }  fragment TagNoViewerEdgeData on Tag { id normalizedTagSlug displayTitle followerCount postCount }  fragment VideoMetadataData on VideoMetadata { videoId previewImageId originalWidth originalHeight }  fragment SectionData on Section { name startIndex textLayout imageLayout videoLayout backgroundImage { __typename ...ImageMetadataData } backgroundVideo { __typename ...VideoMetadataData } }  fragment PostBodyData on RichText { sections { __typename ...SectionData } paragraphs { __typename id ...ParagraphData } }  fragment FullPostData on Post { __typename ...BylineData ...PostMetaData ...LinkMetadataList ...HighlightsData ...PostFooterCountData tags { __typename id ...TagNoViewerEdgeData } content(postMeteringOptions: $postMeteringOptions) { bodyModel { __typename ...PostBodyData } validatedShareKey } }  fragment MeteringInfoData on MeteringInfo { maxUnlockCount unlocksRemaining postIds }",
-        }
-
-        response_data = None
-        exception = None
+        response_data: dict[str, Any] | None = None
+        exception: Exception | None = None
+        url = f"https://medium.com/_/api/posts/{post_id}"
 
         logger.debug("Request started...")
 
-        async with aiohttp.ClientSession(connector=connector) as session:
-            async with RetryClient(
-                client_session=session,
-                raise_for_status=False,
-                retry_options=RetryOptions,
-            ) as retry_client:
-                async with retry_client.post(
-                    "https://medium.com/_/graphql",
-                    headers=headers,
-                    json=graphql_data,
-                    timeout=self.timeout,
-                ) as request:
-                    if request.status != 200:
-                        logger.error(
-                            f"Failed to fetch post by ID {post_id} with status code: {request.status}"
-                        )
-                        return None
+        async with self.request as request:
+            response = await request.aget(url, headers=headers)
 
-                    try:
-                        response_data = await request.json(loads=JSON.loads)
-                    except Exception as ex:
-                        logger.debug("Failed to parse response data as JSON")
-                        logger.exception(ex)
-                        exception = ex
+            if response.status_code != 200:
+                logger.error(
+                    f"Failed to fetch post by ID {post_id} with status code: {response.status_code}"
+                )
+                return None
+
+            try:
+                text = response.text
+                guard_prefix = "])}while(1);</x>"
+                if text.startswith(guard_prefix):
+                    text = text[len(guard_prefix) :]
+                response_data = JSON.loads(text)
+            except Exception as ex:
+                logger.debug("Failed to parse response data as JSON")
+                logger.exception(ex)
+                exception = ex
 
         logger.debug("Request finished...")
 
@@ -91,4 +82,7 @@ class MediumApiService:
             )
             raise exception
 
-        return response_data
+        if response_data is None:
+            return None
+
+        return MediumPostDataResponse.model_validate(response_data)
