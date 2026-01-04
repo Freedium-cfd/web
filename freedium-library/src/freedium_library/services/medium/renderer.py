@@ -81,6 +81,7 @@ class PostMetadata:
     preview_image_id: str
     creator_name: str
     creator_id: str
+    creator_avatar_id: str | None
     collection_name: str | None
     reading_time: int
     first_published_at: int | None
@@ -548,9 +549,13 @@ class MediumMarkdownRenderer:
         # Get creator info from GraphQL structure
         creator_name = ""
         creator_id = ""
+        creator_avatar_id = None
         if post.creator:
             creator_name = post.creator.name or ""
             creator_id = post.creator.id or ""
+            # Use imageId as avatar ID if available
+            if post.creator.imageId:
+                creator_avatar_id = post.creator.imageId
 
         # Get collection name from GraphQL structure
         collection_name = None
@@ -577,6 +582,7 @@ class MediumMarkdownRenderer:
             preview_image_id=preview_image_id,
             creator_name=creator_name,
             creator_id=creator_id,
+            creator_avatar_id=creator_avatar_id,
             collection_name=collection_name,
             reading_time=reading_time,
             first_published_at=post.firstPublishedAt,
@@ -1205,8 +1211,31 @@ class MediumMarkdownRenderer:
         # Build metadata dictionary for YAML serialization
         metadata: dict[str, Any] = {
             "title": meta.title,
-            "author": meta.creator_name,
         }
+
+        # Handle author information with avatar
+        author_data: dict[str, Any] = {
+            "name": meta.creator_name,
+        }
+
+        # Add author avatar if available
+        if meta.creator_avatar_id:
+            avatar_urls = self._generate_image_urls(meta.creator_avatar_id, None, None)
+            avatar_medium_url = avatar_urls["medium"]  # type: ignore[index]
+
+            if self._use_base64_images:
+                # Base64 mode: embed avatar as data URI
+                avatar_src = await self._get_image_as_base64(avatar_medium_url)  # type: ignore[index]
+                if avatar_src is not None:
+                    author_data["avatar"] = avatar_src
+                else:
+                    # Fallback to URL if base64 encoding fails
+                    author_data["avatar"] = avatar_medium_url  # type: ignore[index]
+            else:
+                # Normal mode: use URL
+                author_data["avatar"] = avatar_medium_url  # type: ignore[index]
+
+        metadata["author"] = author_data
 
         if meta.subtitle:
             metadata["subtitle"] = meta.subtitle

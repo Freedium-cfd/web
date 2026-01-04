@@ -327,14 +327,38 @@ export const load: PageServerLoad = async ({ params }) => {
 			}
 		}
 
+		// Extract author information - handle both old string format and new object format
+		let author = {
+			name: "Unknown",
+			avatar: `https://ui-avatars.com/api/?name=Unknown&background=random`,
+			role: "Author",
+		};
+
+		if (metadata.author) {
+			if (typeof metadata.author === "string") {
+				// Old format: just author name string
+				author.name = metadata.author;
+				author.avatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(metadata.author)}&background=random`;
+			} else if (typeof metadata.author === "object" && metadata.author.name) {
+				// New format: author object with name and avatar
+				author.name = metadata.author.name;
+				if (metadata.author.avatar) {
+					author.avatar = metadata.author.avatar;
+				} else {
+					author.avatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(metadata.author.name)}&background=random`;
+				}
+			}
+		}
+
+		// Add reading time as role if available
+		if (metadata.reading_time) {
+			author.role = `${metadata.reading_time} min read`;
+		}
+
 		article = {
 			title: metadata.title || "Untitled",
 			subtitle: metadata.subtitle || undefined,
-			author: {
-				name: metadata.author || "Unknown",
-				avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(metadata.author || "Unknown")}&background=random`,
-				role: `${metadata.reading_time || 0} min read`,
-			},
+			author,
 			date: new Date().toISOString(),
 			postImage,
 			postImageZoom,
