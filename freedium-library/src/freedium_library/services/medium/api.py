@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import base64
 from typing import TYPE_CHECKING, Any
 
 from beartype import beartype
@@ -220,3 +221,54 @@ class MediumApiService:
             logger.error(f"Request failed for iframe {iframe_id}: {ex}")
             logger.exception(ex)
             return ""
+
+    @beartype
+    async def fetch_image_as_base64(self, image_url: str) -> str | None:
+        """
+        Fetch image from URL and encode as base64 data URI.
+
+        Uses the existing HTTP client to fetch the image, respecting proxy settings
+        and connection pooling. Automatically detects content type from response headers.
+
+        Args:
+            image_url: The URL of the image to fetch
+
+        Returns:
+            A complete data URI string (e.g., "data:image/jpeg;base64,...") or None if fetch fails
+        """
+        logger.debug(f"Fetching image as base64 from URL: {image_url}")
+
+        headers = {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
+            "Accept": "image/*,*/*;q=0.8",
+        }
+
+        try:
+            async with self.request as request:
+                response = await request.aget(image_url, headers=headers)
+
+                logger.debug(f"Image fetch response status code: {response.status_code}")
+
+                if response.status_code != 200:
+                    logger.warning(
+                        f"Failed to fetch image from {image_url}\n"
+                        f"Status code: {response.status_code}"
+                    )
+                    return None
+
+                # Get content type from response headers
+                content_type = response.headers.get("Content-Type", "image/jpeg")
+                # Handle cases where content type includes charset or other params
+                if ";" in content_type:
+                    content_type = content_type.split(";")[0].strip()
+
+                # Encode binary content as base64
+                b64_data = base64.b64encode(response.content).decode("utf-8")
+                data_uri = f"data:{content_type};base64,{b64_data}"
+
+                logger.debug(f"Successfully encoded image as base64 (size: {len(b64_data)} chars)")
+                return data_uri
+
+        except Exception as ex:
+            logger.warning(f"Request failed for image {image_url}: {ex}")
+            return None

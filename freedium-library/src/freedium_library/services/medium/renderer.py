@@ -17,6 +17,7 @@ from loguru import logger
 from freedium_library.utils.utils.utf_handler import UTFEncoding, UTFHandler
 
 if TYPE_CHECKING:
+    from .api import MediumApiService
     from .models import GraphQLPost
 
 # Type alias for Medium paragraph/markup dictionaries
@@ -381,14 +382,20 @@ class MediumMarkdownRenderer:
     code blocks, quotes, images, and embeds.
     """
 
-    __slots__ = ("_post_data", "_paragraphs", "_output", "_metadata", "_pos", "_api_service")
+    __slots__ = ("_post_data", "_paragraphs", "_output", "_metadata", "_pos", "_api_service", "_use_base64_images")
 
-    def __init__(self, post_data: GraphQLPost, api_service: Any | None = None) -> None:
+    def __init__(
+        self,
+        post_data: GraphQLPost,
+        api_service: MediumApiService,
+        use_base64_images: bool = True,
+    ) -> None:
         self._post_data = post_data
         self._output: list[str] = []
         self._pos = 0
         self._metadata: PostMetadata | None = None
         self._api_service = api_service
+        self._use_base64_images = use_base64_images
 
         # Extract paragraphs from GraphQL post data
         if post_data.content and post_data.content.bodyModel:
@@ -398,6 +405,20 @@ class MediumMarkdownRenderer:
             ]
         else:
             self._paragraphs = []
+
+    async def _get_image_as_base64(self, image_url: str) -> str | None:
+        """Fetch image from URL and encode as base64 data URI.
+
+        Uses the API service's HTTP client to fetch the image, respecting
+        proxy settings and connection pooling configured in the service.
+
+        Args:
+            image_url: The URL of the image to fetch
+
+        Returns:
+            The complete data URI string or None if fetch fails.
+        """
+        return await self._api_service.fetch_image_as_base64(image_url)
 
     def _extract_metadata(self) -> PostMetadata:
         """Extract metadata from GraphQL post data."""
@@ -519,7 +540,7 @@ class MediumMarkdownRenderer:
         self._output.append(text)
         self._output.append("")
 
-    def _render_image(self, paragraph: ParagraphDict) -> None:
+    async def _render_image(self, paragraph: ParagraphDict) -> None:
         """Render an image paragraph."""
         metadata = paragraph.get("metadata", {})
         image_id = metadata.get("id", "")
@@ -531,7 +552,17 @@ class MediumMarkdownRenderer:
         # Normalize quotes in alt text
         alt_text = _normalize_quotes(alt_text)
         img_url = f"https://miro.medium.com/v2/resize:fit:700/{image_id}"
-        self._output.append(f"![{alt_text}]({img_url})")
+
+        # Use base64 encoding if enabled
+        if self._use_base64_images:
+            img_src = await self._get_image_as_base64(img_url)
+            if img_src is None:
+                # Fallback to URL if base64 encoding fails
+                img_src = img_url
+        else:
+            img_src = img_url
+
+        self._output.append(f"![{alt_text}]({img_src})")
 
         # Add caption if present
         caption = paragraph.get("text")
@@ -541,7 +572,7 @@ class MediumMarkdownRenderer:
 
         self._output.append("")
 
-    def _render_image_row(self, start_pos: int) -> int:
+    async def _render_image_row(self, start_pos: int) -> int:
         """Render a row of images (OUTSET_ROW layout). Returns new position."""
         images: list[str] = []
         pos = start_pos
@@ -560,7 +591,17 @@ class MediumMarkdownRenderer:
             alt_text = metadata.get("alt", "")
             if image_id:
                 img_url = f"https://miro.medium.com/v2/resize:fit:700/{image_id}"
-                images.append(f"![{alt_text}]({img_url})")
+
+                # Use base64 encoding if enabled
+                if self._use_base64_images:
+                    img_src = await self._get_image_as_base64(img_url)
+                    if img_src is None:
+                        # Fallback to URL if base64 encoding fails
+                        img_src = img_url
+                else:
+                    img_src = img_url
+
+                images.append(f"![{alt_text}]({img_src})")
 
             pos += 1
 
@@ -911,12 +952,12 @@ class MediumMarkdownRenderer:
         elif para_type == ParagraphType.IMG:
             layout = paragraph.get("layout", "")
             if layout == "OUTSET_ROW":
-                return self._render_image_row(pos) + 1
+                return await self._render_image_row(pos) + 1
             elif layout == "FULL_WIDTH":
                 logger.warning("IMG FULL_WIDTH layout not fully supported")
-                self._render_image(paragraph)
+                await self._render_image(paragraph)
             else:
-                self._render_image(paragraph)
+                await self._render_image(paragraph)
         elif para_type == ParagraphType.ULI:
             return self._render_unordered_list(pos) + 1
         elif para_type == ParagraphType.OLI:
