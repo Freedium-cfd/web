@@ -29,6 +29,7 @@ export interface Article {
 	url?: string;
 	postImage?: string;
 	postImageZoom?: string;
+	postImageCaption?: string;
 	author: Author;
 	tableOfContents?: TableOfContentsItem[];
 }

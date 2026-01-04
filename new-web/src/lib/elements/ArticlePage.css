@@ -93,6 +93,23 @@
 	@apply mx-auto my-6 rounded-lg;
 }
 
+/* Image figures with captions */
+.prose-image-figure {
+	@apply my-6 text-center;
+}
+
+.prose-image-figure picture {
+	@apply block;
+}
+
+.prose-image-figure img {
+	@apply mx-auto rounded-lg my-0;
+}
+
+.prose-image-caption {
+	@apply mt-3 text-sm italic text-gray-600 dark:text-gray-400;
+}
+
 /* Inline elements */
 .prose strong {
 	@apply font-bold text-gray-900 dark:text-gray-100;

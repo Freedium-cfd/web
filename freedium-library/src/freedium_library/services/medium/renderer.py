@@ -440,7 +440,7 @@ class MediumMarkdownRenderer:
 
         return urls
 
-    def _render_responsive_picture(self, metadata: dict[str, Any], alt_text: str) -> str:
+    def _render_responsive_picture(self, metadata: dict[str, Any], alt_text: str, caption: str = "") -> str:
         """Render a responsive picture element in HTML format for normal mode.
 
         Generates HTML picture element with:
@@ -449,10 +449,12 @@ class MediumMarkdownRenderer:
         - HD Zoom: 4000px version via data-zoom-src for medium-zoom library
         - Width/height attributes for layout shift prevention
         - Lazy loading and prose styling
+        - Caption via data-caption for medium-zoom template
 
         Args:
             metadata: Image metadata dict with 'id', 'originalWidth', 'originalHeight'
             alt_text: Alternative text for accessibility
+            caption: Optional caption text for medium-zoom zoom view
 
         Returns:
             HTML string with picture element
@@ -467,13 +469,17 @@ class MediumMarkdownRenderer:
         urls = self._generate_image_urls(image_id, original_width, original_height)
 
         alt_escaped = self._escape_html_attribute(alt_text)
+        caption_escaped = self._escape_html_attribute(caption) if caption else ""
         width = urls.get("width", 700)
         height = urls.get("height", 525)
+
+        # Add data-caption attribute if caption exists
+        caption_attr = f' data-caption="{caption_escaped}"' if caption else ""
 
         picture_html = f'''<picture>
   <source media="(max-width: 768px)" srcset="{urls['medium']} 1x">
   <source media="(min-width: 769px)" srcset="{urls['original']} 1x">
-  <img src="{urls['medium']}" alt="{alt_escaped}" width="{width}" height="{height}" loading="lazy" data-zoom-src="{urls['zoom']}" class="prose-image"/>
+  <img src="{urls['medium']}" alt="{alt_escaped}" width="{width}" height="{height}" loading="lazy" data-zoom-src="{urls['zoom']}" class="prose-image"{caption_attr}/>
 </picture>'''
 
         return picture_html
@@ -485,6 +491,7 @@ class MediumMarkdownRenderer:
         medium_src: str,
         original_url: str,
         zoom_url: str,
+        caption: str = "",
     ) -> str:
         """Render a responsive picture element with embedded medium + linked original and zoom.
 
@@ -498,6 +505,7 @@ class MediumMarkdownRenderer:
             medium_src: Base64 data URI or URL for 700px version
             original_url: URL for 2000px full-resolution version
             zoom_url: URL for 4000px high-definition zoom version
+            caption: Optional caption text for medium-zoom zoom view
 
         Returns:
             HTML string with picture element
@@ -514,11 +522,15 @@ class MediumMarkdownRenderer:
             height = 525
 
         alt_escaped = self._escape_html_attribute(alt_text)
+        caption_escaped = self._escape_html_attribute(caption) if caption else ""
+
+        # Add data-caption attribute if caption exists
+        caption_attr = f' data-caption="{caption_escaped}"' if caption else ""
 
         picture_html = f'''<picture>
   <source media="(max-width: 768px)" srcset="{medium_src} 1x">
   <source media="(min-width: 769px)" srcset="{original_url} 1x">
-  <img src="{medium_src}" alt="{alt_escaped}" width="{width}" height="{height}" loading="lazy" data-zoom-src="{zoom_url}" class="prose-image"/>
+  <img src="{medium_src}" alt="{alt_escaped}" width="{width}" height="{height}" loading="lazy" data-zoom-src="{zoom_url}" class="prose-image"{caption_attr}/>
 </picture>'''
 
         return picture_html
@@ -536,6 +548,26 @@ class MediumMarkdownRenderer:
             The complete data URI string or None if fetch fails.
         """
         return await self._api_service.fetch_image_as_base64(image_url)
+
+    def _get_preview_image_caption(self) -> str:
+        """Extract caption text for the preview image if it exists in paragraphs."""
+        if not self._metadata or not self._metadata.preview_image_id:
+            return ""
+
+        preview_id = self._metadata.preview_image_id
+
+        # Look for image paragraph with matching ID
+        for para in self._paragraphs:
+            if para.get("type") == ParagraphType.IMG:
+                img_meta = para.get("metadata", {})
+                if img_meta and img_meta.get("id") == preview_id:
+                    # Found the preview image paragraph, get its caption
+                    caption = para.get("text")
+                    if caption:
+                        return self._render_text(caption, para.get("markups", []))
+                    break
+
+        return ""
 
     def _extract_metadata(self) -> PostMetadata:
         """Extract metadata from GraphQL post data."""
@@ -628,7 +660,7 @@ class MediumMarkdownRenderer:
                 # Clear truncated subtitle
                 object.__setattr__(meta, "subtitle", "")
 
-        # Skip preview image
+        # Skip preview image (but caption will still be rendered separately)
         if para_type == ParagraphType.IMG:
             img_meta = paragraph.get("metadata", {})
             if img_meta and img_meta.get("id") == meta.preview_image_id:
@@ -669,6 +701,7 @@ class MediumMarkdownRenderer:
         - Mobile: 700px version
         - Desktop: original resolution version
         - Lazy loading and layout shift prevention
+        - Caption stored in data-caption for medium-zoom
         """
         metadata = paragraph.get("metadata", {})
         image_id = metadata.get("id", "")
@@ -680,7 +713,13 @@ class MediumMarkdownRenderer:
         # Normalize quotes in alt text
         alt_text = _normalize_quotes(alt_text)
 
-        # Generate responsive picture element
+        # Extract and render caption text if present
+        caption = paragraph.get("text")
+        caption_text = ""
+        if caption:
+            caption_text = self._render_text(caption, paragraph.get("markups", []))
+
+        # Generate responsive picture element with caption
         if self._use_base64_images:
             # Base64 mode: embed only 700px as data URI, link original as URL, link zoom as URL
             medium_url = f"https://miro.medium.com/v2/resize:fit:700/{image_id}"
@@ -692,20 +731,13 @@ class MediumMarkdownRenderer:
             original_url = f"https://miro.medium.com/v2/resize:fit:2000/{image_id}"
             zoom_url = f"https://miro.medium.com/v2/resize:fit:4000/{image_id}"
             picture_html = self._render_responsive_picture_base64(
-                metadata, alt_text, medium_src, original_url, zoom_url
+                metadata, alt_text, medium_src, original_url, zoom_url, caption_text
             )
         else:
             # Normal mode: both URLs linked (no base64)
-            picture_html = self._render_responsive_picture(metadata, alt_text)
+            picture_html = self._render_responsive_picture(metadata, alt_text, caption_text)
 
         self._output.append(picture_html)
-
-        # Add caption if present
-        caption = paragraph.get("text")
-        if caption:
-            caption_text = self._render_text(caption, paragraph.get("markups", []))
-            self._output.append(f"*{caption_text}*")
-
         self._output.append("")
 
     async def _render_image_row(self, start_pos: int) -> int:
@@ -734,6 +766,12 @@ class MediumMarkdownRenderer:
             if image_id:
                 alt_text = _normalize_quotes(alt_text)
 
+                # Extract and render caption text if present
+                caption = para.get("text")
+                caption_text = ""
+                if caption:
+                    caption_text = self._render_text(caption, para.get("markups", []))
+
                 # Generate responsive picture element for each image
                 if self._use_base64_images:
                     # Base64 mode: embed only 700px as data URI, link original and zoom as URLs
@@ -746,11 +784,11 @@ class MediumMarkdownRenderer:
                     original_url = f"https://miro.medium.com/v2/resize:fit:2000/{image_id}"
                     zoom_url = f"https://miro.medium.com/v2/resize:fit:4000/{image_id}"
                     picture_html = self._render_responsive_picture_base64(
-                        metadata, alt_text, medium_src, original_url, zoom_url
+                        metadata, alt_text, medium_src, original_url, zoom_url, caption_text
                     )
                 else:
                     # Normal mode: both URLs linked (no base64)
-                    picture_html = self._render_responsive_picture(metadata, alt_text)
+                    picture_html = self._render_responsive_picture(metadata, alt_text, caption_text)
 
                 images.append(picture_html)
 
@@ -1089,6 +1127,7 @@ class MediumMarkdownRenderer:
         para_type = paragraph.get("type", "")
 
         # Skip title/subtitle/preview image in first few paragraphs
+        # Note: Captions are stored in data-caption attribute, not rendered inline
         if self._should_skip_paragraph(paragraph, pos):
             return pos + 1
 
@@ -1251,6 +1290,9 @@ class MediumMarkdownRenderer:
             original_url = urls["original"]  # type: ignore[index]
             zoom_url = urls["zoom"]  # type: ignore[index]
 
+            # Get caption for preview image
+            preview_caption = self._get_preview_image_caption()
+
             if self._use_base64_images:
                 # Base64 mode: embed medium size, link original and zoom
                 medium_src = await self._get_image_as_base64(medium_url)  # type: ignore[index]
@@ -1258,18 +1300,24 @@ class MediumMarkdownRenderer:
                     medium_src = medium_url  # type: ignore[index]
 
                 # Store as JSON for responsive image data
-                metadata["preview_image"] = {
+                preview_image_data: dict[str, Any] = {
                     "medium": medium_src,
                     "original": original_url,  # type: ignore[index]
                     "zoom": zoom_url,  # type: ignore[index]
                 }
+                if preview_caption:
+                    preview_image_data["caption"] = preview_caption
+                metadata["preview_image"] = preview_image_data
             else:
                 # Normal mode: both sizes linked
-                metadata["preview_image"] = {
+                preview_image_data = {
                     "medium": medium_url,  # type: ignore[index]
                     "original": original_url,  # type: ignore[index]
                     "zoom": zoom_url,  # type: ignore[index]
                 }
+                if preview_caption:
+                    preview_image_data["caption"] = preview_caption
+                metadata["preview_image"] = preview_image_data
 
         metadata["reading_time"] = meta.reading_time
         metadata["url"] = meta.medium_url

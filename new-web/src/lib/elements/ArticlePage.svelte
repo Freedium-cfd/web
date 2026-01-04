@@ -157,6 +157,7 @@
 							<ImageZoom
 								src={article.postImage}
 								zoomSrc={article.postImageZoom}
+								caption={article.postImageCaption}
 								alt="Post cover image"
 								class="object-cover w-full h-auto min-h-96"
 							/>

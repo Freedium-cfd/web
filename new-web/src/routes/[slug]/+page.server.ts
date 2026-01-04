@@ -316,6 +316,7 @@ export const load: PageServerLoad = async ({ params }) => {
 		// Extract preview image - handle both responsive object and simple string formats
 		let postImage: string | null = null;
 		let postImageZoom: string | null = null;
+		let postImageCaption: string | null = null;
 		if (metadata.preview_image) {
 			if (typeof metadata.preview_image === "string") {
 				// Simple string format (backward compatibility or base64 data URI)
@@ -324,6 +325,7 @@ export const load: PageServerLoad = async ({ params }) => {
 				// Responsive object format - use medium for display, zoom for HD
 				postImage = metadata.preview_image.medium;
 				postImageZoom = metadata.preview_image.zoom || null;
+				postImageCaption = metadata.preview_image.caption || null;
 			}
 		}
 
@@ -362,6 +364,7 @@ export const load: PageServerLoad = async ({ params }) => {
 			date: new Date().toISOString(),
 			postImage,
 			postImageZoom,
+			postImageCaption: postImageCaption || undefined,
 			url: metadata.url || null,
 			tableOfContents,
 		};
