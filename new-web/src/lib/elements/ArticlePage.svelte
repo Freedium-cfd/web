@@ -156,6 +156,7 @@
 						{#if article.postImage}
 							<ImageZoom
 								src={article.postImage}
+								zoomSrc={article.postImageZoom}
 								alt="Post cover image"
 								class="object-cover w-full h-auto min-h-96"
 							/>
@@ -163,6 +164,9 @@
 						<header class="p-6 bg-gray-50 dark:bg-zinc-800">
 							<p class="mb-2 text-gray-600 dark:text-gray-400">{formatDate(article.date)}</p>
 							<h1 class="mb-4 text-4xl font-bold text-gray-900 dark:text-white">{article.title}</h1>
+							{#if article.subtitle}
+								<p class="mb-4 text-xl text-gray-700 dark:text-gray-300">{article.subtitle}</p>
+							{/if}
 							<div class="flex items-center">
 								<img src={article.author.avatar} alt="" class="w-12 h-12 mr-4 rounded-full" />
 								<div>

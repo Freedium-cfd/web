@@ -5,6 +5,8 @@
 	export let src = undefined;
 	/** @type {string | undefined} */
 	export let alt = undefined;
+	/** @type {string | undefined} */
+	export let zoomSrc = undefined;
 	/** @type {import('medium-zoom').ZoomOptions | undefined} */
 	export let options = undefined;
 
@@ -38,4 +40,4 @@
 	}
 </script>
 
-<img {src} {alt} {...$$restProps} use:attachZoom />
+<img {src} {alt} data-zoom-src={zoomSrc} {...$$restProps} use:attachZoom />

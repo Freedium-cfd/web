@@ -14,6 +14,7 @@ import { getIconData, iconToSVG } from "@iconify/utils";
 import heroiconsData from "@iconify/json/json/heroicons.json";
 import rehypeExternalLinks, { type Options as RehypeExternalLinksOptions } from "rehype-external-links";
 import rehypeSlug from "rehype-slug";
+import FrontMatter from "front-matter";
 
 // Helper to get icon as HAST SVG node
 function getIconHast(iconName: string, customAttrs: Record<string, string> = {}): Element | null {
@@ -296,44 +297,14 @@ export const load: PageServerLoad = async ({ params }) => {
 		};
 	}
 
-	// Parse frontmatter to extract metadata
-	const frontmatterMatch = renderResult.markdown.match(/^---\n([\s\S]*?)\n---\n([\s\S]*)$/);
+	// Parse frontmatter to extract metadata using front-matter library
 	let article = null;
 	let markdownContent = renderResult.markdown;
 
-	if (frontmatterMatch) {
-		const yamlContent = frontmatterMatch[1];
-		markdownContent = frontmatterMatch[2];
-
-		// Simple YAML parser for our use case
-		const metadata: Record<string, any> = {};
-		const lines = yamlContent.split('\n');
-
-		for (const line of lines) {
-			const match = line.match(/^(\w+):\s*(.+)$/);
-			if (match) {
-				const [, key, value] = match;
-				// Handle quoted strings
-				if (value.startsWith('"') && value.endsWith('"')) {
-					metadata[key] = value.slice(1, -1);
-				}
-				// Handle arrays and objects (JSON format)
-				else if (value.startsWith('[') || value.startsWith('{')) {
-					try {
-						metadata[key] = JSON.parse(value);
-					} catch {
-						metadata[key] = value;
-					}
-				}
-				// Handle numbers
-				else if (!isNaN(Number(value))) {
-					metadata[key] = Number(value);
-				}
-				else {
-					metadata[key] = value;
-				}
-			}
-		}
+	try {
+		const parsed = FrontMatter(renderResult.markdown);
+		const metadata = parsed.attributes as Record<string, any>;
+		markdownContent = parsed.body;
 
 		// Use table_of_contents from frontmatter
 		let tableOfContents: Array<{ id: string; title: string }> = [];
@@ -342,18 +313,37 @@ export const load: PageServerLoad = async ({ params }) => {
 			tableOfContents = metadata.table_of_contents;
 		}
 
+		// Extract preview image - handle both responsive object and simple string formats
+		let postImage: string | null = null;
+		let postImageZoom: string | null = null;
+		if (metadata.preview_image) {
+			if (typeof metadata.preview_image === "string") {
+				// Simple string format (backward compatibility or base64 data URI)
+				postImage = metadata.preview_image;
+			} else if (typeof metadata.preview_image === "object" && metadata.preview_image.medium) {
+				// Responsive object format - use medium for display, zoom for HD
+				postImage = metadata.preview_image.medium;
+				postImageZoom = metadata.preview_image.zoom || null;
+			}
+		}
+
 		article = {
 			title: metadata.title || "Untitled",
+			subtitle: metadata.subtitle || undefined,
 			author: {
 				name: metadata.author || "Unknown",
 				avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(metadata.author || "Unknown")}&background=random`,
 				role: `${metadata.reading_time || 0} min read`,
 			},
 			date: new Date().toISOString(),
-			postImage: null,
+			postImage,
+			postImageZoom,
 			url: metadata.url || null,
 			tableOfContents,
 		};
+	} catch (error) {
+		// No frontmatter found or parsing error - use markdown as-is
+		console.warn("Failed to parse frontmatter:", error);
 	}
 
 	try {

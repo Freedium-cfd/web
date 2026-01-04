@@ -24,9 +24,11 @@ export interface TableOfContentsItem {
  */
 export interface Article {
 	title: string;
+	subtitle?: string;
 	date: string;
 	url?: string;
 	postImage?: string;
+	postImageZoom?: string;
 	author: Author;
 	tableOfContents?: TableOfContentsItem[];
 }
@@ -59,5 +61,6 @@ export interface ArticlePageData {
 	content: string | null;
 	markdown: string | null;
 	article: Article | null;
+	postImageZoom: string | null;
 	error: ArticleError | null;
 }

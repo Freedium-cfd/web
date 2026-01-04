@@ -12,6 +12,7 @@ import difflib
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any, Final
 
+import yaml
 from loguru import logger
 
 from freedium_library.utils.utils.utf_handler import UTFEncoding, UTFHandler
@@ -121,20 +122,6 @@ def _normalize_quotes(text: str) -> str:
     for smart_quote, ascii_quote in _QUOTE_MAP.items():
         text = text.replace(smart_quote, ascii_quote)
     return text
-
-
-def _escape_yaml_string(text: str) -> str:
-    """
-    Escape special characters for YAML string values.
-
-    Normalizes smart quotes and escapes the result for use in YAML double-quoted strings.
-    """
-    if not text:
-        return text
-    # Normalize quotes first
-    text = _normalize_quotes(text)
-    # Escape double quotes for YAML
-    return text.replace('"', '\\"')
 
 
 def _unescape_markdown_url(url: str) -> str:
@@ -406,6 +393,135 @@ class MediumMarkdownRenderer:
         else:
             self._paragraphs = []
 
+    def _escape_html_attribute(self, text: str) -> str:
+        """Escape text for use in HTML attributes to prevent XSS.
+
+        Escapes: &, ", ', <, >
+        """
+        if not text:
+            return text
+        return (
+            text.replace("&", "&amp;")
+            .replace('"', "&quot;")
+            .replace("'", "&#39;")
+            .replace("<", "&lt;")
+            .replace(">", "&gt;")
+        )
+
+    def _generate_image_urls(
+        self, image_id: str, original_width: int | None, original_height: int | None
+    ) -> dict[str, int | str]:
+        """Generate image URLs for different sizes.
+
+        Returns dict with:
+        - 'medium': 700px version (mobile/default)
+        - 'original': 2000px version (desktop)
+        - 'zoom': 4000px version (high-definition zoom for medium-zoom library)
+        - 'width': Width for HTML attributes
+        - 'height': Height for HTML attributes
+        """
+        base_url = "https://miro.medium.com/v2/resize:fit"
+
+        urls: dict[str, int | str] = {
+            "medium": f"{base_url}:700/{image_id}",
+            "original": f"{base_url}:2000/{image_id}",
+            "zoom": f"{base_url}:4000/{image_id}",
+        }
+
+        # Store dimensions for HTML attributes (prevent Cumulative Layout Shift)
+        if original_width and original_height:
+            urls["width"] = original_width
+            urls["height"] = original_height
+        else:
+            # Fallback to 4:3 aspect ratio if dimensions unavailable
+            urls["width"] = 700
+            urls["height"] = 525
+
+        return urls
+
+    def _render_responsive_picture(self, metadata: dict[str, Any], alt_text: str) -> str:
+        """Render a responsive picture element in HTML format for normal mode.
+
+        Generates HTML picture element with:
+        - Mobile: 700px version
+        - Desktop: 2000px version
+        - HD Zoom: 4000px version via data-zoom-src for medium-zoom library
+        - Width/height attributes for layout shift prevention
+        - Lazy loading and prose styling
+
+        Args:
+            metadata: Image metadata dict with 'id', 'originalWidth', 'originalHeight'
+            alt_text: Alternative text for accessibility
+
+        Returns:
+            HTML string with picture element
+        """
+        image_id = metadata.get("id", "")
+        if not image_id:
+            return ""
+
+        original_width = metadata.get("originalWidth")
+        original_height = metadata.get("originalHeight")
+
+        urls = self._generate_image_urls(image_id, original_width, original_height)
+
+        alt_escaped = self._escape_html_attribute(alt_text)
+        width = urls.get("width", 700)
+        height = urls.get("height", 525)
+
+        picture_html = f'''<picture>
+  <source media="(max-width: 768px)" srcset="{urls['medium']} 1x">
+  <source media="(min-width: 769px)" srcset="{urls['original']} 1x">
+  <img src="{urls['medium']}" alt="{alt_escaped}" width="{width}" height="{height}" loading="lazy" data-zoom-src="{urls['zoom']}" class="prose-image"/>
+</picture>'''
+
+        return picture_html
+
+    def _render_responsive_picture_base64(
+        self,
+        metadata: dict[str, Any],
+        alt_text: str,
+        medium_src: str,
+        original_url: str,
+        zoom_url: str,
+    ) -> str:
+        """Render a responsive picture element with embedded medium + linked original and zoom.
+
+        Used when base64 embedding is enabled. Only the 700px version is embedded
+        as a data URI to balance offline capability with payload size. The original
+        version is linked for desktop users. The zoom version loads for high-DPI zoom views.
+
+        Args:
+            metadata: Image metadata dict with 'id', 'originalWidth', 'originalHeight'
+            alt_text: Alternative text for accessibility
+            medium_src: Base64 data URI or URL for 700px version
+            original_url: URL for 2000px full-resolution version
+            zoom_url: URL for 4000px high-definition zoom version
+
+        Returns:
+            HTML string with picture element
+        """
+        original_width = metadata.get("originalWidth")
+        original_height = metadata.get("originalHeight")
+
+        # Generate dimensions for layout shift prevention
+        if original_width and original_height:
+            width = original_width
+            height = original_height
+        else:
+            width = 700
+            height = 525
+
+        alt_escaped = self._escape_html_attribute(alt_text)
+
+        picture_html = f'''<picture>
+  <source media="(max-width: 768px)" srcset="{medium_src} 1x">
+  <source media="(min-width: 769px)" srcset="{original_url} 1x">
+  <img src="{medium_src}" alt="{alt_escaped}" width="{width}" height="{height}" loading="lazy" data-zoom-src="{zoom_url}" class="prose-image"/>
+</picture>'''
+
+        return picture_html
+
     async def _get_image_as_base64(self, image_url: str) -> str | None:
         """Fetch image from URL and encode as base64 data URI.
 
@@ -541,7 +657,13 @@ class MediumMarkdownRenderer:
         self._output.append("")
 
     async def _render_image(self, paragraph: ParagraphDict) -> None:
-        """Render an image paragraph."""
+        """Render an image paragraph as a responsive picture element.
+
+        Generates HTML picture element with:
+        - Mobile: 700px version
+        - Desktop: original resolution version
+        - Lazy loading and layout shift prevention
+        """
         metadata = paragraph.get("metadata", {})
         image_id = metadata.get("id", "")
         alt_text = metadata.get("alt", "")
@@ -551,18 +673,26 @@ class MediumMarkdownRenderer:
 
         # Normalize quotes in alt text
         alt_text = _normalize_quotes(alt_text)
-        img_url = f"https://miro.medium.com/v2/resize:fit:700/{image_id}"
 
-        # Use base64 encoding if enabled
+        # Generate responsive picture element
         if self._use_base64_images:
-            img_src = await self._get_image_as_base64(img_url)
-            if img_src is None:
+            # Base64 mode: embed only 700px as data URI, link original as URL, link zoom as URL
+            medium_url = f"https://miro.medium.com/v2/resize:fit:700/{image_id}"
+            medium_src = await self._get_image_as_base64(medium_url)
+            if medium_src is None:
                 # Fallback to URL if base64 encoding fails
-                img_src = img_url
-        else:
-            img_src = img_url
+                medium_src = medium_url
 
-        self._output.append(f"![{alt_text}]({img_src})")
+            original_url = f"https://miro.medium.com/v2/resize:fit:2000/{image_id}"
+            zoom_url = f"https://miro.medium.com/v2/resize:fit:4000/{image_id}"
+            picture_html = self._render_responsive_picture_base64(
+                metadata, alt_text, medium_src, original_url, zoom_url
+            )
+        else:
+            # Normal mode: both URLs linked (no base64)
+            picture_html = self._render_responsive_picture(metadata, alt_text)
+
+        self._output.append(picture_html)
 
         # Add caption if present
         caption = paragraph.get("text")
@@ -573,7 +703,12 @@ class MediumMarkdownRenderer:
         self._output.append("")
 
     async def _render_image_row(self, start_pos: int) -> int:
-        """Render a row of images (OUTSET_ROW layout). Returns new position."""
+        """Render a row of images (OUTSET_ROW layout) with responsive pictures.
+
+        Renders each image as a responsive picture element with mobile and desktop versions.
+
+        Returns new position to continue processing from.
+        """
         images: list[str] = []
         pos = start_pos
 
@@ -589,19 +724,29 @@ class MediumMarkdownRenderer:
             metadata = para.get("metadata", {})
             image_id = metadata.get("id", "")
             alt_text = metadata.get("alt", "")
+
             if image_id:
-                img_url = f"https://miro.medium.com/v2/resize:fit:700/{image_id}"
+                alt_text = _normalize_quotes(alt_text)
 
-                # Use base64 encoding if enabled
+                # Generate responsive picture element for each image
                 if self._use_base64_images:
-                    img_src = await self._get_image_as_base64(img_url)
-                    if img_src is None:
+                    # Base64 mode: embed only 700px as data URI, link original and zoom as URLs
+                    medium_url = f"https://miro.medium.com/v2/resize:fit:700/{image_id}"
+                    medium_src = await self._get_image_as_base64(medium_url)
+                    if medium_src is None:
                         # Fallback to URL if base64 encoding fails
-                        img_src = img_url
-                else:
-                    img_src = img_url
+                        medium_src = medium_url
 
-                images.append(f"![{alt_text}]({img_src})")
+                    original_url = f"https://miro.medium.com/v2/resize:fit:2000/{image_id}"
+                    zoom_url = f"https://miro.medium.com/v2/resize:fit:4000/{image_id}"
+                    picture_html = self._render_responsive_picture_base64(
+                        metadata, alt_text, medium_src, original_url, zoom_url
+                    )
+                else:
+                    # Normal mode: both URLs linked (no base64)
+                    picture_html = self._render_responsive_picture(metadata, alt_text)
+
+                images.append(picture_html)
 
             pos += 1
 
@@ -1057,35 +1202,66 @@ class MediumMarkdownRenderer:
         meta = self._metadata
         content = await self.render()
 
-        # Build frontmatter
-        frontmatter_lines = [
-            "---",
-            f"title: \"{_escape_yaml_string(meta.title)}\"",
-            f"author: \"{_escape_yaml_string(meta.creator_name)}\"",
-        ]
+        # Build metadata dictionary for YAML serialization
+        metadata: dict[str, Any] = {
+            "title": meta.title,
+            "author": meta.creator_name,
+        }
+
+        if meta.subtitle:
+            metadata["subtitle"] = meta.subtitle
 
         if meta.collection_name:
-            frontmatter_lines.append(f"publication: \"{_escape_yaml_string(meta.collection_name)}\"")
+            metadata["publication"] = meta.collection_name
 
-        frontmatter_lines.append(f"reading_time: {meta.reading_time}")
-        frontmatter_lines.append(f"url: \"{_escape_yaml_string(meta.medium_url)}\"")
+        # Handle preview image: generate responsive sizes like regular images
+        if meta.preview_image_id:
+            # Generate multiple image sizes using same logic as article images
+            urls = self._generate_image_urls(meta.preview_image_id, None, None)
+            medium_url = urls["medium"]  # type: ignore[index]
+            original_url = urls["original"]  # type: ignore[index]
+            zoom_url = urls["zoom"]  # type: ignore[index]
+
+            if self._use_base64_images:
+                # Base64 mode: embed medium size, link original and zoom
+                medium_src = await self._get_image_as_base64(medium_url)  # type: ignore[index]
+                if medium_src is None:
+                    medium_src = medium_url  # type: ignore[index]
+
+                # Store as JSON for responsive image data
+                metadata["preview_image"] = {
+                    "medium": medium_src,
+                    "original": original_url,  # type: ignore[index]
+                    "zoom": zoom_url,  # type: ignore[index]
+                }
+            else:
+                # Normal mode: both sizes linked
+                metadata["preview_image"] = {
+                    "medium": medium_url,  # type: ignore[index]
+                    "original": original_url,  # type: ignore[index]
+                    "zoom": zoom_url,  # type: ignore[index]
+                }
+
+        metadata["reading_time"] = meta.reading_time
+        metadata["url"] = meta.medium_url
 
         if meta.tags:
-            escaped_tags = [_escape_yaml_string(tag) for tag in meta.tags]
-            tags_str = ", ".join(f'"{tag}"' for tag in escaped_tags)
-            frontmatter_lines.append(f"tags: [{tags_str}]")
+            metadata["tags"] = meta.tags
 
         # Add table of contents
         toc = self._extract_table_of_contents()
         if toc:
-            import json
-            toc_json = json.dumps(toc)
-            frontmatter_lines.append(f"table_of_contents: {toc_json}")
+            metadata["table_of_contents"] = toc
 
-        frontmatter_lines.append("---")
-        frontmatter_lines.append("")
+        # Serialize to YAML with proper formatting
+        frontmatter_yaml = yaml.dump(
+            metadata,
+            default_flow_style=False,
+            allow_unicode=True,
+            sort_keys=False,
+        )
 
-        frontmatter = "\n".join(frontmatter_lines)
+        frontmatter = f"---\n{frontmatter_yaml}---\n"
 
         return frontmatter + content
 

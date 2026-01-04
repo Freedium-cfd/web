@@ -12,8 +12,9 @@ export function initializeImageZoom(): void {
 		});
 	}
 
-	// Find all images in the article prose content
-	const images = document.querySelectorAll<HTMLImageElement>('.prose img');
+	// Find all zoomable images (both preview image and article prose images)
+	// .prose-image class is added to all img elements that should support zoom
+	const images = document.querySelectorAll<HTMLImageElement>('.prose-image');
 
 	// Attach zoom to each image
 	images.forEach((img) => {
