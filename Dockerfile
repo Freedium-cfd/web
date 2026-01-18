@@ -3,7 +3,8 @@ FROM python:3.12.3
 ENV DEBIAN_FRONTEND=noninteractive
 
 ENV POETRY_NO_INTERACTION=1 \
-    POETRY_CACHE_DIR=/tmp/poetry_cache
+    POETRY_CACHE_DIR=/tmp/poetry_cache \
+    PLAYWRIGHT_BROWSERS_PATH=/opt/playwright
 # POETRY_VIRTUALENVS_IN_PROJECT=1 \
 # POETRY_VIRTUALENVS_CREATE=true \
 
@@ -27,6 +28,10 @@ COPY ./web ./web
 WORKDIR /app/web
 
 RUN --mount=type=cache,target=/tmp/poetry_cache poetry install --without dev --only main --no-ansi
+
+RUN playwright install --with-deps chromium
+
+RUN chmod -R 777 /opt/playwright
 
 RUN apt install -y curl
 

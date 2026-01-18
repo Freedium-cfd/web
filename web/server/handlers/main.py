@@ -1,8 +1,12 @@
-from fastapi import Request
+from fastapi import Request, Response
 from fastapi.responses import HTMLResponse, JSONResponse
 from html5lib import serialize  # type: ignore
 from html5lib.html5parser import parse  # type: ignore
 from loguru import logger
+
+# --- NEW IMPORTS ---
+from playwright.async_api import async_playwright
+# -------------------
 
 from server import config
 from server.handlers.iframe import iframe_proxy
@@ -12,6 +16,64 @@ from server.handlers.post import render_homepage, render_medium_post_link
 from server.services.jinja import base_template, main_template
 from server.utils.logger_trace import trace
 
+# 1. The PDF Renderer
+@trace
+async def render_pdf(path: str, request: Request):
+    """
+    Generates a 'Ctrl+P' style PDF using Headless Chrome.
+    """
+    path = path.removeprefix("/")
+    
+    query_params = request.query_params
+    redis = "no-redis" not in query_params
+    db_cache = "no-db-cache" not in query_params
+
+    # Fetch HTML content
+    response = await render_medium_post_link(path, db_cache, redis)
+
+    if isinstance(response, HTMLResponse):
+        html_content = response.body.decode("utf-8")
+
+        # CSS to clean up the PDF (Hide Navbar, etc.)
+        print_css = """
+        <style>
+            @media print {
+                nav, footer, .search-bar, .report-problem, button, iframe, .exclude-from-pdf { 
+                    display: none !important; 
+                }
+                body { background-color: white !important; margin: 0; }
+                a { text-decoration: none !important; color: black !important; }
+                pre, blockquote { page-break-inside: avoid; }
+            }
+        </style>
+        """
+        html_content += print_css
+
+        # Render with Playwright
+        async with async_playwright() as p:
+            browser = await p.chromium.launch(headless=True)
+            context = await browser.new_context()
+            page = await context.new_page()
+
+            # Load HTML and wait for images/JS
+            await page.set_content(html_content, wait_until="networkidle")
+
+            pdf_bytes = await page.pdf(
+                format="A4",
+                print_background=True, # Keeps syntax highlighting colors
+                margin={"top": "15mm", "bottom": "15mm", "left": "15mm", "right": "15mm"}
+            )
+
+            await browser.close()
+
+        # Return PDF
+        filename = path.strip("/").replace("/", "_") or "article"
+        return Response(
+            content=pdf_bytes,
+            media_type="application/pdf",
+            headers={"Content-Disposition": f"attachment; filename={filename}.pdf"}
+        )
+    return response
 
 @trace
 async def route_processing(path: str, request: Request):
@@ -61,10 +123,17 @@ async def main_page():
     serialized_template = serialize(parsed_template, encoding="utf-8")
     return HTMLResponse(serialized_template)
 
-
 def register_main_router(app):
     app.add_api_route(path="/delete-from-cache", endpoint=delete_from_cache, methods=["POST"])
     app.add_api_route(path="/report-problem", endpoint=report_problem, methods=["POST"])
+    
+    app.add_api_route(
+        path="/render_pdf/{path:path}",
+        endpoint=render_pdf,
+        methods=["GET"],
+        tags=["pdf"],
+    )
+
     app.add_api_route(
         path="/{path:path}",
         endpoint=route_processing,

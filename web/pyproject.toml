@@ -23,7 +23,7 @@ xkcdpass = "1.19.3"
 loguru = "0.6.0"
 anyio = "<=4.0.0"
 pydantic-settings = "^2.5.2"
-
+playwright = "^1.57.0"
 
 [tool.poetry.group.dev.dependencies]
 djlint = "^1.35.2"
