@@ -5,6 +5,7 @@
   import PayButtons from './PayButtons.svelte';
   import ExtensionsButton from './ExtensionsButton.svelte';
   import SearchDialog from './SearchDialog.svelte';
+  import SupportDialog from './SupportDialog.svelte';
   import Menu from '@lucide/svelte/icons/menu';
   import X from '@lucide/svelte/icons/x';
   import Search from '@lucide/svelte/icons/search';
@@ -12,12 +13,14 @@
   import TeenyiconsCupSolid from '~icons/teenyicons/cup-solid';
   import SimpleIconsLiberapay from '~icons/simple-icons/liberapay';
   import SimpleIconsDiscord from '~icons/simple-icons/discord';
+  import SimpleIconsPaypal from '~icons/simple-icons/paypal';
 
   import { Button } from '$lib/components/ui/button/index.js';
   import { onMount } from 'svelte';
 
   let isNavOpen = $state(false);
   let isSearchOpen = $state(false);
+  let isSupportOpen = $state(false);
   let isHeaderVisible = $state(true);
   let lastScrollY = $state(0);
 
@@ -83,7 +86,21 @@
 
       <div class="w-px h-5 mx-1" style="background: var(--line)"></div>
 
+      <Button
+        variant="ghost"
+        size="sm"
+        class="h-8 px-2.5 gap-1.5 text-xs font-medium text-amber-600 dark:text-amber-400 hover:bg-amber-500/10 hover:text-amber-700 dark:hover:text-amber-300 transition-colors"
+        onclick={() => (isSupportOpen = true)}
+        title="1.1M articles unlocked — Support Freedium"
+      >
+        <span>🎉</span>
+        <span class="font-mono font-semibold">1.1M</span>
+      </Button>
+
+      <div class="w-px h-5 mx-1" style="background: var(--line)"></div>
+
       <div class="flex items-center gap-0.5">
+        <PayButtons name="PayPal" url="https://www.paypal.me/qHDa3" icon={SimpleIconsPaypal} showLabel={false} />
         <PayButtons name="Ko-fi" url="https://ko-fi.com/zhymabekroman" icon={TeenyiconsCupSolid} showLabel={false} />
         <PayButtons name="Liberapay" url="https://liberapay.com/ZhymabekRoman/" icon={SimpleIconsLiberapay} showLabel={false} />
         <PayButtons name="Discord" url="https://discord.gg/dAxCuG9nYM" icon={SimpleIconsDiscord} showLabel={false} />
@@ -135,10 +152,23 @@
         <div class="mobile-section">
           <p class="mobile-section-label">Support Freedium</p>
           <div class="flex flex-wrap gap-2">
+            <PayButtons name="PayPal" url="https://www.paypal.me/qHDa3" icon={SimpleIconsPaypal} showLabel={true} />
             <PayButtons name="Ko-fi" url="https://ko-fi.com/zhymabekroman" icon={TeenyiconsCupSolid} showLabel={true} />
             <PayButtons name="Liberapay" url="https://liberapay.com/ZhymabekRoman/" icon={SimpleIconsLiberapay} showLabel={true} />
             <PayButtons name="Discord" url="https://discord.gg/dAxCuG9nYM" icon={SimpleIconsDiscord} showLabel={true} />
           </div>
+          <Button
+            variant="outline"
+            size="sm"
+            class="w-full mt-2.5 justify-center gap-2 text-xs font-medium text-amber-700 dark:text-amber-300 border-amber-500/30 bg-amber-500/10 hover:bg-amber-500/20"
+            onclick={() => {
+              isNavOpen = false;
+              isSupportOpen = true;
+            }}
+          >
+            <span>🎉</span>
+            <span>1.1M Milestone — Support Details</span>
+          </Button>
         </div>
 
         <div class="mobile-section">
@@ -151,6 +181,7 @@
 </nav>
 
 <!-- <SearchDialog bind:open={isSearchOpen} /> -->
+<SupportDialog bind:open={isSupportOpen} />
 
 <style>
   .header-nav {
