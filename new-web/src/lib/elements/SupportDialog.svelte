@@ -11,6 +11,7 @@
 	import HeroiconsOutlineExternalLink from '~icons/heroicons-outline/external-link';
 	import copy from 'copy-to-clipboard';
 	import { toast } from 'svelte-sonner';
+	import { onMount } from 'svelte';
 
 	interface Props {
 		open?: boolean;
@@ -19,6 +20,32 @@
 	let { open = $bindable(false) }: Props = $props();
 	const isDesktop = mediaQuery('(min-width: 768px)');
 	const PAYPAL_URL = 'https://www.paypal.me/qHDa3';
+	const STORAGE_KEY = 'freedium_support_1_1m_dismissed';
+
+	let hasBeenOpened = $state(false);
+
+	onMount(() => {
+		try {
+			const dismissed = localStorage.getItem(STORAGE_KEY);
+			if (!dismissed) {
+				open = true;
+			}
+		} catch {
+			// localStorage disabled/restricted
+		}
+	});
+
+	$effect(() => {
+		if (open) {
+			hasBeenOpened = true;
+		} else if (hasBeenOpened) {
+			try {
+				localStorage.setItem(STORAGE_KEY, 'true');
+			} catch {
+				// localStorage disabled/restricted
+			}
+		}
+	});
 
 	function handleCopy(text: string) {
 		copy(text);
