@@ -151,8 +151,11 @@ class BloombergService(BaseService):
                 # Embedded audio/podcast player
                 audio_src = (comp.get("links") or {}).get("audio", {}).get("src") or ""
                 if audio_src:
+                    import urllib.parse
+
+                    proxy_audio_url = f"/api/audio?url={urllib.parse.quote(audio_src, safe='')}"
                     out.append(
-                        f'\n<audio controls preload="none" class="w-full my-4" src="{_esc(audio_src)}"></audio>\n'
+                        f'\n<audio controls preload="metadata" class="w-full my-4" src="{_esc(proxy_audio_url)}"></audio>\n'
                     )
             elif role in ("listItem", "ul"):
                 # ul.parts = [{role:"li", parts:[…]}, …]
