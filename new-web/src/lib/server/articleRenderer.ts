@@ -68,7 +68,8 @@ const FREEDIUM_SANITIZE_SCHEMA: typeof defaultSchema = (() => {
 	// <figure class="image-grid">…<figcaption>. Not in the default allowlist,
 	// so without this sanitize unwraps them → images spill out loose + the
 	// grid layout breaks.
-	s.tagNames = [...new Set([...(s.tagNames ?? []), "iframe", "mark", "figure", "figcaption"])];
+	// audio/source: Bloomberg and other podcast/audio episode embeds.
+	s.tagNames = [...new Set([...(s.tagNames ?? []), "iframe", "mark", "figure", "figcaption", "audio", "source"])];
 	s.attributes = {
 		...s.attributes,
 		// Note: id/style intentionally NOT wildcard-allowed (DOM-clobbering /
@@ -81,6 +82,16 @@ const FREEDIUM_SANITIZE_SCHEMA: typeof defaultSchema = (() => {
 			"dataZoomSrc",
 			"dataCaption",
 			"dataNosnippet",
+		],
+		audio: [
+			"src",
+			"controls",
+			"preload",
+			"className",
+		],
+		source: [
+			"src",
+			"type",
 		],
 		iframe: [
 			"src",

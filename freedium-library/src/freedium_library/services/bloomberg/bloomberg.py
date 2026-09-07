@@ -87,16 +87,26 @@ class BloombergService(BaseService):
 
     @staticmethod
     def _parts_to_md(parts: list[dict[str, Any]]) -> str:
-        """Render component parts → inline markdown (text + links)."""
+        """Render component parts → inline markdown (text + links + formatting)."""
         out: list[str] = []
         for p in parts:
             if not isinstance(p, dict):
                 continue
+            role = p.get("role")
+            if role == "br":
+                out.append("\n\n")
+                continue
             text = p.get("text", "")
-            href = p.get("href", "")
+            href = p.get("URL") or p.get("href") or ""
             nested = p.get("parts")
             if nested:
                 text = BloombergService._parts_to_md(nested)
+            style = p.get("style", "")
+            if style == "strong" and text:
+                text = f"**{text}**"
+            elif style == "em" and text:
+                text = f"_{text}_"
+
             if href and text:
                 out.append(f"[{text}]({href})")
             elif text:
@@ -137,6 +147,12 @@ class BloombergService(BaseService):
                     out.append(
                         f'\n<figure><img src="{_esc(img_url)}" alt="{_esc(caption or "image")}"'
                         f' loading="lazy"{cap_attr} class="prose-image"/>{figcap}</figure>\n'
+                    )
+                # Embedded audio/podcast player
+                audio_src = (comp.get("links") or {}).get("audio", {}).get("src") or ""
+                if audio_src:
+                    out.append(
+                        f'\n<audio controls preload="none" class="w-full my-4" src="{_esc(audio_src)}"></audio>\n'
                     )
             elif role in ("listItem", "ul"):
                 # ul.parts = [{role:"li", parts:[…]}, …]
@@ -194,11 +210,20 @@ class BloombergService(BaseService):
         lede = data.get("ledeImage") or {}
         lede_urls = lede.get("imageURLs") or {}
         lede_url = lede_urls.get("large") or lede_urls.get("default") or ""
+        lede_caption = lede.get("caption", "")
+        if not lede_url:
+            for comp in data.get("components") or []:
+                if isinstance(comp, dict) and comp.get("role") == "image":
+                    c_urls = comp.get("imageURLs") or {}
+                    lede_url = c_urls.get("large") or c_urls.get("default") or ""
+                    lede_caption = comp.get("caption") or ""
+                    if lede_url:
+                        break
         if lede_url:
             meta["preview_image"] = {
                 "medium": lede_url,
                 "zoom": lede_url,
-                "caption": lede.get("caption", ""),
+                "caption": lede_caption,
             }
 
         return "---\n" + yaml.safe_dump(meta, allow_unicode=True, sort_keys=False) + "---\n\n"
