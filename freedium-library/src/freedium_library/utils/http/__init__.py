@@ -7,6 +7,7 @@ from .client import (
     HttpxResponse,
     RequestConfig,
 )
+from .proxy import get_warp_proxy, get_warp_proxy_config
 from .url import URLProcessor
 
 __all__ = [
@@ -18,4 +19,6 @@ __all__ = [
     "HttpxResponse",
     "URLProcessor",
     "RequestConfig",
+    "get_warp_proxy",
+    "get_warp_proxy_config",
 ]

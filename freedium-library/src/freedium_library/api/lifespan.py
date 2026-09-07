@@ -119,6 +119,9 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     # permissive — it accepts any URL and tries to resolve it as a Medium
     # post, so it must be last to avoid stealing FT/NYT/WaPo/etc. URLs.
     medium_service = medium_container.service()
+    from freedium_library.utils.http import get_warp_proxy
+
+    warp_proxy = get_warp_proxy()
 
     # The Athletic (opt-in). Before NYT: its articles live under
     # nytimes.com/athletic/. NytService's path rules don't claim those today,
@@ -142,11 +145,10 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
         from freedium_library.services.nyt import client as _nyt_client
 
         if _nyt_client._NYT_PRIVATE_KEY is not None:
-            _nyt_proxy = (os.environ.get("PROXY_LIST", "").split(",")[0].strip() or None)
             resolver.register(
-                "nyt", NytService(proxy=_nyt_proxy, mdream_url=_nyt_cfg.MDREAM_URL)
+                "nyt", NytService(proxy=warp_proxy, mdream_url=_nyt_cfg.MDREAM_URL)
             )
-            logger.info("NYT service registered (egress via PROXY_LIST[0])")
+            logger.info("NYT service registered (egress via WARP)")
         else:
             logger.warning("NYT_ENABLED but NYT_SIGNING_KEY missing/invalid — NYT not registered")
 
@@ -183,8 +185,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     if ReutersConfig().ENABLED:
         from freedium_library.services.reuters import ReutersService
 
-        _reuters_proxy = os.environ.get("PROXY_LIST", "").split(",")[0].strip() or None
-        resolver.register("reuters", ReutersService(proxy=_reuters_proxy))
+        resolver.register("reuters", ReutersService(proxy=warp_proxy))
         logger.info("Reuters service registered")
 
     # Bloomberg (opt-in). Mobile CDN API with CurlRequest + WARP.
@@ -193,8 +194,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     if BloombergConfig().ENABLED:
         from freedium_library.services.bloomberg import BloombergService
 
-        _bbg_proxy = os.environ.get("PROXY_LIST", "").split(",")[0].strip() or None
-        resolver.register("bloomberg", BloombergService(proxy=_bbg_proxy))
+        resolver.register("bloomberg", BloombergService(proxy=warp_proxy))
         logger.info("Bloomberg service registered")
 
     # Medium LAST — its validator is permissive (accepts any URL, tries to

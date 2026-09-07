@@ -207,7 +207,9 @@ def main() -> int:
     pat = re.compile(args.filter) if args.filter else None
     proxy = None
     if args.proxy_from_env:
-        proxy = (os.environ.get("PROXY_LIST", "").split(",")[0].strip()) or None
+        from freedium_library.utils.http import get_warp_proxy
+
+        proxy = get_warp_proxy()
 
     state = State.load_or_init(args.state, args.root)
     seen = load_seen(args.out)

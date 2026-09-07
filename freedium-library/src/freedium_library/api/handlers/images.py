@@ -99,8 +99,9 @@ _REDIRECT_HEADERS: dict[str, str] = {
 
 
 def _proxy() -> str | None:
-    first = os.environ.get("PROXY_LIST", "").split(",")[0].strip()
-    return first or None
+    from freedium_library.utils.http import get_warp_proxy
+
+    return get_warp_proxy()
 
 
 # Unified source-prefixed redirect map. Each entry's CDN host is hardcoded

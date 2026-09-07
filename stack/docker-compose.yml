@@ -72,7 +72,8 @@ services:
       - MONGO_COLLECTION=${MONGO_COLLECTION:-post_cache}
       - REDIS_URL=redis://redis:6379/0
       - PROMETHEUS_MULTIPROC_DIR=/tmp/prometheus_multiproc
-      - PROXY_LIST=${PROXY_LIST:-socks5://haproxy-pb:1080}
+      - WARP_PROXY_BALANCER=${WARP_PROXY_BALANCER:-${PROXY_LIST:-socks5://haproxy-pb:1080}}
+      - PROXY_LIST=${WARP_PROXY_BALANCER:-${PROXY_LIST:-socks5://haproxy-pb:1080}}
       - IMAGE_SERVE_MODE=redirect
       - TRACEMALLOC=${TRACEMALLOC:-0}
       - MEDIUM_ENABLED=${MEDIUM_ENABLED:-true}
@@ -206,7 +207,8 @@ services:
       - MONGO_COLLECTION=${MONGO_COLLECTION:-post_cache}
       - CACHE_ENABLED=${CACHE_ENABLED:-true}
       - ERROR_LOG_PATH=/var/log/freedium/errored-links.jsonl
-      - PROXY_LIST=${PROXY_LIST:-socks5://haproxy-pb:1080}
+      - WARP_PROXY_BALANCER=${WARP_PROXY_BALANCER:-${PROXY_LIST:-socks5://haproxy-pb:1080}}
+      - PROXY_LIST=${WARP_PROXY_BALANCER:-${PROXY_LIST:-socks5://haproxy-pb:1080}}
       - PROMETHEUS_MULTIPROC_DIR=/tmp/prometheus_multiproc
       - JXL_BATCH_SIZE=100
       - JXL_PARALLEL=2

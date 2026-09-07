@@ -45,12 +45,10 @@ _PLACEHOLDER_DATA_URI: Final = (
 
 
 def proxy_url_from_env() -> str | None:
-    """Return the first proxy URL from PROXY_LIST, or None when unset.
+    """Return the primary WARP proxy URL, or None when unset."""
+    from freedium_library.utils.http import get_warp_proxy
 
-    Route reconstructed miro fetches through the same Warp/HAProxy chain the
-    backend uses (so miro.medium.com sees a Cloudflare IP). Direct when unset.
-    """
-    return os.environ.get("PROXY_LIST", "").split(",")[0].strip() or None
+    return get_warp_proxy()
 
 
 def fetch_url_for_src(src: str) -> str | None:

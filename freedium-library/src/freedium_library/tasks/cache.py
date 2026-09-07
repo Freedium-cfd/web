@@ -112,8 +112,10 @@ def _get_resolver() -> ServiceResolver:
         WapoConfig,
     )
 
+    from freedium_library.utils.http import get_warp_proxy
+
     resolver = ServiceResolver()
-    proxy = os.environ.get("PROXY_LIST", "").split(",")[0].strip() or None
+    proxy = get_warp_proxy()
 
     # Before NYT — see the matching comment in api/lifespan.py.
     ath_cfg = AthleticConfig()

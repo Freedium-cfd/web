@@ -59,19 +59,12 @@ def _is_bloomberg_url(url: str) -> bool:
 class BloombergService(BaseService):
     """Renders bloomberg.com articles via the mobile CDN API."""
 
-    def __init__(self, proxy: str | None = None) -> None:
-        from freedium_library.utils.http.client.config import RequestConfig, RequestProxyConfig
+    def __init__(self, proxy: str | RequestProxyConfig | None = None) -> None:
+        from freedium_library.utils.http.client.config import RequestConfig
 
-        config = RequestConfig()
-        if proxy:
-            parts = proxy.split("://", 1)
-            scheme = parts[0] if len(parts) > 1 else "socks5"
-            hostport = parts[1] if len(parts) > 1 else parts[0]
-            host, _, port_s = hostport.rpartition(":")
-            config.proxy = RequestProxyConfig(type=scheme, host=host, port=int(port_s or 1080))
         # One client per service (services are singletons) — reuses the session
         # and its WARP connections across renders.
-        self._request = CurlRequest(config=config, persistent=True)
+        self._request = CurlRequest(config=RequestConfig.with_proxy(proxy), persistent=True)
 
     def _is_valid(self, path: str) -> bool:
         return _is_bloomberg_url(path)
