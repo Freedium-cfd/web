@@ -155,7 +155,7 @@ def _get_resolver() -> ServiceResolver:
     if BloombergConfig().ENABLED:
         from freedium_library.services.bloomberg import BloombergService
 
-        resolver.register("bloomberg", BloombergService())
+        resolver.register("bloomberg", BloombergService(proxy=proxy))
 
     # Medium LAST — permissive validator (accepts any URL).
     if MediumConfig().ENABLED:

@@ -187,13 +187,14 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
         resolver.register("reuters", ReutersService(proxy=_reuters_proxy))
         logger.info("Reuters service registered")
 
-    # Bloomberg (opt-in). No auth needed — the mobile CDN API is open.
+    # Bloomberg (opt-in). Mobile CDN API with CurlRequest + WARP.
     from freedium_library.api.config import BloombergConfig
 
     if BloombergConfig().ENABLED:
         from freedium_library.services.bloomberg import BloombergService
 
-        resolver.register("bloomberg", BloombergService())
+        _bbg_proxy = os.environ.get("PROXY_LIST", "").split(",")[0].strip() or None
+        resolver.register("bloomberg", BloombergService(proxy=_bbg_proxy))
         logger.info("Bloomberg service registered")
 
     # Medium LAST — its validator is permissive (accepts any URL, tries to

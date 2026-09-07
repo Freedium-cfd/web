@@ -17,6 +17,7 @@ from loguru import logger
 
 from freedium_library.services.base import BaseService
 from freedium_library.services.bloomberg import client as bbg_client
+from freedium_library.utils.http import CurlRequest
 
 _BBG_IMG_PREFIX = "https://assets.bwbx.io/"
 
@@ -58,6 +59,20 @@ def _is_bloomberg_url(url: str) -> bool:
 class BloombergService(BaseService):
     """Renders bloomberg.com articles via the mobile CDN API."""
 
+    def __init__(self, proxy: str | None = None) -> None:
+        from freedium_library.utils.http.client.config import RequestConfig, RequestProxyConfig
+
+        config = RequestConfig()
+        if proxy:
+            parts = proxy.split("://", 1)
+            scheme = parts[0] if len(parts) > 1 else "socks5"
+            hostport = parts[1] if len(parts) > 1 else parts[0]
+            host, _, port_s = hostport.rpartition(":")
+            config.proxy = RequestProxyConfig(type=scheme, host=host, port=int(port_s or 1080))
+        # One client per service (services are singletons) — reuses the session
+        # and its WARP connections across renders.
+        self._request = CurlRequest(config=config, persistent=True)
+
     def _is_valid(self, path: str) -> bool:
         return _is_bloomberg_url(path)
 
@@ -66,7 +81,7 @@ class BloombergService(BaseService):
 
     async def _arender(self, path: str) -> str:
         url = _normalize_url(path)
-        data = await bbg_client.fetch_article(url)
+        data = await bbg_client.fetch_article(self._request, url)
         if not data or not data.get("components"):
             raise ValueError("empty Bloomberg response")
 
