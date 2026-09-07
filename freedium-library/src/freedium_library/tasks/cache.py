@@ -177,6 +177,11 @@ async def render_article_async(content: str, frontmatter: bool) -> dict:
     A plain Exception raised here becomes `result.is_err = True`.
     The poll endpoint surfaces a user-safe error message.
     """
+    from freedium_library.api.blocked_domains import is_blocked_domain
+
+    if await is_blocked_domain(content):
+        raise ValueError("unsupported_site")
+
     resolver = _get_resolver()
     service_name, resolved_service = await resolver.resolve(content)
 

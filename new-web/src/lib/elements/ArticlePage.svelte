@@ -145,7 +145,13 @@
 					<div class="error-status">{error.status}</div>
 					<div class="error-eyebrow">— {error.code.replace(/_/g, ' ')}</div>
 					<h1 class="error-title">
-						{error.status === 404 ? 'Article not found.' : 'Something went wrong.'}
+						{#if error.code === 'UNSUPPORTED_SITE'}
+							Site not supported.
+						{:else if error.status === 404}
+							Article not found.
+						{:else}
+							Something went wrong.
+						{/if}
 					</h1>
 					<p class="error-message">{getErrorMessage(error)}</p>
 

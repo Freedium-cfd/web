@@ -139,6 +139,17 @@ async def render_universal(
     request.content = _re.sub(r"^(https?):/+", r"\1://", request.content.strip())
 
     if await is_blocked_domain(request.content):
+        from freedium_library.api.blocked_domains import _host
+
+        host = _host(request.content)
+        if host == "wsj.com" or host.endswith(".wsj.com"):
+            raise HTTPException(
+                status_code=422, detail="The Wall Street Journal is not supported"
+            )
+        if host == "substack.com" or host.endswith(".substack.com"):
+            raise HTTPException(
+                status_code=422, detail="Substack is not supported"
+            )
         raise HTTPException(status_code=422, detail="unsupported_site")
 
     # The real browser/bot UA, forwarded by SvelteKit SSR as X-Client-UA.

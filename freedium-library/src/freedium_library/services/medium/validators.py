@@ -110,6 +110,15 @@ class _MediumServiceURLValidator:
         parsed_url = urlparse(url)
         parsed_netloc = URLProcessor.un_wwwify(parsed_url.netloc)
 
+        # Unsupported publications should never be resolved as Medium
+        if (
+            parsed_netloc == "wsj.com"
+            or parsed_netloc.endswith(".wsj.com")
+            or parsed_netloc == "substack.com"
+            or parsed_netloc.endswith(".substack.com")
+        ):
+            return None
+
         if parsed_url.path.startswith("/p/"):  # TODO: add more information
             logger.debug("URL is Medium 'mobile' link")
             post_id = parsed_url.path.rsplit("/p/")[1]

@@ -18,7 +18,45 @@ import type { PageServerLoad } from "./$types";
  */
 const EAGER_BUDGET_MS = 2500;
 
+function getUnsupportedSiteInfo(urlStr: string): { message: string } | null {
+	const normalized = urlStr.replace(/^(https?):\/+(?!\/)/i, "$1://");
+	const withScheme = normalized.includes("://") ? normalized : `https://${normalized}`;
+	try {
+		const host = new URL(withScheme).hostname.toLowerCase().replace(/^www\./, "");
+		if (host === "wsj.com" || host.endsWith(".wsj.com")) {
+			return { message: "The Wall Street Journal is not supported by Freedium." };
+		}
+		if (host === "substack.com" || host.endsWith(".substack.com")) {
+			return { message: "Substack is not supported by Freedium." };
+		}
+	} catch {
+		return null;
+	}
+	return null;
+}
+
 export const load: PageServerLoad = async ({ params, request }) => {
+	const unsupported = getUnsupportedSiteInfo(params.slug);
+	if (unsupported) {
+		recordArticleFetch("unsupported");
+		return {
+			slug: params.slug,
+			eager: {
+				html: null,
+				markdown: null,
+				article: null,
+				cacheStatus: "miss",
+				renderTimeMs: 0,
+				error: {
+					status: 400,
+					message: unsupported.message,
+					code: "UNSUPPORTED_SITE",
+				},
+			},
+			streamed: null,
+		};
+	}
+
 	const start = performance.now();
 	const clientUa = request.headers.get("User-Agent") ?? "";
 
@@ -57,6 +95,15 @@ export const load: PageServerLoad = async ({ params, request }) => {
 		}
 		if (message === "UPSTREAM_422") {
 			recordArticleFetch("unsupported");
+			const detail = (err as Error & { detail?: string })?.detail;
+			const unsupportedInfo = getUnsupportedSiteInfo(params.slug);
+			let customMsg =
+				"This site isn’t supported. Freedium unlocks article paywalls — video, social, search, and shopping links aren’t articles.";
+			if (detail && detail !== "unsupported_site") {
+				customMsg = detail;
+			} else if (unsupportedInfo) {
+				customMsg = unsupportedInfo.message;
+			}
 			return {
 				html: null as string | null,
 				markdown: null as string | null,
@@ -65,8 +112,7 @@ export const load: PageServerLoad = async ({ params, request }) => {
 				renderTimeMs: Math.round(performance.now() - start),
 				error: {
 					status: 400,
-					message:
-						"This site isn’t supported. Freedium unlocks article paywalls — video, social, search, and shopping links aren’t articles.",
+					message: customMsg,
 					code: "UNSUPPORTED_SITE",
 				},
 			};

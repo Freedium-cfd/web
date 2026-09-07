@@ -10,6 +10,8 @@ export function getErrorMessage(error: ArticlePageData['error']): string {
 			return 'There was a problem preparing this article.';
 		case 'COMPILE_ERROR':
 			return 'There was a problem processing the article content.';
+		case 'UNSUPPORTED_SITE':
+			return error.message || "This site isn't supported.";
 		default:
 			return error.message || 'An unexpected error occurred.';
 	}

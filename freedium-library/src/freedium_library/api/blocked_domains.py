@@ -51,6 +51,8 @@ _SEED_DOMAINS: tuple[str, ...] = (
     "adobe.com",
     # gaming
     "steampowered.com", "epicgames.com", "roblox.com",
+    # unsupported publications
+    "wsj.com", "substack.com",
 )
 
 # SvelteKit collapses the "//" in /https://… paths to "https:/…", so normalise
@@ -89,25 +91,32 @@ def _collection():
 
 
 async def seed_blocked_domains() -> None:
-    """Migrate _SEED_DOMAINS into Mongo when the collection is empty. Idempotent
-    — once seeded, the collection is owned by ops and never auto-overwritten.
+    """Migrate _SEED_DOMAINS into Mongo when missing. Idempotent — once seeded,
+    the collection is owned by ops and never auto-overwritten, but any newly
+    added seed domains are inserted on startup.
 
     Hardened against duplicate seeding across rapid restarts: a unique index on
-    `domain` makes dupes impossible, count_documents() is exact (unlike
-    estimated_document_count, which reads stale metadata), and the insert is
-    unordered so a racing seed's duplicate-key errors are skipped, not fatal."""
+    `domain` makes dupes impossible, and the insert is unordered so a racing
+    seed's duplicate-key errors are skipped, not fatal."""
     try:
         coll = _collection()
         await coll.create_index("domain", unique=True)  # idempotent
-        if await coll.count_documents({}) > 0:
-            return
-        try:
-            await coll.insert_many(
-                [{"domain": d, "note": "seed"} for d in _SEED_DOMAINS], ordered=False
-            )
-        except Exception:  # noqa: BLE001 — duplicate-key from a racing seed is fine
-            pass
-        logger.info(f"blocked_domains: seeded {len(_SEED_DOMAINS)} domains")
+        existing = {
+            doc["domain"]
+            async for doc in coll.find({}, {"domain": 1, "_id": 0})
+            if doc.get("domain")
+        }
+        to_insert = [
+            {"domain": d, "note": "seed"}
+            for d in _SEED_DOMAINS
+            if d not in existing
+        ]
+        if to_insert:
+            try:
+                await coll.insert_many(to_insert, ordered=False)
+                logger.info(f"blocked_domains: seeded {len(to_insert)} new domain(s)")
+            except Exception:
+                pass
     except Exception as exc:  # noqa: BLE001 — never crash startup over the denylist
         logger.warning(f"blocked_domains seed failed: {exc!r}")
 

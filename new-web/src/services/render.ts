@@ -59,11 +59,20 @@ export async function render(
 			headers,
 		});
 	} catch (err: unknown) {
-		const status =
-			(err as { status?: number; response?: { status?: number } })?.status ??
-			(err as { response?: { status?: number } })?.response?.status;
+		const errObj = err as {
+			status?: number;
+			statusCode?: number;
+			data?: { detail?: string };
+			response?: { status?: number; _data?: { detail?: string } };
+		};
+		const status = errObj?.status ?? errObj?.statusCode ?? errObj?.response?.status;
+		const detail = errObj?.data?.detail ?? errObj?.response?._data?.detail;
 		if (typeof status === "number") {
-			throw new Error(`UPSTREAM_${status}`);
+			const error = new Error(`UPSTREAM_${status}`) as Error & { detail?: string };
+			if (detail) {
+				error.detail = detail;
+			}
+			throw error;
 		}
 		throw err;
 	}

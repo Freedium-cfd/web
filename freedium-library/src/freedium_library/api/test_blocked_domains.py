@@ -28,6 +28,11 @@ def test_blocks_newly_added_domains():
     assert _blocked("https://temu.com/x")
     assert _blocked("https://huggingface.co/models")
     assert _blocked("https://disneyplus.com/")
+    # unsupported publications
+    assert _blocked("https://www.wsj.com/articles/some-article-12345678")
+    assert _blocked("https://wsj.com/articles/foo")
+    assert _blocked("https://astralcodexten.substack.com/p/some-post")
+    assert _blocked("https://substack.com/home")
 
 
 def test_blocks_collapsed_slash_form():
