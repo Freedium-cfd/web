@@ -33,6 +33,8 @@ def test_blocks_newly_added_domains():
     assert _blocked("https://wsj.com/articles/foo")
     assert _blocked("https://astralcodexten.substack.com/p/some-post")
     assert _blocked("https://substack.com/home")
+    assert _blocked("https://www.wired.com/story/europe-ai")
+    assert _blocked("https://wired.com/story/test")
 
 
 def test_blocks_collapsed_slash_form():

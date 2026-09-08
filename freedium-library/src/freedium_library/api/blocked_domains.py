@@ -52,7 +52,7 @@ _SEED_DOMAINS: tuple[str, ...] = (
     # gaming
     "steampowered.com", "epicgames.com", "roblox.com",
     # unsupported publications
-    "wsj.com", "substack.com",
+    "wsj.com", "substack.com", "wired.com",
 )
 
 # SvelteKit collapses the "//" in /https://… paths to "https:/…", so normalise

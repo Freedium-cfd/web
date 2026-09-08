@@ -150,6 +150,10 @@ async def render_universal(
             raise HTTPException(
                 status_code=422, detail="Substack is not supported"
             )
+        if host == "wired.com" or host.endswith(".wired.com"):
+            raise HTTPException(
+                status_code=422, detail="Wired is not supported"
+            )
         raise HTTPException(status_code=422, detail="unsupported_site")
 
     # The real browser/bot UA, forwarded by SvelteKit SSR as X-Client-UA.

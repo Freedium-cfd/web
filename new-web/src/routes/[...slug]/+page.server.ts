@@ -29,6 +29,9 @@ function getUnsupportedSiteInfo(urlStr: string): { message: string } | null {
 		if (host === "substack.com" || host.endsWith(".substack.com")) {
 			return { message: "Substack is not supported by Freedium." };
 		}
+		if (host === "wired.com" || host.endsWith(".wired.com")) {
+			return { message: "Wired is not supported by Freedium." };
+		}
 	} catch {
 		return null;
 	}

@@ -121,16 +121,21 @@ services:
       - "--logpath=/dev/null"
       - "--wiredTigerCollectionBlockCompressor=zstd"
       - "--wiredTigerJournalCompressor=zstd"
+      - "--wiredTigerCacheSizeGB=0.5"
     volumes:
       - mongo_data:/data/db
     networks:
       - freedium_obs_net
     restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 1200m
     healthcheck:
       test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping')"]
-      interval: 10s
-      timeout: 5s
-      start_period: 15s
+      interval: 15s
+      timeout: 10s
+      start_period: 20s
       retries: 5
 
   traefik:

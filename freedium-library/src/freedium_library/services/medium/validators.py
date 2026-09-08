@@ -116,6 +116,8 @@ class _MediumServiceURLValidator:
             or parsed_netloc.endswith(".wsj.com")
             or parsed_netloc == "substack.com"
             or parsed_netloc.endswith(".substack.com")
+            or parsed_netloc == "wired.com"
+            or parsed_netloc.endswith(".wired.com")
         ):
             return None
 

@@ -92,17 +92,25 @@ fi
 # --- synthetic render probe: catches "healthy but every article 500s" ---
 # Containers can all report healthy (/healthz is trivial) while article
 # rendering is broken (e.g. the instrumentator _IncludedRouter 500 that hid
-# for 17h). Probe the real render path on a backend replica directly (the
+# for 17h). Probe the real render path on a healthy backend replica directly (the
 # backend image ships curl; the traefik image is FROM scratch, no shell).
 PROBE_ID="${RENDER_PROBE_ID:-450a855584f8}"
-probe_c=$(docker ps --filter name=freedium-obs-backend -q 2>/dev/null | head -1)
+probe_c=$(docker ps --filter name=freedium-obs-backend --filter health=healthy -q 2>/dev/null | head -1)
 if [ -z "$probe_c" ]; then
-  alert render "🔴 <b>$HOST</b> no backend replica to probe render path."
+  # Already covered by the backend replica check above
+  :
 else
-  probe_code=$(docker exec "$probe_c" curl -s -o /tmp/_probe.out -w "%{http_code}" \
+  docker exec "$probe_c" rm -f /tmp/_probe.out 2>/dev/null || true
+  if ! probe_code=$(docker exec "$probe_c" curl -s -o /tmp/_probe.out -w "%{http_code}" \
     -X POST http://localhost:7080/api/render \
     -H "content-type: application/json" \
-    -d "{\"content\":\"${PROBE_ID}\"}" --max-time 30 2>/dev/null || echo 000)
+    -d "{\"content\":\"${PROBE_ID}\"}" --max-time 30 2>/dev/null); then
+    probe_code="000"
+  fi
+  # Clean status code: digits only, default to 000 on exec / daemon failure
+  probe_code=$(echo "$probe_code" | tr -dc '0-9' | tail -c 3)
+  probe_code=${probe_code:-000}
+
   probe_len=$(docker exec "$probe_c" sh -c 'wc -c < /tmp/_probe.out 2>/dev/null' 2>/dev/null | tr -dc '0-9')
   probe_len=${probe_len:-0}
   if [ "$probe_code" = "200" ] && [ "$probe_len" -gt 500 ]; then
