@@ -39,7 +39,7 @@ services:
     deploy:
       resources:
         limits:
-          memory: 64m
+          memory: 256m
     depends_on:
       wgcf:
         # service_started (not service_healthy) so the stack still comes up
