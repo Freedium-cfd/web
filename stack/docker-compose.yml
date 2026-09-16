@@ -36,6 +36,10 @@ services:
   haproxy-pb:
     build:
       context: ../proxy-balancer
+    deploy:
+      resources:
+        limits:
+          memory: 64m
     depends_on:
       wgcf:
         # service_started (not service_healthy) so the stack still comes up
