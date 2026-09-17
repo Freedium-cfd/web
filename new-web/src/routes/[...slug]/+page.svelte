@@ -15,6 +15,7 @@
 	}) {
 		return {
 			slug: data.slug,
+			originalUrl: data.originalUrl,
 			loading: false,
 			content: result.html,
 			markdown: result.markdown,

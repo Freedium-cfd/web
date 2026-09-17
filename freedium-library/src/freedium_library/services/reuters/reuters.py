@@ -16,6 +16,7 @@ from typing import Any
 from loguru import logger
 
 from freedium_library.services.base import BaseService
+from freedium_library.services.exceptions import ArticleNotFoundError
 from freedium_library.services.reuters import client as reuters_client
 from freedium_library.utils.http import CurlRequest
 
@@ -121,7 +122,7 @@ class ReutersService(BaseService):
         raw = await reuters_client.fetch_article(self._request, url)
         article = _extract_article(raw)
         if not article["title"] and not article["content_elements"]:
-            raise ValueError("empty Reuters response")
+            raise ArticleNotFoundError("empty Reuters response")
 
         body_md = self._elements_to_markdown(article["content_elements"])
         markdown = self._frontmatter(article, url) + body_md

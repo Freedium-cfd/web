@@ -8,6 +8,7 @@
 	import './ArticlePage.css';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
 	import ArticleActions from '$lib/elements/ArticleActions.svelte';
+	import ArchiveFallbacks from '$lib/elements/ArchiveFallbacks.svelte';
 	import HeroiconsDocumentArrowDown20Solid from '~icons/heroicons/document-arrow-down-20-solid';
 	import HeroiconsDocumentText20Solid from '~icons/heroicons/document-text-20-solid';
 	import HeroiconsChevronDown20Solid from '~icons/heroicons/chevron-down-20-solid';
@@ -44,6 +45,7 @@
 	// uses: an all-H3 article (Medium often flattens to one level) renders
 	// flat, while a mixed H2/H3/H4 article shows real nesting.
 	let tocMinLevel = $derived(toc.length ? Math.min(...toc.map((t) => t.level)) : 2);
+	let originalUrl = $derived(data.originalUrl || article?.url);
 
 	function downloadMarkdown() {
 		if (!data.slug) return;
@@ -154,6 +156,10 @@
 						{/if}
 					</h1>
 					<p class="error-message">{getErrorMessage(error)}</p>
+
+					{#if originalUrl && (error.code === 'UNSUPPORTED_SITE' || error.status === 404 || error.status === 400 || error.status === 422)}
+						<ArchiveFallbacks url={originalUrl} />
+					{/if}
 
 					{#if error.details && import.meta.env.DEV}
 						<pre class="error-details">{error.details}</pre>

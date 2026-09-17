@@ -16,6 +16,7 @@ from freedium_library.api.metrics import (
     RENDERED_CACHE_MISSES,
     track_render,
 )
+from freedium_library.services.exceptions import BaseServiceError
 from freedium_library.services.medium import MediumService
 from freedium_library.services.medium.container import MediumContainer
 from freedium_library.services.medium.exceptions import InvalidMediumServicePathError
@@ -283,6 +284,11 @@ async def render_universal(
                     ctx.set_outcome("parser_failure")
                     log_errored_link(request.content, "parser_failure", None, str(e), client_ua=client_ua)
                     raise HTTPException(status_code=404, detail=str(e)) from e
+                except BaseServiceError as e:
+                    outcome = "parser_failure" if e.status_code in (404, 422) else "network_error"
+                    ctx.set_outcome(outcome)
+                    log_errored_link(request.content, outcome, None, str(e), client_ua=client_ua)
+                    raise HTTPException(status_code=e.status_code, detail=str(e)) from e
                 except Exception as e:
                     ctx.set_outcome("network_error")
                     log_errored_link(request.content, "network_error", None, str(e), client_ua=client_ua)
@@ -297,14 +303,15 @@ async def render_universal(
                 task_id=dispatch.task_id,
             )
 
-        except ServiceResolutionError as e:
+        except (ServiceResolutionError, InvalidMediumServicePathError) as e:
             ctx.set_outcome("parser_failure")
             log_errored_link(request.content, "parser_failure", None, str(e), client_ua=client_ua)
             raise HTTPException(status_code=404, detail=str(e)) from e
-        except InvalidMediumServicePathError as e:
-            ctx.set_outcome("parser_failure")
-            log_errored_link(request.content, "parser_failure", None, str(e), client_ua=client_ua)
-            raise HTTPException(status_code=404, detail=str(e)) from e
+        except BaseServiceError as e:
+            outcome = "parser_failure" if e.status_code in (404, 422) else "network_error"
+            ctx.set_outcome(outcome)
+            log_errored_link(request.content, outcome, None, str(e), client_ua=client_ua)
+            raise HTTPException(status_code=e.status_code, detail=str(e)) from e
         except Exception as e:
             ctx.set_outcome("network_error")
             log_errored_link(request.content, "network_error", None, str(e), client_ua=client_ua)

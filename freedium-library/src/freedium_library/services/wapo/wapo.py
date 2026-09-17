@@ -17,6 +17,7 @@ from typing import Any
 from loguru import logger
 
 from freedium_library.services.base import BaseService
+from freedium_library.services.exceptions import ArticleNotFoundError, UnsupportedContentError
 from freedium_library.services.wapo import client as wapo_client
 
 # washingtonpost.com article URLs (various section/blog/year patterns).
@@ -75,11 +76,11 @@ class WapoService(BaseService):
             url += "/"
         data = await wapo_client.fetch_article(url)
         if not data or not data.get("items"):
-            raise ValueError("empty WaPo response")
+            raise ArticleNotFoundError("empty WaPo response")
 
         body_md = self._items_to_markdown(data.get("items") or [])
         if len(body_md) < 50:
-            raise ValueError("no renderable body items")
+            raise UnsupportedContentError("no renderable body items")
 
         markdown = self._frontmatter(data, url) + body_md
         markdown = _ARC_IMG_RE.sub("/img/wapo/", markdown)

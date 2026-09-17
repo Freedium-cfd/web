@@ -66,4 +66,5 @@ export interface ArticlePageData {
 	markdown: string | null;
 	article: Article | null;
 	error: ArticleError | null;
+	originalUrl?: string | null;
 }

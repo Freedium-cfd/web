@@ -1,11 +1,11 @@
-from freedium_library.services.exceptions import BaseServiceError
+from freedium_library.services.exceptions import ArticleNotFoundError, BaseServiceError
 
 
 class MediumServiceError(BaseServiceError):
     pass
 
 
-class InvalidMediumServicePathError(MediumServiceError):
+class InvalidMediumServicePathError(ArticleNotFoundError, MediumServiceError):
     pass
 
 
@@ -15,3 +15,4 @@ class InvalidMediumServiceHashError(InvalidMediumServicePathError):
 
 class InvalidMediumServiceUrlError(InvalidMediumServicePathError):
     pass
+

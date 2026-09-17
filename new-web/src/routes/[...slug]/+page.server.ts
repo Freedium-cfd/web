@@ -1,5 +1,6 @@
 import { renderArticle } from "$lib/server/articleRenderer";
 import { recordArticleFetch } from "$lib/server/metrics";
+import { toOriginalUrl } from "$lib/utils/url";
 import type { PageServerLoad } from "./$types";
 
 /**
@@ -38,12 +39,17 @@ function getUnsupportedSiteInfo(urlStr: string): { message: string } | null {
 	return null;
 }
 
-export const load: PageServerLoad = async ({ params, request }) => {
+export const load: PageServerLoad = async ({ params, request, setHeaders }) => {
+	const originalUrl = toOriginalUrl(params.slug);
 	const unsupported = getUnsupportedSiteInfo(params.slug);
 	if (unsupported) {
 		recordArticleFetch("unsupported");
+		setHeaders({
+			"cache-control": "public, max-age=86400",
+		});
 		return {
 			slug: params.slug,
+			originalUrl,
 			eager: {
 				html: null,
 				markdown: null,
@@ -149,9 +155,14 @@ export const load: PageServerLoad = async ({ params, request }) => {
 	]);
 
 	if (winner !== TIMED_OUT) {
+		if (!winner.error) {
+			setHeaders({
+				"cache-control": "public, max-age=604800, stale-while-revalidate=86400",
+			});
+		}
 		// Fast (cache hit / quick render) → full HTML in the initial response.
-		return { slug: params.slug, eager: winner, streamed: null };
+		return { slug: params.slug, originalUrl, eager: winner, streamed: null };
 	}
 	// Cold → stream the skeleton, body arrives when renderPromise resolves.
-	return { slug: params.slug, eager: null, streamed: renderPromise };
+	return { slug: params.slug, originalUrl, eager: null, streamed: renderPromise };
 };

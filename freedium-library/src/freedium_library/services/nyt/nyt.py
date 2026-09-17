@@ -21,6 +21,7 @@ from typing import Any
 from loguru import logger
 
 from freedium_library.services.base import BaseService
+from freedium_library.services.exceptions import UnsupportedContentError
 from freedium_library.services.nyt import client as nyt_client
 
 
@@ -53,7 +54,7 @@ def _normalize_url(path: str) -> str:
 _RENDERABLE_TYPES = {"Article", "AthleticArticle"}
 
 
-class NytUnsupportedError(Exception):
+class NytUnsupportedError(UnsupportedContentError):
     """Raised for NYT content we can't render (video, interactive, etc.)."""
 
 

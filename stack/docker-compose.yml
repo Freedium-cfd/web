@@ -267,6 +267,9 @@ services:
       dockerfile: Dockerfile
     deploy:
       replicas: 3
+      resources:
+        limits:
+          memory: 450m
     environment:
       # API via Traefik internal entrypoint (:7090), NOT backend directly.
       # Traefik load-balances + health-checks the 2 backend replicas, and web

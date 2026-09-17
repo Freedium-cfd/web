@@ -17,6 +17,7 @@ FROM oven/bun:1.2-slim AS runtime
 WORKDIR /app
 
 ENV NODE_ENV=production \
+    NODE_OPTIONS="--max-old-space-size=384" \
     HOST=0.0.0.0 \
     PORT=3000
 

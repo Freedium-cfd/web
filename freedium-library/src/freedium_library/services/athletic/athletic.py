@@ -17,6 +17,7 @@ from loguru import logger
 
 from freedium_library.services.athletic import client as athletic_client
 from freedium_library.services.base import BaseService
+from freedium_library.services.exceptions import UnsupportedContentError
 from freedium_library.utils.http import CurlRequest
 
 # Same CDN the NYT service uses — reuse its /img source rather than adding one.
@@ -84,7 +85,7 @@ class AthleticService(BaseService):
         body_html = article.get("article_body") or ""
         body_md = await self._to_markdown(body_html)
         if len(body_md) < 100:
-            raise ValueError("no renderable body")
+            raise UnsupportedContentError("no renderable body in Athletic article")
 
         markdown = self._frontmatter(article, url) + body_md
         return markdown.replace(_NYT_IMG_PREFIX, "/img/nyt/")

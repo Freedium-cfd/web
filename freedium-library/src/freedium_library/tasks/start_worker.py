@@ -24,8 +24,18 @@ time.sleep(0.3)
 
 # Run the real TaskIQ worker as a subprocess. Use the same Python
 # to avoid PATH issues with the taskiq console script.
+# --max-tasks-per-child 200 recycles worker processes to eliminate memory leaks
+# and heap fragmentation from heavy HTML/GraphQL parsing.
 proc = subprocess.Popen(
-    [sys.executable, "-m", "taskiq", "worker", "freedium_library.tasks:broker"],
+    [
+        sys.executable,
+        "-m",
+        "taskiq",
+        "worker",
+        "--max-tasks-per-child",
+        "200",
+        "freedium_library.tasks:broker",
+    ],
 )
 
 # Forward signals so docker stop / SIGTERM reaches the child.

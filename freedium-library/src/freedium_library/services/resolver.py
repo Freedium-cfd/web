@@ -6,11 +6,13 @@ from typing import TYPE_CHECKING, Literal
 
 from loguru import logger
 
+from freedium_library.services.exceptions import InvalidServiceError
+
 if TYPE_CHECKING:
     from freedium_library.services.base import BaseService
 
 
-class ServiceResolutionError(Exception):
+class ServiceResolutionError(InvalidServiceError):
     """Raised when no service can handle the provided content."""
 
     pass

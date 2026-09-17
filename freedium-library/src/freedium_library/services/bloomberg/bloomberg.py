@@ -17,6 +17,7 @@ from loguru import logger
 
 from freedium_library.services.base import BaseService
 from freedium_library.services.bloomberg import client as bbg_client
+from freedium_library.services.exceptions import ArticleNotFoundError, UnsupportedContentError
 from freedium_library.utils.http import CurlRequest
 
 _BBG_IMG_PREFIX = "https://assets.bwbx.io/"
@@ -76,11 +77,11 @@ class BloombergService(BaseService):
         url = _normalize_url(path)
         data = await bbg_client.fetch_article(self._request, url)
         if not data or not data.get("components"):
-            raise ValueError("empty Bloomberg response")
+            raise ArticleNotFoundError("empty Bloomberg response")
 
         body_md = self._components_to_markdown(data.get("components") or [])
         if len(body_md) < 50:
-            raise ValueError("no renderable body components")
+            raise UnsupportedContentError("no renderable body components")
 
         markdown = self._frontmatter(data, url) + body_md
         return markdown.replace(_BBG_IMG_PREFIX, "/img/bbg/")

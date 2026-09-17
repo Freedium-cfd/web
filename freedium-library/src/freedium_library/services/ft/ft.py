@@ -14,6 +14,7 @@ from typing import Any
 from loguru import logger
 
 from freedium_library.services.base import BaseService
+from freedium_library.services.exceptions import UnsupportedContentError
 from freedium_library.services.ft import client as ft_client
 from freedium_library.utils.http import CurlRequest
 
@@ -91,7 +92,7 @@ class FtService(BaseService):
         refs = structured.get("references", [])
         body_md = self._tree_to_markdown(body, data, refs)
         if len(body_md) < 50:
-            raise ValueError("no renderable body")
+            raise UnsupportedContentError("no renderable body in FT article")
 
         return self._frontmatter(data, url) + body_md
 
