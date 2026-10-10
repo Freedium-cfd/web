@@ -196,10 +196,10 @@ async def render_article_async(content: str, frontmatter: bool) -> dict:
         if service_name == "medium":
             if frontmatter:
                 markdown, _metadata = (
-                    await service.arender_with_frontmatter_and_metadata(content)
+                    await resolved_service.arender_with_frontmatter_and_metadata(content)
                 )
             else:
-                markdown, _metadata = await service.arender_with_metadata(content)
+                markdown, _metadata = await resolved_service.arender_with_metadata(content)
         else:
             markdown = (
                 await resolved_service.arender_with_frontmatter(content)

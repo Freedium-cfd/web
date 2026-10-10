@@ -14,6 +14,16 @@ import threading
 
 from freedium_library.tasks.metrics_server import start_metrics_server
 
+# Clean up stale multiprocess metric files on container boot
+mp_dir = os.environ.get("PROMETHEUS_MULTIPROC_DIR", "")
+if mp_dir and os.path.isdir(mp_dir):
+    for entry in os.scandir(mp_dir):
+        if entry.is_file() and entry.name.endswith(".db"):
+            try:
+                os.remove(entry.path)
+            except OSError:
+                pass
+
 # Must start BEFORE taskiq children import prometheus_client metrics
 # (the multiprocess dir switch happens at import time).
 start_metrics_server()

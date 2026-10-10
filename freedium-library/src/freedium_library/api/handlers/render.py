@@ -192,6 +192,48 @@ async def render_universal(
 
     from freedium_library.tasks.cache import render_article_async
 
+    def _is_not_found(exc: Exception) -> bool:
+        try:
+            if exc.code == 404:
+                return True
+        except AttributeError:
+            pass
+        try:
+            if exc.response.status_code == 404:
+                return True
+        except AttributeError:
+            pass
+        try:
+            if exc.status_code == 404:
+                return True
+        except AttributeError:
+            pass
+        err_str = str(exc)
+        if "404" in err_str:
+            return True
+        return False
+
+    def _is_unsupported(exc: Exception) -> bool:
+        try:
+            if exc.code == 422:
+                return True
+        except AttributeError:
+            pass
+        try:
+            if exc.response.status_code == 422:
+                return True
+        except AttributeError:
+            pass
+        try:
+            if exc.status_code == 422:
+                return True
+        except AttributeError:
+            pass
+        err_str = str(exc).lower()
+        if "unsupported" in err_str or "422" in err_str:
+            return True
+        return False
+
     async def _render_inline(timeout: float | None) -> RenderResponse:
         """Resolve + render the content, optionally under a time budget.
 
@@ -290,6 +332,14 @@ async def render_universal(
                     log_errored_link(request.content, outcome, None, str(e), client_ua=client_ua)
                     raise HTTPException(status_code=e.status_code, detail=str(e)) from e
                 except Exception as e:
+                    if _is_not_found(e):
+                        ctx.set_outcome("parser_failure")
+                        log_errored_link(request.content, "parser_failure", None, str(e), client_ua=client_ua)
+                        raise HTTPException(status_code=404, detail="Article not found") from e
+                    if _is_unsupported(e):
+                        ctx.set_outcome("parser_failure")
+                        log_errored_link(request.content, "parser_failure", None, str(e), client_ua=client_ua)
+                        raise HTTPException(status_code=422, detail=str(e)) from e
                     ctx.set_outcome("network_error")
                     log_errored_link(request.content, "network_error", None, str(e), client_ua=client_ua)
                     raise HTTPException(
@@ -313,6 +363,14 @@ async def render_universal(
             log_errored_link(request.content, outcome, None, str(e), client_ua=client_ua)
             raise HTTPException(status_code=e.status_code, detail=str(e)) from e
         except Exception as e:
+            if _is_not_found(e):
+                ctx.set_outcome("parser_failure")
+                log_errored_link(request.content, "parser_failure", None, str(e), client_ua=client_ua)
+                raise HTTPException(status_code=404, detail="Article not found") from e
+            if _is_unsupported(e):
+                ctx.set_outcome("parser_failure")
+                log_errored_link(request.content, "parser_failure", None, str(e), client_ua=client_ua)
+                raise HTTPException(status_code=422, detail=str(e)) from e
             ctx.set_outcome("network_error")
             log_errored_link(request.content, "network_error", None, str(e), client_ua=client_ua)
             raise HTTPException(
@@ -370,8 +428,28 @@ def register_render_router(router: APIRouter) -> None:
 
         result = await result_backend.get_result(task_id)
         if result.is_err:
-            # Don't leak exception details to the frontend
-            return {"status": "error", "error": "Render failed — please try again"}
+            err = result.error
+            if isinstance(err, (ServiceResolutionError, InvalidMediumServicePathError)) or (err is not None and _is_not_found(err)):
+                return {
+                    "status": "error",
+                    "error": "Article not found",
+                    "code": "ARTICLE_NOT_FOUND",
+                    "status_code": 404,
+                }
+            if err is not None and _is_unsupported(err):
+                return {
+                    "status": "error",
+                    "error": str(err),
+                    "code": "UNSUPPORTED_SITE",
+                    "status_code": 422,
+                }
+            # Don't leak raw internal exception details to the frontend
+            return {
+                "status": "error",
+                "error": "Render failed — please try again",
+                "code": "RENDER_ERROR",
+                "status_code": 500,
+            }
 
         data = result.return_value  # {"markdown", "service"}
         return {"status": "done", "markdown": data["markdown"], "service": data["service"]}

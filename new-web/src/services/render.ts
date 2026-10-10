@@ -37,6 +37,15 @@ async function pollTask(taskId: string, maxWaitMs = 180_000): Promise<RenderResp
 			};
 		}
 		if (poll.status === "error") {
+			const pollErr = poll as { error?: string; code?: string; status_code?: number };
+			if (pollErr.code === "ARTICLE_NOT_FOUND" || pollErr.status_code === 404) {
+				throw new Error("ARTICLE_NOT_FOUND");
+			}
+			if (pollErr.code === "UNSUPPORTED_SITE" || pollErr.status_code === 422) {
+				const err = new Error("UPSTREAM_422") as Error & { detail?: string };
+				if (pollErr.error) err.detail = pollErr.error;
+				throw err;
+			}
 			throw new Error("RENDER_ERROR");
 		}
 		// status === "pending" — keep polling
@@ -68,6 +77,14 @@ export async function render(
 		const status = errObj?.status ?? errObj?.statusCode ?? errObj?.response?.status;
 		const detail = errObj?.data?.detail ?? errObj?.response?._data?.detail;
 		if (typeof status === "number") {
+			if (status === 404 || (detail && detail.includes("404"))) {
+				throw new Error("ARTICLE_NOT_FOUND");
+			}
+			if (status === 422 || (detail && detail.toLowerCase().includes("unsupported"))) {
+				const error = new Error("UPSTREAM_422") as Error & { detail?: string };
+				if (detail) error.detail = detail;
+				throw error;
+			}
 			const error = new Error(`UPSTREAM_${status}`) as Error & { detail?: string };
 			if (detail) {
 				error.detail = detail;
