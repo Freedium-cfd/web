@@ -234,6 +234,30 @@ async def render_universal(
             return True
         return False
 
+    def _is_blocked(exc: Exception) -> bool:
+        from freedium_library.services.exceptions import UpstreamBlockedError
+        if isinstance(exc, UpstreamBlockedError):
+            return True
+        try:
+            if exc.code in (401, 403, 502):
+                return True
+        except AttributeError:
+            pass
+        try:
+            if exc.response.status_code in (401, 403, 502):
+                return True
+        except AttributeError:
+            pass
+        try:
+            if exc.status_code in (401, 403, 502):
+                return True
+        except AttributeError:
+            pass
+        err_str = str(exc).lower()
+        if "403" in err_str or "forbidden" in err_str or "datadome" in err_str or "captcha" in err_str or "turnstile" in err_str:
+            return True
+        return False
+
     async def _render_inline(timeout: float | None) -> RenderResponse:
         """Resolve + render the content, optionally under a time budget.
 
@@ -340,6 +364,10 @@ async def render_universal(
                         ctx.set_outcome("parser_failure")
                         log_errored_link(request.content, "parser_failure", None, str(e), client_ua=client_ua)
                         raise HTTPException(status_code=422, detail=str(e)) from e
+                    if _is_blocked(e):
+                        ctx.set_outcome("network_error")
+                        log_errored_link(request.content, "network_error", None, str(e), client_ua=client_ua)
+                        raise HTTPException(status_code=502, detail=str(e)) from e
                     ctx.set_outcome("network_error")
                     log_errored_link(request.content, "network_error", None, str(e), client_ua=client_ua)
                     raise HTTPException(
@@ -371,6 +399,10 @@ async def render_universal(
                 ctx.set_outcome("parser_failure")
                 log_errored_link(request.content, "parser_failure", None, str(e), client_ua=client_ua)
                 raise HTTPException(status_code=422, detail=str(e)) from e
+            if _is_blocked(e):
+                ctx.set_outcome("network_error")
+                log_errored_link(request.content, "network_error", None, str(e), client_ua=client_ua)
+                raise HTTPException(status_code=502, detail=str(e)) from e
             ctx.set_outcome("network_error")
             log_errored_link(request.content, "network_error", None, str(e), client_ua=client_ua)
             raise HTTPException(
@@ -442,6 +474,13 @@ def register_render_router(router: APIRouter) -> None:
                     "error": str(err),
                     "code": "UNSUPPORTED_SITE",
                     "status_code": 422,
+                }
+            if err is not None and _is_blocked(err):
+                return {
+                    "status": "error",
+                    "error": str(err),
+                    "code": "UPSTREAM_BLOCKED",
+                    "status_code": 502,
                 }
             # Don't leak raw internal exception details to the frontend
             return {

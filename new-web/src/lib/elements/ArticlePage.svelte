@@ -149,6 +149,8 @@
 					<h1 class="error-title">
 						{#if error.code === 'UNSUPPORTED_SITE'}
 							Site not supported.
+						{:else if error.code === 'UPSTREAM_BLOCKED' || error.status === 502}
+							Access blocked by publisher.
 						{:else if error.status === 404}
 							Article not found.
 						{:else}
@@ -157,7 +159,7 @@
 					</h1>
 					<p class="error-message">{getErrorMessage(error)}</p>
 
-					{#if originalUrl && (error.code === 'UNSUPPORTED_SITE' || error.status === 404 || error.status === 400 || error.status === 422)}
+					{#if originalUrl && (error.code === 'UNSUPPORTED_SITE' || error.code === 'UPSTREAM_BLOCKED' || error.status === 404 || error.status === 400 || error.status === 422 || error.status === 502)}
 						<ArchiveFallbacks url={originalUrl} />
 					{/if}
 

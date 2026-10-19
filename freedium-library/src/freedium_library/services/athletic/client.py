@@ -34,8 +34,19 @@ _NEXT_DATA_RE = re.compile(
 
 async def fetch_article(request: CurlRequest, url: str) -> dict[str, Any]:
     """The page's `pageProps.article` object: body HTML plus metadata."""
-    resp = await request.aget(url, headers=HEADERS)
-    resp.raise_for_status()
+    from freedium_library.services.exceptions import UpstreamBlockedError
+
+    try:
+        resp = await request.aget(url, headers=HEADERS)
+        resp.raise_for_status()
+    except Exception as e:
+        err_msg = str(e).lower()
+        if "403" in err_msg or "datadome" in err_msg:
+            raise UpstreamBlockedError("The Athletic is protected by DataDome bot challenge") from e
+        raise
+
+    if "datadome" in resp.text.lower() or "captcha" in resp.text.lower():
+        raise UpstreamBlockedError("The Athletic is protected by DataDome bot challenge")
 
     m = _NEXT_DATA_RE.search(resp.text)
     if not m:

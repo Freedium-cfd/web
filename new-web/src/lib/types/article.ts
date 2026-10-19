@@ -54,7 +54,9 @@ export type ArticleErrorCode =
 	| 'ARTICLE_NOT_FOUND'
 	| 'RENDER_ERROR'
 	| 'COMPILE_ERROR'
-	| 'INTERNAL_ERROR';
+	| 'INTERNAL_ERROR'
+	| 'UNSUPPORTED_SITE'
+	| 'UPSTREAM_BLOCKED';
 
 /**
  * Data structure returned by the article page loader

@@ -56,8 +56,19 @@ def _extract_relay_payload(html: str) -> dict[str, Any] | None:
 
 async def fetch_content(request: CurlRequest, url: str) -> dict[str, Any]:
     """Fetch Quora page and extract post or question/answer payload."""
-    resp = await request.aget(url, headers=HEADERS)
-    resp.raise_for_status()
+    from freedium_library.services.exceptions import UpstreamBlockedError
+
+    try:
+        resp = await request.aget(url, headers=HEADERS)
+        resp.raise_for_status()
+    except Exception as e:
+        err_msg = str(e).lower()
+        if "403" in err_msg or "turnstile" in err_msg or "cloudflare" in err_msg:
+            raise UpstreamBlockedError("Quora is protected by Cloudflare bot challenge") from e
+        raise
+
+    if "just a moment" in resp.text.lower() or "turnstile" in resp.text.lower():
+        raise UpstreamBlockedError("Quora is protected by Cloudflare bot challenge")
 
     payload = _extract_relay_payload(resp.text)
     if not payload:

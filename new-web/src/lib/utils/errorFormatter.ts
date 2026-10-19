@@ -12,6 +12,8 @@ export function getErrorMessage(error: ArticlePageData['error']): string {
 			return 'There was a problem processing the article content.';
 		case 'UNSUPPORTED_SITE':
 			return error.message || "This site isn't supported.";
+		case 'UPSTREAM_BLOCKED':
+			return error.message || "This publication is currently blocking automated access. Check public archives below.";
 		default:
 			return error.message || 'An unexpected error occurred.';
 	}

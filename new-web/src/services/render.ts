@@ -46,6 +46,11 @@ async function pollTask(taskId: string, maxWaitMs = 180_000): Promise<RenderResp
 				if (pollErr.error) err.detail = pollErr.error;
 				throw err;
 			}
+			if (pollErr.code === "UPSTREAM_BLOCKED" || pollErr.status_code === 502) {
+				const err = new Error("UPSTREAM_502") as Error & { detail?: string };
+				if (pollErr.error) err.detail = pollErr.error;
+				throw err;
+			}
 			throw new Error("RENDER_ERROR");
 		}
 		// status === "pending" — keep polling
@@ -82,6 +87,11 @@ export async function render(
 			}
 			if (status === 422 || (detail && detail.toLowerCase().includes("unsupported"))) {
 				const error = new Error("UPSTREAM_422") as Error & { detail?: string };
+				if (detail) error.detail = detail;
+				throw error;
+			}
+			if (status === 502 || status === 403 || (detail && (detail.toLowerCase().includes("blocked") || detail.includes("403")))) {
+				const error = new Error("UPSTREAM_502") as Error & { detail?: string };
 				if (detail) error.detail = detail;
 				throw error;
 			}

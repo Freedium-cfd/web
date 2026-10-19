@@ -126,6 +126,22 @@ export const load: PageServerLoad = async ({ params, request, setHeaders }) => {
 				},
 			};
 		}
+			if (message === "UPSTREAM_502" || message === "UPSTREAM_403") {
+				recordArticleFetch("upstream_error");
+				const detail = (err as Error & { detail?: string })?.detail;
+				return {
+					html: null as string | null,
+					markdown: null as string | null,
+					article: null as import("$lib/types").ArticlePageData["article"] | null,
+					cacheStatus: "miss" as string,
+					renderTimeMs: Math.round(performance.now() - start),
+					error: {
+						status: 502,
+						message: detail || "This publication blocked direct access (anti-bot protection). You can view an archived copy below.",
+						code: "UPSTREAM_BLOCKED",
+					},
+				};
+			}
 		console.error("Failed to render article:", err);
 		recordArticleFetch(
 			message.startsWith("UPSTREAM_") ? "upstream_error" : "network_fail",
