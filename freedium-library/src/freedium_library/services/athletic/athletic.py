@@ -19,19 +19,10 @@ from freedium_library.services.athletic import client as athletic_client
 from freedium_library.services.base import BaseService
 from freedium_library.services.exceptions import UnsupportedContentError
 from freedium_library.utils.http import CurlRequest
+from freedium_library.utils.url import normalize_url as _normalize_url
 
 # Same CDN the NYT service uses — reuse its /img source rather than adding one.
 _NYT_IMG_PREFIX = "https://static01.nyt.com/"
-
-
-def _normalize_url(path: str) -> str:
-    url = path.strip()
-    # Proxies/SvelteKit collapse the // in /https://host/… → https:/host/…
-    if url.startswith("https:/") and not url.startswith("https://"):
-        url = "https://" + url[len("https:/"):]
-    elif url.startswith("http:/") and not url.startswith("http://"):
-        url = "http://" + url[len("http:/"):]
-    return url
 
 
 def _is_athletic_url(url: str) -> bool:

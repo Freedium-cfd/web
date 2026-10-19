@@ -19,25 +19,9 @@ from freedium_library.services.base import BaseService
 from freedium_library.services.bloomberg import client as bbg_client
 from freedium_library.services.exceptions import ArticleNotFoundError, UnsupportedContentError
 from freedium_library.utils.http import CurlRequest
+from freedium_library.utils.url import escape_html as _esc, normalize_url as _normalize_url
 
 _BBG_IMG_PREFIX = "https://assets.bwbx.io/"
-
-
-def _normalize_url(path: str) -> str:
-    url = path.strip()
-    # Collapsed scheme fix (proxy/SvelteKit).
-    if url.startswith("https:/") and not url.startswith("https://"):
-        url = "https://" + url[len("https:/"):]
-    elif url.startswith("http:/") and not url.startswith("http://"):
-        url = "http://" + url[len("http:/"):]
-    return url
-
-
-def _esc(text: str) -> str:
-    return (
-        text.replace("&", "&amp;").replace('"', "&quot;")
-        .replace("<", "&lt;").replace(">", "&gt;")
-    )
 
 
 def _format_date(ts: int | None) -> str:

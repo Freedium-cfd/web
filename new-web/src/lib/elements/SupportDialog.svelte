@@ -12,6 +12,7 @@
 	import copy from 'copy-to-clipboard';
 	import { toast } from 'svelte-sonner';
 	import { onMount } from 'svelte';
+	import { SUPPORT_MILESTONE_TEXT } from '$lib/constants';
 
 	interface Props {
 		open?: boolean;
@@ -62,7 +63,7 @@
 				<span>1.1M+ Articles Unlocked!</span>
 			</div>
 			<p class="mt-1.5 text-xs leading-relaxed text-zinc-600 dark:text-zinc-400">
-				Freedium has served over <strong>1,100,000</strong> paywall-free reads across Medium, NYT, The Washington Post, Bloomberg, Reuters, The Economist, Financial Times, The Athletic &amp; Quora.
+				Freedium has served over <strong>1,100,000</strong> paywall-free reads {SUPPORT_MILESTONE_TEXT}
 			</p>
 		</div>
 

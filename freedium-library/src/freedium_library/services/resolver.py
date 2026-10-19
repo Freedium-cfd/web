@@ -99,3 +99,96 @@ class ServiceResolver:
     def list_services(self) -> list[str]:
         """List all registered service names."""
         return list(self._services.keys())
+
+
+def build_service_resolver(
+    proxy: str | None = None,
+    medium_service: BaseService | None = None,
+) -> ServiceResolver:
+    """Build and configure the standard ServiceResolver with all enabled publications.
+
+    Mirrors the canonical registration order: specific hosts first (Athletic,
+    NYT, WaPo, FT, Economist, Reuters, Bloomberg, Quora), and Medium last as
+    the permissive fallback.
+    """
+    from freedium_library.api.config import (
+        AthleticConfig,
+        BloombergConfig,
+        EconomistConfig,
+        FtConfig,
+        MediumConfig,
+        NytConfig,
+        QuoraConfig,
+        ReutersConfig,
+        WapoConfig,
+    )
+
+    resolver = ServiceResolver()
+
+    ath_cfg = AthleticConfig()
+    if ath_cfg.ENABLED:
+        from freedium_library.services.athletic import AthleticService
+
+        resolver.register("athletic", AthleticService(mdream_url=ath_cfg.MDREAM_URL))
+        logger.info("Athletic service registered")
+
+    nyt_cfg = NytConfig()
+    if nyt_cfg.ENABLED:
+        from freedium_library.services.nyt import NytService
+        from freedium_library.services.nyt import client as _nyt_client
+
+        if _nyt_client._NYT_PRIVATE_KEY is not None:
+            resolver.register(
+                "nyt", NytService(proxy=proxy, mdream_url=nyt_cfg.MDREAM_URL)
+            )
+            logger.info("NYT service registered (egress via WARP)")
+        else:
+            logger.warning("NYT_ENABLED but NYT_SIGNING_KEY missing/invalid — NYT not registered")
+
+    if WapoConfig().ENABLED:
+        from freedium_library.services.wapo import WapoService
+
+        resolver.register("wapo", WapoService())
+        logger.info("WaPo service registered")
+
+    if FtConfig().ENABLED:
+        from freedium_library.services.ft import FtService
+
+        resolver.register("ft", FtService())
+        logger.info("FT service registered")
+
+    if EconomistConfig().ENABLED:
+        from freedium_library.services.economist import EconomistService
+
+        resolver.register("economist", EconomistService())
+        logger.info("Economist service registered")
+
+    if ReutersConfig().ENABLED:
+        from freedium_library.services.reuters import ReutersService
+
+        resolver.register("reuters", ReutersService(proxy=proxy))
+        logger.info("Reuters service registered")
+
+    if BloombergConfig().ENABLED:
+        from freedium_library.services.bloomberg import BloombergService
+
+        resolver.register("bloomberg", BloombergService(proxy=proxy))
+        logger.info("Bloomberg service registered")
+
+    if QuoraConfig().ENABLED:
+        from freedium_library.services.quora import QuoraService
+
+        resolver.register("quora", QuoraService(proxy=proxy))
+        logger.info("Quora service registered")
+
+    if MediumConfig().ENABLED:
+        if medium_service is None:
+            from freedium_library.services.medium.container import MediumContainer
+
+            medium_service = MediumContainer().service()
+        resolver.register("medium", medium_service)
+        logger.info("Medium service registered (last — catch-all)")
+    else:
+        logger.info("Medium service disabled (MEDIUM_ENABLED=false)")
+
+    return resolver

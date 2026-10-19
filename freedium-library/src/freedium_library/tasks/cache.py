@@ -91,84 +91,17 @@ def _get_resolver() -> ServiceResolver:
 
     Must be process-wide, not per task: the services own long-lived HTTP
     clients, so rebuilding them on every render would open (and never close)
-    a fresh connection pool per article. Mirrors the registration order in
-    api/lifespan.py — specific hosts first, Medium last, because Medium's
-    validator accepts any URL.
+    a fresh connection pool per article.
     """
     global _resolver
     if _resolver is not None:
         return _resolver
 
-    import os
-
-    from freedium_library.api.config import (
-        AthleticConfig,
-        BloombergConfig,
-        EconomistConfig,
-        FtConfig,
-        MediumConfig,
-        NytConfig,
-        ReutersConfig,
-        WapoConfig,
-    )
-
+    from freedium_library.services.resolver import build_service_resolver
     from freedium_library.utils.http import get_warp_proxy
 
-    resolver = ServiceResolver()
     proxy = get_warp_proxy()
-
-    # Before NYT — see the matching comment in api/lifespan.py.
-    ath_cfg = AthleticConfig()
-    if ath_cfg.ENABLED:
-        from freedium_library.services.athletic import AthleticService
-
-        resolver.register("athletic", AthleticService(mdream_url=ath_cfg.MDREAM_URL))
-
-    nyt_cfg = NytConfig()
-    if nyt_cfg.ENABLED:
-        from freedium_library.services.nyt import NytService
-        from freedium_library.services.nyt import client as nyt_client
-
-        if nyt_client._NYT_PRIVATE_KEY is not None:
-            resolver.register(
-                "nyt", NytService(proxy=proxy, mdream_url=nyt_cfg.MDREAM_URL)
-            )
-
-    if WapoConfig().ENABLED:
-        from freedium_library.services.wapo import WapoService
-
-        resolver.register("wapo", WapoService())
-
-    if FtConfig().ENABLED:
-        from freedium_library.services.ft import FtService
-
-        resolver.register("ft", FtService())
-
-    if EconomistConfig().ENABLED:
-        from freedium_library.services.economist import EconomistService
-
-        resolver.register("economist", EconomistService())
-
-    if ReutersConfig().ENABLED:
-        from freedium_library.services.reuters import ReutersService
-
-        resolver.register("reuters", ReutersService(proxy=proxy))
-
-    if BloombergConfig().ENABLED:
-        from freedium_library.services.bloomberg import BloombergService
-
-        resolver.register("bloomberg", BloombergService(proxy=proxy))
-
-    if QuoraConfig().ENABLED:
-        from freedium_library.services.quora import QuoraService
-
-        resolver.register("quora", QuoraService(proxy=proxy))
-
-    # Medium LAST — permissive validator (accepts any URL).
-    if MediumConfig().ENABLED:
-        resolver.register("medium", MediumContainer().service())
-
-    _resolver = resolver
+    _resolver = build_service_resolver(proxy=proxy)
     return _resolver
 
 
@@ -217,7 +150,7 @@ async def render_article_async(content: str, frontmatter: bool) -> dict:
 
     try:
         await write_rendered_cache.kiq(content, markdown, service_name)
-    except Exception:
-        pass
+    except Exception as exc:
+        logger.warning(f"Failed to enqueue write_rendered_cache: {exc}")
 
     return {"markdown": markdown, "service": service_name}

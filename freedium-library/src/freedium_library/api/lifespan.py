@@ -112,109 +112,13 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     recent_posts_service = recent_posts_container.service()
     app.state.recent_posts_service = recent_posts_service
 
-    # Initialize service resolver
-    resolver = ServiceResolver()
-
-    # Register specific-host services BEFORE Medium. Medium's validator is
-    # permissive — it accepts any URL and tries to resolve it as a Medium
-    # post, so it must be last to avoid stealing FT/NYT/WaPo/etc. URLs.
-    medium_service = medium_container.service()
+    # Initialize service resolver using centralized factory
+    from freedium_library.services.resolver import build_service_resolver
     from freedium_library.utils.http import get_warp_proxy
 
+    medium_service = medium_container.service()
     warp_proxy = get_warp_proxy()
-
-    # The Athletic (opt-in). Before NYT: its articles live under
-    # nytimes.com/athletic/. NytService's path rules don't claim those today,
-    # but registering first keeps that true if those rules ever loosen.
-    from freedium_library.api.config import AthleticConfig
-
-    _ath_cfg = AthleticConfig()
-    if _ath_cfg.ENABLED:
-        from freedium_library.services.athletic import AthleticService
-
-        resolver.register("athletic", AthleticService(mdream_url=_ath_cfg.MDREAM_URL))
-        logger.info("Athletic service registered")
-
-    # NYT (opt-in). Needs NYT_SIGNING_KEY in env (the RSA signing key, never
-    # committed); without it the client can't sign → leave unregistered.
-    from freedium_library.api.config import NytConfig
-
-    _nyt_cfg = NytConfig()
-    if _nyt_cfg.ENABLED:
-        from freedium_library.services.nyt import NytService
-        from freedium_library.services.nyt import client as _nyt_client
-
-        if _nyt_client._NYT_PRIVATE_KEY is not None:
-            resolver.register(
-                "nyt", NytService(proxy=warp_proxy, mdream_url=_nyt_cfg.MDREAM_URL)
-            )
-            logger.info("NYT service registered (egress via WARP)")
-        else:
-            logger.warning("NYT_ENABLED but NYT_SIGNING_KEY missing/invalid — NYT not registered")
-
-    # WaPo (opt-in). No auth/signing needed — the Rainbow API is open.
-    from freedium_library.api.config import WapoConfig
-
-    if WapoConfig().ENABLED:
-        from freedium_library.services.wapo import WapoService
-
-        resolver.register("wapo", WapoService())
-        logger.info("WaPo service registered")
-
-    # Financial Times (opt-in). Unauthenticated mobile app API.
-    from freedium_library.api.config import FtConfig
-
-    if FtConfig().ENABLED:
-        from freedium_library.services.ft import FtService
-
-        resolver.register("ft", FtService())
-        logger.info("FT service registered")
-
-    # The Economist (opt-in). HMAC-signed GraphQL + curl_cffi web fallback.
-    from freedium_library.api.config import EconomistConfig
-
-    if EconomistConfig().ENABLED:
-        from freedium_library.services.economist import EconomistService
-
-        resolver.register("economist", EconomistService())
-        logger.info("Economist service registered")
-
-    # Reuters (opt-in). No auth — ?outputType=json on any Reuters URL.
-    from freedium_library.api.config import ReutersConfig
-
-    if ReutersConfig().ENABLED:
-        from freedium_library.services.reuters import ReutersService
-
-        resolver.register("reuters", ReutersService(proxy=warp_proxy))
-        logger.info("Reuters service registered")
-
-    # Bloomberg (opt-in). Mobile CDN API with CurlRequest + WARP.
-    from freedium_library.api.config import BloombergConfig
-
-    if BloombergConfig().ENABLED:
-        from freedium_library.services.bloomberg import BloombergService
-
-        resolver.register("bloomberg", BloombergService(proxy=warp_proxy))
-        logger.info("Bloomberg service registered")
-
-    # Quora (opt-in).
-    from freedium_library.api.config import QuoraConfig
-
-    if QuoraConfig().ENABLED:
-        from freedium_library.services.quora import QuoraService
-
-        resolver.register("quora", QuoraService(proxy=warp_proxy))
-        logger.info("Quora service registered")
-
-    # Medium LAST — its validator is permissive (accepts any URL, tries to
-    # resolve as a Medium post). Specific-host services must match first.
-    from freedium_library.api.config import MediumConfig
-
-    if MediumConfig().ENABLED:
-        resolver.register("medium", medium_service)
-        logger.info("Medium service registered (last — catch-all)")
-    else:
-        logger.info("Medium service disabled (MEDIUM_ENABLED=false)")
+    resolver = build_service_resolver(proxy=warp_proxy, medium_service=medium_service)
 
     app.state.service_resolver = resolver
 

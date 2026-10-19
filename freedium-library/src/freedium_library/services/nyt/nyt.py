@@ -23,6 +23,7 @@ from loguru import logger
 from freedium_library.services.base import BaseService
 from freedium_library.services.exceptions import UnsupportedContentError
 from freedium_library.services.nyt import client as nyt_client
+from freedium_library.utils.url import normalize_url as _normalize_url
 
 
 # Any nytimes.com subdomain (www, cooking, …). Content paths: dated articles
@@ -41,14 +42,6 @@ _STATIC01_RE = re.compile(r"https?://static01\.nyt\.com/", re.IGNORECASE)
 _ENHANCED_BYLINE_RE = re.compile(
     r'id="enhanced-byline"[^>]*>\s*<p[^>]*>(.*?)</p>', re.S | re.IGNORECASE
 )
-# Proxies/SvelteKit collapse the `//` in /https://nytimes.com/… → `https:/…`.
-# Medium's extractor tolerates it; restore it before matching/fetching.
-_COLLAPSED_SCHEME_RE = re.compile(r"^(https?):/+", re.IGNORECASE)
-
-
-def _normalize_url(path: str) -> str:
-    return _COLLAPSED_SCHEME_RE.sub(r"\1://", path.strip())
-
 # Article __typename values we can render. Others (Video, EmbeddedInteractive)
 # don't have a readable hybridBody → unsupported.
 _RENDERABLE_TYPES = {"Article", "AthleticArticle"}

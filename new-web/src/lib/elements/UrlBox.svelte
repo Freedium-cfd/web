@@ -2,6 +2,7 @@
   import { goto } from '$app/navigation';
   import { onMount } from 'svelte';
   import config from '@/config';
+  import { URL_INPUT_PLACEHOLDER } from '$lib/constants';
 
   let { showProtocol = true }: { showProtocol?: boolean } = $props();
   let url = $state('');
@@ -80,7 +81,7 @@
   <!-- svelte-ignore a11y_autofocus -->
   <textarea
     rows="2"
-    placeholder="paste a link — Medium, NYT, WaPo, Bloomberg, Reuters, Economist, FT, The Athletic, Quora"
+    placeholder={URL_INPUT_PLACEHOLDER}
     bind:value={url}
     onkeydown={handleKeydown}
     autofocus

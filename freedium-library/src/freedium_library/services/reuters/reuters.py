@@ -19,27 +19,12 @@ from freedium_library.services.base import BaseService
 from freedium_library.services.exceptions import ArticleNotFoundError
 from freedium_library.services.reuters import client as reuters_client
 from freedium_library.utils.http import CurlRequest
+from freedium_library.utils.url import escape_html as _esc, normalize_url as _normalize_url
 
 _REUTERS_IMG_PREFIXES = [
     "https://www.reuters.com/resizer/",
     "https://cloudfront-us-east-2.images.arcpublishing.com/reuters/",
 ]
-
-
-def _normalize_url(path: str) -> str:
-    url = path.strip()
-    if url.startswith("https:/") and not url.startswith("https://"):
-        url = "https://" + url[len("https:/"):]
-    elif url.startswith("http:/") and not url.startswith("http://"):
-        url = "http://" + url[len("http:/"):]
-    return url
-
-
-def _esc(text: str) -> str:
-    return (
-        text.replace("&", "&amp;").replace('"', "&quot;")
-        .replace("<", "&lt;").replace(">", "&gt;")
-    )
 
 
 def _is_reuters_url(url: str) -> bool:

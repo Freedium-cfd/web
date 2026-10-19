@@ -291,8 +291,8 @@ async def render_universal(
             from freedium_library.tasks.cache import write_rendered_cache
             try:
                 await write_rendered_cache.kiq(request.content, markdown, service_name)
-            except Exception:
-                pass  # broker down — fall through silently
+            except Exception as exc:
+                logger.warning(f"Failed to enqueue write_rendered_cache: {exc}")
 
         log_successful_render(
             request.content, "inline", client_ua,

@@ -19,6 +19,7 @@ from loguru import logger
 from freedium_library.services.base import BaseService
 from freedium_library.services.exceptions import ArticleNotFoundError, UnsupportedContentError
 from freedium_library.services.wapo import client as wapo_client
+from freedium_library.utils.url import escape_html as _esc, normalize_url as _normalize_url
 
 # washingtonpost.com article URLs (various section/blog/year patterns).
 # Excludes non-article pages (/video/, /photography/, /podcasts/).
@@ -28,7 +29,6 @@ _WAPO_ARTICLE_RE = re.compile(
     r"[a-z0-9-]+/",
     re.IGNORECASE,
 )
-_COLLAPSED_SCHEME_RE = re.compile(r"^(https?):/+", re.IGNORECASE)
 
 # WaPo image CDN hosts — separate patterns so the redirect source maps to the
 # correct CDN (see images.py _IMG_SOURCES).
@@ -38,17 +38,6 @@ _ARC_IMG_RE = re.compile(
 _LEGACY_IMG_RE = re.compile(
     r"https?://img\.washingtonpost\.com/", re.IGNORECASE
 )
-
-
-def _normalize_url(path: str) -> str:
-    return _COLLAPSED_SCHEME_RE.sub(r"\1://", path.strip())
-
-
-def _esc(text: str) -> str:
-    return (
-        text.replace("&", "&amp;").replace('"', "&quot;")
-        .replace("<", "&lt;").replace(">", "&gt;")
-    )
 
 
 def _format_date(ts_ms: int | None) -> str:

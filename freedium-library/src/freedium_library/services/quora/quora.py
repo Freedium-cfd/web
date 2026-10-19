@@ -22,20 +22,9 @@ from freedium_library.services.exceptions import ArticleNotFoundError, Unsupport
 from freedium_library.services.quora import client as quora_client
 from freedium_library.utils.http import CurlRequest
 from freedium_library.utils.http.client.config import RequestConfig, RequestProxyConfig
+from freedium_library.utils.url import escape_html as _esc, normalize_url as _normalize_url
 
 _QUORA_IMG_PREFIX = "https://qph.cf2.quoracdn.net/"
-
-
-def _normalize_url(path: str) -> str:
-    url = path.strip()
-    # Collapsed scheme fix (proxy/SvelteKit: https:/host -> https://host)
-    if url.startswith("https:/") and not url.startswith("https://"):
-        url = "https://" + url[len("https:/"):]
-    elif url.startswith("http:/") and not url.startswith("http://"):
-        url = "http://" + url[len("http:/"):]
-    elif not url.startswith(("http://", "https://")):
-        url = f"https://{url}"
-    return url
 
 
 def _is_quora_url(url: str) -> bool:
@@ -47,10 +36,6 @@ def _is_quora_url(url: str) -> bool:
         return host == "quora.com" or host.endswith(".quora.com")
     except Exception:
         return False
-
-
-def _esc(text: str) -> str:
-    return html.escape(text, quote=True)
 
 
 class QuoraService(BaseService):

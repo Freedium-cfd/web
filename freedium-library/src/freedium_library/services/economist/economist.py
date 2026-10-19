@@ -14,23 +14,10 @@ from loguru import logger
 from freedium_library.services.base import BaseService
 from freedium_library.services.economist import client as eco_client
 from freedium_library.utils.http import CurlRequest
+from freedium_library.utils.url import escape_html as _esc, normalize_url as _normalize_url
 
 _ECO_IMG_PREFIX = "https://www.economist.com/cdn-cgi/image/"
 _ECO_IMG_PREFIX2 = "https://cdn.static-economist.com/"
-
-
-def _normalize_url(path: str) -> str:
-    url = path.strip()
-    if url.startswith("https:/") and not url.startswith("https://"):
-        url = "https://" + url[len("https:/"):]
-    return url
-
-
-def _esc(text: str) -> str:
-    return (
-        text.replace("&", "&amp;").replace('"', "&quot;")
-        .replace("<", "&lt;").replace(">", "&gt;")
-    )
 
 
 def _is_economist_url(url: str) -> bool:

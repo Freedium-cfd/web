@@ -17,24 +17,11 @@ from freedium_library.services.base import BaseService
 from freedium_library.services.exceptions import UnsupportedContentError
 from freedium_library.services.ft import client as ft_client
 from freedium_library.utils.http import CurlRequest
+from freedium_library.utils.url import escape_html as _esc, normalize_url as _normalize_url
 
 # FT image URLs (images.ft.com/v3/image/raw/...) are public CDN URLs that
 # work directly — no need to proxy them through /img/ft/. They include query
 # params (source, width, quality) that break the simple prefix-redirect.
-
-
-def _normalize_url(path: str) -> str:
-    url = path.strip()
-    if url.startswith("https:/") and not url.startswith("https://"):
-        url = "https://" + url[len("https:/"):]
-    return url
-
-
-def _esc(text: str) -> str:
-    return (
-        text.replace("&", "&amp;").replace('"', "&quot;")
-        .replace("<", "&lt;").replace(">", "&gt;")
-    )
 
 
 def _is_ft_url(url: str) -> bool:
