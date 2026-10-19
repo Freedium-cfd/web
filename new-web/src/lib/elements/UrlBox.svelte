@@ -57,6 +57,13 @@
       altchaError = 'Verification failed. Please try again.';
     }
   }
+
+  function handleKeydown(event: KeyboardEvent) {
+    if (event.key === 'Enter' && !event.shiftKey) {
+      event.preventDefault();
+      handleSubmit(event);
+    }
+  }
 </script>
 
 <form class="unlock" class:no-pre={!showProtocol} onsubmit={handleSubmit}>
@@ -71,13 +78,14 @@
     </div>
   {/if}
   <!-- svelte-ignore a11y_autofocus -->
-  <input
-    type="text"
+  <textarea
+    rows="2"
     placeholder="paste a link — Medium, NYT, WaPo, Bloomberg, Reuters, Economist, FT, The Athletic, Quora"
     bind:value={url}
+    onkeydown={handleKeydown}
     autofocus
     aria-label="Article URL"
-  />
+  ></textarea>
   <button type="submit">
     Unlock
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
@@ -126,17 +134,19 @@
   }
   .pre svg { width: 14px; height: 14px; color: var(--accent); }
 
-  input {
+  textarea {
     background: transparent;
     border: none;
     outline: none;
+    resize: none;
     color: var(--ink);
     font-family: var(--font-sans);
     font-size: 14.5px;
-    padding: 14px 16px;
+    padding: 10px 14px;
     width: 100%;
+    line-height: 1.45;
   }
-  input::placeholder { color: var(--ink-4); }
+  textarea::placeholder { color: var(--ink-4); }
 
   button {
     display: inline-flex;
