@@ -91,11 +91,13 @@ async def fetch_content(
                 raise UpstreamBlockedError("Quora is protected by Cloudflare bot challenge") from e
             raise
 
-    if "just a moment" in html.lower() or "turnstile" in html.lower():
+    if "<title>just a moment...</title>" in html.lower() or "challenge-running" in html.lower():
         raise UpstreamBlockedError("Quora is protected by Cloudflare bot challenge")
 
     payload = _extract_relay_payload(html)
     if not payload:
+        if "just a moment" in html.lower() or "cf-mitigated" in html.lower():
+            raise UpstreamBlockedError("Quora is protected by Cloudflare bot challenge")
         raise ArticleNotFoundError("Could not find post or answer in Quora page")
 
     return payload
