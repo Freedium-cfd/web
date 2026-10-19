@@ -92,6 +92,7 @@ services:
       - REUTERS_ENABLED=${REUTERS_ENABLED:-false}
       - BBG_ENABLED=${BBG_ENABLED:-false}
       - QUORA_ENABLED=${QUORA_ENABLED:-false}
+      - FLARESOLVERR_URL=${FLARESOLVERR_URL:-http://flaresolverr:8191}
       - NYT_ENABLED=${NYT_ENABLED:-false}
       - NYT_SIGNING_KEY=${NYT_SIGNING_KEY:-}
       - NYT_MDREAM_URL=http://mdream:8085
@@ -220,6 +221,8 @@ services:
       - WARP_PROXY_BALANCER=${WARP_PROXY_BALANCER:-${PROXY_LIST:-socks5://haproxy-pb:1080}}
       - PROXY_LIST=${WARP_PROXY_BALANCER:-${PROXY_LIST:-socks5://haproxy-pb:1080}}
       - PROMETHEUS_MULTIPROC_DIR=/tmp/prometheus_multiproc
+      - QUORA_ENABLED=${QUORA_ENABLED:-false}
+      - FLARESOLVERR_URL=${FLARESOLVERR_URL:-http://flaresolverr:8191}
       - JXL_BATCH_SIZE=100
       - JXL_PARALLEL=2
       - JXL_MIN_BYTES=50000
@@ -261,6 +264,22 @@ services:
     networks:
       - freedium_obs_net
     restart: unless-stopped
+
+  flaresolverr:
+    image: ghcr.io/flaresolverr/flaresolverr:latest
+    container_name: freedium-flaresolverr
+    environment:
+      - LOG_LEVEL=info
+      - LOG_HTML=false
+      - CAPTCHA_SOLVER=none
+      - TZ=UTC
+    deploy:
+      resources:
+        limits:
+          memory: 600m
+    restart: unless-stopped
+    networks:
+      - freedium_obs_net
 
   web:
     build:

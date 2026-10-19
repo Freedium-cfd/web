@@ -54,23 +54,47 @@ def _extract_relay_payload(html: str) -> dict[str, Any] | None:
     return candidate
 
 
-async def fetch_content(request: CurlRequest, url: str) -> dict[str, Any]:
+async def fetch_content(
+    request: CurlRequest,
+    url: str,
+    flaresolverr_url: str = "",
+) -> dict[str, Any]:
     """Fetch Quora page and extract post or question/answer payload."""
     from freedium_library.services.exceptions import UpstreamBlockedError
+    import httpx
 
-    try:
-        resp = await request.aget(url, headers=HEADERS)
-        resp.raise_for_status()
-    except Exception as e:
-        err_msg = str(e).lower()
-        if "403" in err_msg or "turnstile" in err_msg or "cloudflare" in err_msg:
-            raise UpstreamBlockedError("Quora is protected by Cloudflare bot challenge") from e
-        raise
+    html = ""
+    if flaresolverr_url:
+        try:
+            async with httpx.AsyncClient(timeout=35.0) as client:
+                res = await client.post(
+                    f"{flaresolverr_url.rstrip('/')}/v1",
+                    json={"cmd": "request.get", "url": url, "maxTimeout": 30000},
+                )
+                if res.status_code == 200:
+                    data = res.json()
+                    if data.get("status") == "ok":
+                        sol = data.get("solution", {})
+                        if sol.get("status") == 200:
+                            html = sol.get("response", "")
+        except Exception:
+            pass
 
-    if "just a moment" in resp.text.lower() or "turnstile" in resp.text.lower():
+    if not html:
+        try:
+            resp = await request.aget(url, headers=HEADERS)
+            resp.raise_for_status()
+            html = resp.text
+        except Exception as e:
+            err_msg = str(e).lower()
+            if "403" in err_msg or "turnstile" in err_msg or "cloudflare" in err_msg:
+                raise UpstreamBlockedError("Quora is protected by Cloudflare bot challenge") from e
+            raise
+
+    if "just a moment" in html.lower() or "turnstile" in html.lower():
         raise UpstreamBlockedError("Quora is protected by Cloudflare bot challenge")
 
-    payload = _extract_relay_payload(resp.text)
+    payload = _extract_relay_payload(html)
     if not payload:
         raise ArticleNotFoundError("Could not find post or answer in Quora page")
 

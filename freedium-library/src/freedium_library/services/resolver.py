@@ -178,7 +178,11 @@ def build_service_resolver(
     if QuoraConfig().ENABLED:
         from freedium_library.services.quora import QuoraService
 
-        resolver.register("quora", QuoraService(proxy=proxy))
+        quora_cfg = QuoraConfig()
+        resolver.register(
+            "quora",
+            QuoraService(proxy=proxy, flaresolverr_url=quora_cfg.FLARESOLVERR_URL),
+        )
         logger.info("Quora service registered")
 
     if MediumConfig().ENABLED:

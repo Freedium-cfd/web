@@ -41,8 +41,13 @@ def _is_quora_url(url: str) -> bool:
 class QuoraService(BaseService):
     """Renders quora.com posts and answers into Markdown with YAML frontmatter."""
 
-    def __init__(self, proxy: str | RequestProxyConfig | None = None) -> None:
+    def __init__(
+        self,
+        proxy: str | RequestProxyConfig | None = None,
+        flaresolverr_url: str = "http://flaresolverr:8191",
+    ) -> None:
         self._request = CurlRequest(config=RequestConfig.with_proxy(proxy), impersonate="chrome124", persistent=True)
+        self._flaresolverr_url = flaresolverr_url
 
     def _is_valid(self, path: str) -> bool:
         return _is_quora_url(path)
@@ -52,7 +57,7 @@ class QuoraService(BaseService):
 
     async def _arender(self, path: str) -> str:
         url = _normalize_url(path)
-        data = await quora_client.fetch_content(self._request, url)
+        data = await quora_client.fetch_content(self._request, url, flaresolverr_url=self._flaresolverr_url)
         if not data:
             raise ArticleNotFoundError("Empty Quora response")
 

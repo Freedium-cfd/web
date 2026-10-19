@@ -1,6 +1,6 @@
 from typing import Literal, Optional
 
-from pydantic import Field
+from pydantic import AliasChoices, Field
 
 from freedium_library.utils.meta.pydantic import BaseConfig, BaseSettingsConfigDict
 
@@ -142,6 +142,10 @@ class QuoraConfig(BaseConfig):
     model_config = BaseSettingsConfigDict(env_prefix="QUORA_")
 
     ENABLED: bool = Field(default=False)
+    FLARESOLVERR_URL: str = Field(
+        default="http://flaresolverr:8191",
+        validation_alias="FLARESOLVERR_URL",
+    )
 
 
 class CacheConfig(BaseConfig):
