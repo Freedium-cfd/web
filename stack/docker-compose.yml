@@ -91,6 +91,7 @@ services:
       - ECONOMIST_ENABLED=${ECONOMIST_ENABLED:-false}
       - REUTERS_ENABLED=${REUTERS_ENABLED:-false}
       - BBG_ENABLED=${BBG_ENABLED:-false}
+      - QUORA_ENABLED=${QUORA_ENABLED:-false}
       - NYT_ENABLED=${NYT_ENABLED:-false}
       - NYT_SIGNING_KEY=${NYT_SIGNING_KEY:-}
       - NYT_MDREAM_URL=http://mdream:8085

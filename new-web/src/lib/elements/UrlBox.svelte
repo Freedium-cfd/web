@@ -73,7 +73,7 @@
   <!-- svelte-ignore a11y_autofocus -->
   <input
     type="text"
-    placeholder="paste a link — Medium, NYT, WaPo, Bloomberg, Reuters, Economist, FT, The Athletic"
+    placeholder="paste a link — Medium, NYT, WaPo, Bloomberg, Reuters, Economist, FT, The Athletic, Quora"
     bind:value={url}
     autofocus
     aria-label="Article URL"

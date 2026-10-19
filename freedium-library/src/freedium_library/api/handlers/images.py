@@ -117,6 +117,7 @@ _IMG_SOURCES: dict[str, str] = {
     "economist-static": "https://cdn.static-economist.com/",
     "ft": "https://images.ft.com/",
     "ft-cdn": "https://d1e00ek4ebabms.cloudfront.net/",
+    "quora": "https://qph.cf2.quoracdn.net/",
 }
 
 

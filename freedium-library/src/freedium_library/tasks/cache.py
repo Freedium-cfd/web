@@ -159,6 +159,11 @@ def _get_resolver() -> ServiceResolver:
 
         resolver.register("bloomberg", BloombergService(proxy=proxy))
 
+    if QuoraConfig().ENABLED:
+        from freedium_library.services.quora import QuoraService
+
+        resolver.register("quora", QuoraService(proxy=proxy))
+
     # Medium LAST — permissive validator (accepts any URL).
     if MediumConfig().ENABLED:
         resolver.register("medium", MediumContainer().service())

@@ -27,7 +27,7 @@ _SEED_DOMAINS: tuple[str, ...] = (
     "x.com", "twitter.com", "facebook.com", "fb.com", "fb.watch",
     "instagram.com", "tiktok.com", "threads.net", "reddit.com", "linkedin.com",
     "pinterest.com", "snapchat.com", "t.me", "telegram.org", "whatsapp.com",
-    "quora.com", "tumblr.com", "bsky.app", "mastodon.social", "discord.com",
+    "tumblr.com", "bsky.app", "mastodon.social", "discord.com",
     "discord.gg", "slack.com", "vk.com", "weibo.com", "ok.ru",
     # search / portals
     "google.com", "bing.com", "duckduckgo.com", "yahoo.com", "yandex.com",

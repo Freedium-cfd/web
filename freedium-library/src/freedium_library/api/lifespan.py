@@ -197,6 +197,15 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
         resolver.register("bloomberg", BloombergService(proxy=warp_proxy))
         logger.info("Bloomberg service registered")
 
+    # Quora (opt-in).
+    from freedium_library.api.config import QuoraConfig
+
+    if QuoraConfig().ENABLED:
+        from freedium_library.services.quora import QuoraService
+
+        resolver.register("quora", QuoraService(proxy=warp_proxy))
+        logger.info("Quora service registered")
+
     # Medium LAST — its validator is permissive (accepts any URL, tries to
     # resolve as a Medium post). Specific-host services must match first.
     from freedium_library.api.config import MediumConfig

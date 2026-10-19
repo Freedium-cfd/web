@@ -23,7 +23,6 @@ def test_blocks_exact_and_subdomains():
 
 
 def test_blocks_newly_added_domains():
-    assert _blocked("https://quora.com/q")
     assert _blocked("https://bsky.app/profile/x")
     assert _blocked("https://temu.com/x")
     assert _blocked("https://huggingface.co/models")

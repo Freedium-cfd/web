@@ -136,6 +136,14 @@ class WapoConfig(BaseConfig):
     ENABLED: bool = Field(default=False)
 
 
+class QuoraConfig(BaseConfig):
+    """Quora service. Off by default — flip QUORA_ENABLED=true."""
+
+    model_config = BaseSettingsConfigDict(env_prefix="QUORA_")
+
+    ENABLED: bool = Field(default=False)
+
+
 class CacheConfig(BaseConfig):
     """Mongo-backed post-cache settings.
 
