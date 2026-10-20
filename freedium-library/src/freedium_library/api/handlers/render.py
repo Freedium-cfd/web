@@ -254,7 +254,15 @@ async def render_universal(
         except AttributeError:
             pass
         err_str = str(exc).lower()
-        if "403" in err_str or "forbidden" in err_str or "datadome" in err_str or "captcha" in err_str or "turnstile" in err_str:
+        if (
+            "403" in err_str
+            or "forbidden" in err_str
+            or "datadome" in err_str
+            or "captcha" in err_str
+            or "turnstile" in err_str
+            or "soft-block" in err_str
+            or "soft_block" in err_str
+        ):
             return True
         return False
 

@@ -23,6 +23,14 @@ if TYPE_CHECKING:
 
 _GRAPHQL_RETRY_BACKOFFS: tuple[float, ...] = (0.5, 1.5)  # delays before retry 2 and 3
 
+_RETRY_USER_AGENTS = (
+    "Mozilla/5.0 (iPhone; CPU iPhone OS 15_4_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.0 Mobile/15E148 Safari/604.1 (compatible; YandexMobileBot/3.0;",
+    "Mozilla/5.0 (Linux; Android 14; Pixel 8) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Mobile Safari/537.36",
+    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
+)
+
+_RETRY_CLIENT_NAMES = ("android", "ios", "web")
+
 
 def resolve_graphql_references(data: Any, root_data: dict[str, Any]) -> Any:
     """
@@ -180,12 +188,21 @@ class MediumApiService:
         # are exhausted, and INFO when a retry recovers — so a successful
         # render never leaves a scary WARNING/ERROR behind.
         last_reason = "no response"
+        has_soft_block = False
         for attempt in range(3):
+            # Rotate headers and client identities across retries
+            req_headers = dict(headers)
+            req_headers["User-Agent"] = _RETRY_USER_AGENTS[attempt % len(_RETRY_USER_AGENTS)]
+            req_headers["X-Obvious-CID"] = _RETRY_CLIENT_NAMES[attempt % len(_RETRY_CLIENT_NAMES)]
+            req_headers["X-APOLLO-OPERATION-ID"] = HashLib.random_sha256()
+
             try:
                 async with self.request as request:
-                    response = await request.apost(url, headers=headers, data=graphql_data)
+                    response = await request.apost(url, headers=req_headers, data=graphql_data)
                 if response.status_code != 200:
                     last_reason = f"status {response.status_code}"
+                    if response.status_code in (403, 429, 502, 503):
+                        has_soft_block = True
                 else:
                     try:
                         parsed = JSON.loads(response.text)
@@ -201,6 +218,7 @@ class MediumApiService:
                         break
                     elif parsed is not None:
                         last_reason = "HTTP 200 with null post (Medium soft-block)"
+                        has_soft_block = True
             except Exception as ex:  # connection-level failure through WARP, etc.
                 last_reason = f"{type(ex).__name__}: {ex}"
             logger.debug(f"GraphQL attempt {attempt + 1}/3 for {post_id}: {last_reason}")
@@ -211,6 +229,10 @@ class MediumApiService:
             logger.error(
                 f"Failed to fetch post by ID {post_id} after 3 attempts ({last_reason})"
             )
+            if has_soft_block:
+                from .exceptions import MediumBlockedError
+
+                raise MediumBlockedError(f"Medium temporarily soft-blocked egress IP ({last_reason})")
             return None
 
         logger.debug("GraphQL request finished...")

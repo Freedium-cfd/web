@@ -14,6 +14,13 @@
 
 set -e
 
+# 0) Identity rotation support: if ROTATE_IDENTITY is set, wipe stale profile & account
+#    files on startup so /entry.sh generates a brand-new Cloudflare WARP account & device keys.
+if [ "${ROTATE_IDENTITY:-false}" = "true" ] || [ "${ROTATE_IDENTITY:-0}" = "1" ]; then
+    echo "[combined-entry] ROTATE_IDENTITY active — removing old wgcf account and profile"
+    rm -f /wgcf/wgcf-account.toml /wgcf/wgcf-profile.conf /etc/wireguard/wgcf.conf 2>/dev/null || true
+fi
+
 # 1) Launch upstream wgcf bootstrap in the background.
 #    /entry.sh comes from neilpang/wgcf-docker and lives at the image root.
 /entry.sh &
